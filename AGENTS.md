@@ -65,6 +65,32 @@ When creating a new .NET project:
    dotnet test
    ```
 
+### Database Migrations
+
+When making changes to the database schema (entity models in `Deckle.Domain`):
+
+1. **Generate Migration**: Use Entity Framework Core tools to create a migration
+   ```bash
+   dotnet ef migrations add <MigrationName> --project src/Deckle.Domain --startup-project src/Deckle.API
+   ```
+
+2. **If API is Running**: Use the `--no-build` flag to avoid file locking issues
+   ```bash
+   dotnet ef migrations add <MigrationName> --project src/Deckle.Domain --startup-project src/Deckle.API --no-build
+   ```
+
+3. **Migration Naming**: Use descriptive PascalCase names (e.g., `AddProjectEntities`, `UpdateUserTable`)
+
+4. **Review Migration**: Always review the generated migration file before committing
+   - Verify the `Up()` method creates the correct schema changes
+   - Ensure the `Down()` method properly reverses the changes
+   - Check for any data loss or breaking changes
+
+5. **Apply Migration**: The migration will be applied automatically on application startup, or manually with:
+   ```bash
+   dotnet ef database update --project src/Deckle.Domain --startup-project src/Deckle.API
+   ```
+
 ### Commit Guidelines
 
 1. **Logical Units of Work**: Commit after completing a logical unit of work
