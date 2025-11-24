@@ -1,7 +1,9 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-// Add PostgreSQL with pgAdmin
+// Add PostgreSQL with pgAdmin and persistent data volume
 var postgres = builder.AddPostgres("postgres")
+    .WithDataVolume()
+    .WithLifetime(ContainerLifetime.Persistent)
     .WithPgAdmin()
     .AddDatabase("deckledb");
 
