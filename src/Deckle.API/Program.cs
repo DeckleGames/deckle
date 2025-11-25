@@ -55,10 +55,20 @@ builder.Services.AddAuthentication(options =>
     options.Scope.Add("profile");
     options.Scope.Add("email");
 
+    options.AccessType = "offline";
     options.SaveTokens = true;
 
     options.Events.OnCreatingTicket = async context =>
     {
+        // Check if this is a Google Sheets auth flow by looking at the redirect URI
+        var redirectUri = context.Properties.RedirectUri;
+        if (redirectUri?.Contains("/google-sheets-auth/callback") == true)
+        {
+            // Skip user creation for Google Sheets auth flow
+            // The tokens will be available in the callback endpoint
+            return;
+        }
+
         var userService = context.HttpContext.RequestServices.GetRequiredService<UserService>();
 
         var googleId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -117,6 +127,8 @@ builder.Services.AddOpenApi();
 // Register application services
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ProjectService>();
+builder.Services.AddScoped<GoogleSheetsService>();
+builder.Services.AddScoped<DataSourceService>();
 
 var app = builder.Build();
 
@@ -148,5 +160,7 @@ app.MapDefaultEndpoints();
 // Map endpoint groups
 app.MapAuthEndpoints();
 app.MapProjectEndpoints();
+app.MapDataSourceEndpoints();
+app.MapGoogleSheetsAuthEndpoints();
 
 app.Run();
