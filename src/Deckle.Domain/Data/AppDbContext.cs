@@ -62,8 +62,6 @@ public class AppDbContext : DbContext
         {
             entity.HasKey(p => p.Id);
 
-            entity.HasIndex(p => p.OwnerId);
-
             entity.Property(p => p.Name)
                 .IsRequired()
                 .HasMaxLength(255);
@@ -79,10 +77,9 @@ public class AppDbContext : DbContext
                 .IsRequired()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-            entity.HasOne(p => p.Owner)
-                .WithMany()
-                .HasForeignKey(p => p.OwnerId)
-                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasMany(p => p.Users)
+                .WithMany(p => p.Projects)
+                .UsingEntity<UserProject>();
         });
 
         modelBuilder.Entity<UserProject>(entity =>
@@ -96,16 +93,6 @@ public class AppDbContext : DbContext
             entity.Property(up => up.JoinedAt)
                 .IsRequired()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-            entity.HasOne(up => up.User)
-                .WithMany(u => u.UserProjects)
-                .HasForeignKey(up => up.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(up => up.Project)
-                .WithMany(p => p.UserProjects)
-                .HasForeignKey(up => up.ProjectId)
-                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

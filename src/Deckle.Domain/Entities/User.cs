@@ -24,5 +24,6 @@ public class User
 
     public DateTime? LastLoginAt { get; set; }
 
-    public ICollection<UserProject> UserProjects { get; set; } = new List<UserProject>();
+    public ICollection<Project> Projects { get; set; } = [];
+    public ICollection<UserProject> UserProjects { get; set; } = [];
 }

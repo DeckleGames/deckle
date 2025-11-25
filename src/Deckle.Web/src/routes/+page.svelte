@@ -1,5 +1,21 @@
 <script lang="ts">
   import { config } from '$lib/config';
+  import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
+
+  onMount(async () => {
+    try {
+      const response = await fetch(`${config.apiUrl}/auth/me`, {
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        goto('/projects');
+      }
+    } catch (error) {
+      // User is not authenticated, stay on this page
+    }
+  });
 
   function handleSignIn() {
     window.location.href = `${config.apiUrl}/auth/login`;

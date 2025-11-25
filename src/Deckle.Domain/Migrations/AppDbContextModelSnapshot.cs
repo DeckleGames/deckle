@@ -42,17 +42,12 @@ namespace Deckle.Domain.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("OwnerId");
 
                     b.ToTable("Projects");
                 });
@@ -138,17 +133,6 @@ namespace Deckle.Domain.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("UserProjects");
-                });
-
-            modelBuilder.Entity("Deckle.Domain.Entities.Project", b =>
-                {
-                    b.HasOne("Deckle.Domain.Entities.User", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("Deckle.Domain.Entities.UserProject", b =>

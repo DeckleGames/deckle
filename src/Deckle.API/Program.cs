@@ -23,10 +23,29 @@ builder.Services.AddAuthentication(options =>
 {
     options.Cookie.Name = "Deckle.Auth";
     options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.SameSite = SameSiteMode.Lax;
+    if (builder.Environment.IsDevelopment())
+    {
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+    }
+    else
+    {
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.None;
+    }
+    options.Cookie.Domain = null; // Don't set domain to allow cross-port cookies on localhost
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = 403;
+        return Task.CompletedTask;
+    };
 })
 .AddGoogle(options =>
 {
@@ -103,7 +122,22 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins(frontendUrl, "http://localhost:5173", "https://localhost:5173")
+        policy.SetIsOriginAllowed(origin =>
+            {
+                if (string.IsNullOrEmpty(origin))
+                    return false;
+
+                var uri = new Uri(origin);
+
+                // Allow localhost on any port during development
+                if (builder.Environment.IsDevelopment() && uri.Host == "localhost")
+                    return true;
+
+                // Allow the configured frontend URL
+                return origin == frontendUrl ||
+                       origin == "http://localhost:5173" ||
+                       origin == "https://localhost:5173";
+            })
             .AllowCredentials()
             .AllowAnyHeader()
             .AllowAnyMethod();
@@ -130,7 +164,22 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseHttpsRedirection();
+// Handle CORS preflight requests before authentication
+app.Use(async (context, next) =>
+{
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.StatusCode = 200;
+        await context.Response.CompleteAsync();
+        return;
+    }
+    await next();
+});
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors();
 app.UseAuthentication();
@@ -143,7 +192,7 @@ app.MapGet("/auth/login", () =>
 {
     var frontendUrl = app.Configuration["FrontendUrl"] ?? "http://localhost:5173";
     return Results.Challenge(
-        new AuthenticationProperties { RedirectUri = frontendUrl },
+        new AuthenticationProperties { RedirectUri = $"{frontendUrl}/projects" },
         new[] { GoogleDefaults.AuthenticationScheme }
     );
 })
@@ -184,6 +233,90 @@ app.MapGet("/auth/me", (ClaimsPrincipal user) =>
 .WithName("GetCurrentUser")
 .WithTags("Authentication");
 
+// Project endpoints
+app.MapGet("/projects", async (ClaimsPrincipal user, AppDbContext dbContext) =>
+{
+    if (!user.Identity?.IsAuthenticated ?? true)
+    {
+        return Results.Unauthorized();
+    }
+
+    var userIdString = user.FindFirst("user_id")?.Value;
+    if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
+    {
+        return Results.Unauthorized();
+    }
+
+    var projects = await dbContext.UserProjects
+        .Where(up => up.UserId == userId)
+        .Include(up => up.Project)
+        .Select(up => new
+        {
+            id = up.Project.Id,
+            name = up.Project.Name,
+            description = up.Project.Description,
+            createdAt = up.Project.CreatedAt,
+            updatedAt = up.Project.UpdatedAt,
+            role = up.Role.ToString()
+        })
+        .ToListAsync();
+
+    return Results.Ok(projects);
+})
+.RequireAuthorization()
+.WithName("GetProjects")
+.WithTags("Projects");
+
+app.MapPost("/projects", async (ClaimsPrincipal user, AppDbContext dbContext, CreateProjectRequest request) =>
+{
+    if (!user.Identity?.IsAuthenticated ?? true)
+    {
+        return Results.Unauthorized();
+    }
+
+    var userIdString = user.FindFirst("user_id")?.Value;
+    if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
+    {
+        return Results.Unauthorized();
+    }
+
+    var project = new Project
+    {
+        Id = Guid.NewGuid(),
+        Name = request.Name,
+        Description = request.Description,
+        CreatedAt = DateTime.UtcNow,
+        UpdatedAt = DateTime.UtcNow
+    };
+
+    dbContext.Projects.Add(project);
+
+    var userProject = new UserProject
+    {
+        UserId = userId,
+        ProjectId = project.Id,
+        Role = ProjectRole.Owner,
+        JoinedAt = DateTime.UtcNow
+    };
+
+    dbContext.UserProjects.Add(userProject);
+
+    await dbContext.SaveChangesAsync();
+
+    return Results.Created($"/projects/{project.Id}", new
+    {
+        id = project.Id,
+        name = project.Name,
+        description = project.Description,
+        createdAt = project.CreatedAt,
+        updatedAt = project.UpdatedAt,
+        role = userProject.Role.ToString()
+    });
+})
+.RequireAuthorization()
+.WithName("CreateProject")
+.WithTags("Projects");
+
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -210,3 +343,5 @@ record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
+
+record CreateProjectRequest(string Name, string? Description);

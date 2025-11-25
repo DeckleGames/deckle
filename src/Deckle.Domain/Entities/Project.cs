@@ -8,13 +8,10 @@ public class Project
 
     public string? Description { get; set; }
 
-    public Guid OwnerId { get; set; }
-
-    public User Owner { get; set; } = null!;
-
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
 
-    public ICollection<UserProject> UserProjects { get; set; } = new List<UserProject>();
+    public ICollection<User> Users { get; set; } = [];
+    public ICollection<UserProject> UserProjects { get; set; } = [];
 }

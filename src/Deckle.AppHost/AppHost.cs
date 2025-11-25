@@ -18,6 +18,7 @@ var api = builder.AddProject<Projects.Deckle_API>("api")
     .WithEnvironment("FrontendUrl", web.GetEndpoint("http"))
     .WaitFor(postgres);
 
-web.WithReference(api);
+web.WithReference(api)
+    .WithEnvironment("PUBLIC_API_URL", api.GetEndpoint("http"));
 
 builder.Build().Run();
