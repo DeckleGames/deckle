@@ -8,8 +8,15 @@
     icon: string;
   }
 
-  let { user }: { user: any } = $props();
-  let collapsed = $state(false);
+  let { user, collapsed = $bindable(false) }: { user: any; collapsed?: boolean } = $props();
+
+  // Initialize collapsed state from local storage if available
+  if (typeof window !== 'undefined') {
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    if (savedState !== null) {
+      collapsed = savedState === 'true';
+    }
+  }
 
   const navItems: NavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
@@ -25,6 +32,9 @@
 
   function toggleSidebar() {
     collapsed = !collapsed;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sidebarCollapsed', collapsed.toString());
+    }
   }
 </script>
 

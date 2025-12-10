@@ -10,6 +10,9 @@
 
   // Determine if we should show the dashboard layout (sidebar + topbar)
   const isAuthPage = $derived($page.url.pathname === '/' && !data.user);
+
+  // Track sidebar collapsed state
+  let sidebarCollapsed = $state(false);
 </script>
 
 <svelte:head>
@@ -24,10 +27,10 @@
 {:else}
   <!-- Dashboard layout (sidebar + topbar + content) -->
   {#if data.user}
-    <Sidebar user={data.user} />
+    <Sidebar user={data.user} bind:collapsed={sidebarCollapsed} />
   {/if}
 
-  <div class="dashboard-layout" class:with-sidebar={data.user}>
+  <div class="dashboard-layout" class:with-sidebar={data.user} class:sidebar-collapsed={sidebarCollapsed}>
     {#if data.user}
       <TopBar user={data.user} />
     {/if}
@@ -52,6 +55,10 @@
   .dashboard-layout.with-sidebar {
     margin-left: 260px;
     transition: margin-left 0.3s ease;
+  }
+
+  .dashboard-layout.with-sidebar.sidebar-collapsed {
+    margin-left: 72px;
   }
 
   .main-content {
