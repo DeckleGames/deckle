@@ -2,6 +2,7 @@
   import type { PageData } from './$types';
   import { config } from '$lib/config';
   import { invalidateAll } from '$app/navigation';
+  import Card from '$lib/components/Card.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -139,15 +140,14 @@
 </svelte:head>
 
 <div class="tab-content">
-  <div class="tab-header">
-    <h2>Components</h2>
+  <div class="tab-actions">
     <button class="add-button" onclick={openModal}>+ Add Component</button>
   </div>
 
   {#if data.components && data.components.length > 0}
     <div class="components-list">
       {#each data.components as component}
-        <div class="component-card">
+        <Card>
           <h3>{component.name}</h3>
           {#if component.type}
             <div class="dice-info">
@@ -166,7 +166,7 @@
           {:else}
             <p class="component-type">Component</p>
           {/if}
-        </div>
+        </Card>
       {/each}
     </div>
   {:else}
@@ -291,25 +291,13 @@
 
 <style>
   .tab-content {
-    background-color: white;
-    border: 2px solid var(--color-teal-grey);
-    border-radius: 12px;
-    padding: 2rem;
     min-height: 400px;
   }
 
-  .tab-header {
+  .tab-actions {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-  }
-
-  h2 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--color-sage);
-    margin: 0;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
   }
 
   .add-button {
@@ -336,21 +324,7 @@
     gap: 1rem;
   }
 
-  .component-card {
-    background-color: white;
-    border: 2px solid var(--color-teal-grey);
-    border-radius: 8px;
-    padding: 1.5rem;
-    transition: all 0.2s ease;
-  }
-
-  .component-card:hover {
-    border-color: var(--color-muted-teal);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(120, 160, 131, 0.2);
-  }
-
-  .component-card h3 {
+  .components-list h3 {
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--color-sage);

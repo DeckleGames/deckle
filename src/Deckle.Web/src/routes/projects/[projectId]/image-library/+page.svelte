@@ -10,8 +10,7 @@
 </svelte:head>
 
 <div class="tab-content">
-  <div class="tab-header">
-    <h2>Image Library</h2>
+  <div class="tab-actions">
     <button class="add-button">+ Upload Images</button>
   </div>
 
@@ -23,25 +22,13 @@
 
 <style>
   .tab-content {
-    background-color: white;
-    border: 2px solid var(--color-teal-grey);
-    border-radius: 12px;
-    padding: 2rem;
     min-height: 400px;
   }
 
-  .tab-header {
+  .tab-actions {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-  }
-
-  h2 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--color-sage);
-    margin: 0;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
   }
 
   .add-button {

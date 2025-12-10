@@ -2,6 +2,7 @@
   import type { PageData } from './$types';
   import { config } from '$lib/config';
   import { onMount } from 'svelte';
+  import Card from '$lib/components/Card.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -150,8 +151,7 @@
 </svelte:head>
 
 <div class="tab-content">
-  <div class="tab-header">
-    <h2>Data Sources</h2>
+  <div class="tab-actions">
     <button class="add-button" onclick={openAddModal}>
       {isGoogleSheetsAuthorized ? '+ Add Data Source' : 'Authorize Google Sheets'}
     </button>
@@ -179,23 +179,25 @@
   {:else}
     <div class="data-sources-list">
       {#each dataSources as source}
-        <div class="data-source-card">
-          <div class="source-info">
-            <h3>{source.name}</h3>
-            <p class="source-type">{source.type}</p>
-            {#if source.googleSheetsUrl}
-              <a href={source.googleSheetsUrl} target="_blank" rel="noopener noreferrer" class="source-link">
-                Open in Google Sheets →
+        <Card>
+          <div class="card-content">
+            <div class="source-info">
+              <h3>{source.name}</h3>
+              <p class="source-type">{source.type}</p>
+              {#if source.googleSheetsUrl}
+                <a href={source.googleSheetsUrl} target="_blank" rel="noopener noreferrer" class="source-link">
+                  Open in Google Sheets →
+                </a>
+              {/if}
+            </div>
+            <div class="source-actions">
+              <a href={`/projects/${data.project.id}/data-sources/${source.id}`} class="view-button">
+                View
               </a>
-            {/if}
+              <button class="delete-button" onclick={() => deleteDataSource(source.id)}>Delete</button>
+            </div>
           </div>
-          <div class="source-actions">
-            <a href={`/projects/${data.project.id}/data-sources/${source.id}`} class="view-button">
-              View
-            </a>
-            <button class="delete-button" onclick={() => deleteDataSource(source.id)}>Delete</button>
-          </div>
-        </div>
+        </Card>
       {/each}
     </div>
   {/if}
@@ -246,25 +248,13 @@
 
 <style>
   .tab-content {
-    background-color: white;
-    border: 2px solid var(--color-teal-grey);
-    border-radius: 12px;
-    padding: 2rem;
     min-height: 400px;
   }
 
-  .tab-header {
+  .tab-actions {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-  }
-
-  h2 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--color-sage);
-    margin: 0;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
   }
 
   .add-button {
@@ -274,7 +264,7 @@
     padding: 0.625rem 1.25rem;
     font-size: 0.875rem;
     font-weight: 600;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     transition: all 0.2s ease;
   }
@@ -282,7 +272,7 @@
   .add-button:hover {
     background-color: var(--color-sage);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(120, 160, 131, 0.3);
+    box-shadow: var(--shadow-md);
   }
 
   .auth-banner {
@@ -329,20 +319,10 @@
     gap: 1rem;
   }
 
-  .data-source-card {
-    background-color: var(--color-teal-grey);
-    border: 2px solid var(--color-muted-teal);
-    border-radius: 8px;
-    padding: 1.5rem;
+  .card-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: all 0.2s ease;
-  }
-
-  .data-source-card:hover {
-    border-color: var(--color-sage);
-    box-shadow: 0 4px 12px rgba(120, 160, 131, 0.2);
   }
 
   .source-info h3 {

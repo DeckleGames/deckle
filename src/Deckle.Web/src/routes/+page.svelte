@@ -10,7 +10,7 @@
       });
 
       if (response.ok) {
-        goto('/projects');
+        goto('/dashboard');
       }
     } catch (error) {
       // User is not authenticated, stay on this page
