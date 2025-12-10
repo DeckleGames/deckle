@@ -1,10 +1,15 @@
 <script lang="ts">
-  import { CARD_SIZES, DICE_COLORS } from '$lib/constants';
-  import Card from '$lib/components/Card.svelte';
-  import type { GameComponent } from '$lib/types';
+  import {
+    CARD_SIZES,
+    DICE_COLORS,
+    DICE_TYPES,
+    DICE_STYLES,
+  } from "$lib/constants";
+  import Card from "$lib/components/Card.svelte";
+  import type { GameComponent } from "$lib/types";
 
   let {
-    component
+    component,
   }: {
     component: GameComponent;
   } = $props();
@@ -12,20 +17,34 @@
 
 <Card>
   <h3>{component.name}</h3>
-  {#if component.type}
+  {#if component.type === "Dice"}
     <div class="dice-info">
-      <p class="component-type">{component.type}</p>
+      <p class="component-type">
+        {DICE_TYPES.find((t) => t.value === component.diceType)?.label ||
+          component.diceType}
+        • {DICE_STYLES.find((s) => s.value === component.diceStyle)?.label ||
+          component.diceStyle}
+      </p>
       <div class="dice-color-display">
         <span
           class="color-indicator"
-          style="background-color: {DICE_COLORS.find(c => c.value === component.baseColor)?.hex}"
-          title={DICE_COLORS.find(c => c.value === component.baseColor)?.label}
+          style="background-color: {DICE_COLORS.find(
+            (c) => c.value === component.diceBaseColor
+          )?.hex}"
+          title={DICE_COLORS.find((c) => c.value === component.diceBaseColor)
+            ?.label}
         ></span>
-        <span class="color-name">{DICE_COLORS.find(c => c.value === component.baseColor)?.label}</span>
+        <span class="color-name"
+          >{DICE_COLORS.find((c) => c.value === component.diceBaseColor)
+            ?.label}</span
+        >
       </div>
     </div>
-  {:else if component.size}
-    <p class="component-type">Card • {CARD_SIZES.find(s => s.value === component.size)?.label || component.size}</p>
+  {:else if component.type === "Card"}
+    <p class="component-type">
+      Card • {CARD_SIZES.find((s) => s.value === component.cardSize)?.label ||
+        component.cardSize}
+    </p>
   {:else}
     <p class="component-type">Component</p>
   {/if}

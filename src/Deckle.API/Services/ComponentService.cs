@@ -29,18 +29,44 @@ public class ComponentService
             .OrderBy(c => c.CreatedAt)
             .ToListAsync();
 
-        return components.Select(c => new ComponentDto
+        return components.Select(c =>
         {
-            Id = c.Id,
-            ProjectId = c.ProjectId,
-            Name = c.Name,
-            Type = c is Card ? "Card" : "Dice",
-            CreatedAt = c.CreatedAt,
-            UpdatedAt = c.UpdatedAt
+            if (c is Card card)
+            {
+                return new ComponentDto
+                {
+                    Id = card.Id,
+                    ProjectId = card.ProjectId,
+                    Name = card.Name,
+                    Type = "Card",
+                    CreatedAt = card.CreatedAt,
+                    UpdatedAt = card.UpdatedAt,
+                    CardSize = card.Size.ToString(),
+                    FrontDesign = card.FrontDesign,
+                    BackDesign = card.BackDesign
+                };
+            }
+            else if (c is Dice dice)
+            {
+                return new ComponentDto
+                {
+                    Id = dice.Id,
+                    ProjectId = dice.ProjectId,
+                    Name = dice.Name,
+                    Type = "Dice",
+                    CreatedAt = dice.CreatedAt,
+                    UpdatedAt = dice.UpdatedAt,
+                    DiceType = dice.Type.ToString(),
+                    DiceStyle = dice.Style.ToString(),
+                    DiceBaseColor = dice.BaseColor.ToString()
+                };
+            }
+
+            throw new InvalidOperationException($"Unknown component type: {c.GetType().Name}");
         }).ToList();
     }
 
-    public async Task<ComponentDetailDto?> GetComponentByIdAsync(Guid userId, Guid componentId)
+    public async Task<ComponentDto?> GetComponentByIdAsync(Guid userId, Guid componentId)
     {
         var component = await _context.Components
             .Where(c => c.Id == componentId &&
@@ -54,7 +80,7 @@ public class ComponentService
 
         if (component is Card card)
         {
-            return new ComponentDetailDto
+            return new ComponentDto
             {
                 Id = card.Id,
                 ProjectId = card.ProjectId,
@@ -69,7 +95,7 @@ public class ComponentService
         }
         else if (component is Dice dice)
         {
-            return new ComponentDetailDto
+            return new ComponentDto
             {
                 Id = dice.Id,
                 ProjectId = dice.ProjectId,

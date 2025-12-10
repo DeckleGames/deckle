@@ -4,26 +4,23 @@ export interface Component {
   id: string;
   projectId: string;
   name: string;
+  type: 'Card' | 'Dice';
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CardComponent extends Component {
-  size: string;
-  type?: never;
-  style?: never;
-  baseColor?: never;
-  frontDesign?: string;
-  backDesign?: string;
+  type: 'Card';
+  cardSize: string;
+  frontDesign?: string | null;
+  backDesign?: string | null;
 }
 
 export interface DiceComponent extends Component {
-  type: string;
-  style: string;
-  baseColor: string;
-  size?: never;
-  frontDesign?: never;
-  backDesign?: never;
+  type: 'Dice';
+  diceType: string;
+  diceStyle: string;
+  diceBaseColor: string;
 }
 
 export type GameComponent = CardComponent | DiceComponent;

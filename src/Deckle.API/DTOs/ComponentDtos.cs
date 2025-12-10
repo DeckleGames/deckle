@@ -10,23 +10,13 @@ public record ComponentDto
     public required string Type { get; init; } // "Card" or "Dice"
     public required DateTime CreatedAt { get; init; }
     public required DateTime UpdatedAt { get; init; }
-}
 
-public record ComponentDetailDto
-{
-    public required Guid Id { get; init; }
-    public required Guid ProjectId { get; init; }
-    public required string Name { get; init; }
-    public required string Type { get; init; } // "Card" or "Dice"
-    public required DateTime CreatedAt { get; init; }
-    public required DateTime UpdatedAt { get; init; }
-
-    // Card-specific properties
+    // Card-specific properties (null for Dice)
     public string? CardSize { get; init; }
     public string? FrontDesign { get; init; }
     public string? BackDesign { get; init; }
 
-    // Dice-specific properties
+    // Dice-specific properties (null for Card)
     public string? DiceType { get; init; }
     public string? DiceStyle { get; init; }
     public string? DiceBaseColor { get; init; }
