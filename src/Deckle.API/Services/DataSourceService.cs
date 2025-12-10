@@ -1,3 +1,4 @@
+using Deckle.API.DTOs;
 using Deckle.Domain.Data;
 using Deckle.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -164,17 +165,3 @@ public class DataSourceService
         return true;
     }
 }
-
-public record DataSourceDto
-{
-    public required Guid Id { get; init; }
-    public required Guid ProjectId { get; init; }
-    public required string Name { get; init; }
-    public required string Type { get; init; }
-    public string? GoogleSheetsId { get; init; }
-    public string? GoogleSheetsUrl { get; init; }
-    public required DateTime CreatedAt { get; init; }
-    public required DateTime UpdatedAt { get; init; }
-}
-
-public record CreateDataSourceRequest(Guid ProjectId, string Name, string Url);

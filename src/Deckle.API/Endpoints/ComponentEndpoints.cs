@@ -1,5 +1,5 @@
+using Deckle.API.DTOs;
 using Deckle.API.Services;
-using Deckle.Domain.Entities;
 using System.Security.Claims;
 
 namespace Deckle.API.Endpoints;
@@ -91,6 +91,3 @@ public static class ComponentEndpoints
         return group;
     }
 }
-
-public record CreateCardRequest(string Name, CardSize Size);
-public record CreateDiceRequest(string Name, DiceType Type, DiceStyle Style, DiceColor BaseColor);

@@ -1,3 +1,4 @@
+using Deckle.API.DTOs;
 using Deckle.Domain.Data;
 using Deckle.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -146,22 +147,4 @@ public class UserService
             Picture = picture
         };
     }
-}
-
-public record GoogleUserInfo(
-    string GoogleId,
-    string Email,
-    string? Name,
-    string? GivenName,
-    string? FamilyName,
-    string? Picture,
-    string? Locale
-);
-
-public record CurrentUserDto
-{
-    public string? Id { get; init; }
-    public string? Email { get; init; }
-    public string? Name { get; init; }
-    public string? Picture { get; init; }
 }

@@ -1,3 +1,4 @@
+using Deckle.API.DTOs;
 using Deckle.Domain.Data;
 using Deckle.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -13,31 +14,79 @@ public class ComponentService
         _context = context;
     }
 
-    public async Task<List<Component>> GetProjectComponentsAsync(Guid userId, Guid projectId)
+    public async Task<List<ComponentDto>> GetProjectComponentsAsync(Guid userId, Guid projectId)
     {
         var hasAccess = await _context.UserProjects
             .AnyAsync(up => up.UserId == userId && up.ProjectId == projectId);
 
         if (!hasAccess)
         {
-            return new List<Component>();
+            return new List<ComponentDto>();
         }
 
-        return await _context.Components
+        var components = await _context.Components
             .Where(c => c.ProjectId == projectId)
             .OrderBy(c => c.CreatedAt)
             .ToListAsync();
+
+        return components.Select(c => new ComponentDto
+        {
+            Id = c.Id,
+            ProjectId = c.ProjectId,
+            Name = c.Name,
+            Type = c is Card ? "Card" : "Dice",
+            CreatedAt = c.CreatedAt,
+            UpdatedAt = c.UpdatedAt
+        }).ToList();
     }
 
-    public async Task<Component?> GetComponentByIdAsync(Guid userId, Guid componentId)
+    public async Task<ComponentDetailDto?> GetComponentByIdAsync(Guid userId, Guid componentId)
     {
-        return await _context.Components
+        var component = await _context.Components
             .Where(c => c.Id == componentId &&
                         c.Project.Users.Any(u => u.Id == userId))
             .FirstOrDefaultAsync();
+
+        if (component == null)
+        {
+            return null;
+        }
+
+        if (component is Card card)
+        {
+            return new ComponentDetailDto
+            {
+                Id = card.Id,
+                ProjectId = card.ProjectId,
+                Name = card.Name,
+                Type = "Card",
+                CreatedAt = card.CreatedAt,
+                UpdatedAt = card.UpdatedAt,
+                CardSize = card.Size.ToString(),
+                FrontDesign = card.FrontDesign,
+                BackDesign = card.BackDesign
+            };
+        }
+        else if (component is Dice dice)
+        {
+            return new ComponentDetailDto
+            {
+                Id = dice.Id,
+                ProjectId = dice.ProjectId,
+                Name = dice.Name,
+                Type = "Dice",
+                CreatedAt = dice.CreatedAt,
+                UpdatedAt = dice.UpdatedAt,
+                DiceType = dice.Type.ToString(),
+                DiceStyle = dice.Style.ToString(),
+                DiceBaseColor = dice.BaseColor.ToString()
+            };
+        }
+
+        return null;
     }
 
-    public async Task<Card> CreateCardAsync(Guid userId, Guid projectId, string name, CardSize size)
+    public async Task<CardDto> CreateCardAsync(Guid userId, Guid projectId, string name, CardSize size)
     {
         var hasAccess = await _context.UserProjects
             .AnyAsync(up => up.UserId == userId && up.ProjectId == projectId);
@@ -60,10 +109,20 @@ public class ComponentService
         _context.Cards.Add(card);
         await _context.SaveChangesAsync();
 
-        return card;
+        return new CardDto
+        {
+            Id = card.Id,
+            ProjectId = card.ProjectId,
+            Name = card.Name,
+            Size = card.Size.ToString(),
+            FrontDesign = card.FrontDesign,
+            BackDesign = card.BackDesign,
+            CreatedAt = card.CreatedAt,
+            UpdatedAt = card.UpdatedAt
+        };
     }
 
-    public async Task<Dice> CreateDiceAsync(Guid userId, Guid projectId, string name, DiceType type, DiceStyle style, DiceColor baseColor)
+    public async Task<DiceDto> CreateDiceAsync(Guid userId, Guid projectId, string name, DiceType type, DiceStyle style, DiceColor baseColor)
     {
         var hasAccess = await _context.UserProjects
             .AnyAsync(up => up.UserId == userId && up.ProjectId == projectId);
@@ -88,6 +147,16 @@ public class ComponentService
         _context.Dices.Add(dice);
         await _context.SaveChangesAsync();
 
-        return dice;
+        return new DiceDto
+        {
+            Id = dice.Id,
+            ProjectId = dice.ProjectId,
+            Name = dice.Name,
+            Type = dice.Type.ToString(),
+            Style = dice.Style.ToString(),
+            BaseColor = dice.BaseColor.ToString(),
+            CreatedAt = dice.CreatedAt,
+            UpdatedAt = dice.UpdatedAt
+        };
     }
 }
