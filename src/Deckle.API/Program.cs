@@ -68,14 +68,41 @@ builder.Services.AddAuthentication(options =>
         context.Properties.Items.TryGetValue("loginType", out var loginType);
         var isGoogleSheetsAuth = loginType == "google-sheets";
 
-        // Extract user info from Google
-        var googleId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var email = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
-        var name = context.Principal?.FindFirst(ClaimTypes.Name)?.Value;
-        var givenName = context.Principal?.FindFirst(ClaimTypes.GivenName)?.Value;
-        var familyName = context.Principal?.FindFirst(ClaimTypes.Surname)?.Value;
-        var picture = context.Principal?.FindFirst("picture")?.Value;
-        var locale = context.Principal?.FindFirst("locale")?.Value;
+        // Extract user info from Google's userinfo endpoint response
+        // The user info is in context.User (JsonElement), not context.Principal
+        var googleId = context.User.GetProperty("sub").GetString();
+        var email = context.User.GetProperty("email").GetString();
+
+        // Optional fields - use TryGetProperty to avoid exceptions
+        string? name = null;
+        if (context.User.TryGetProperty("name", out var nameElement))
+        {
+            name = nameElement.GetString();
+        }
+
+        string? givenName = null;
+        if (context.User.TryGetProperty("given_name", out var givenNameElement))
+        {
+            givenName = givenNameElement.GetString();
+        }
+
+        string? familyName = null;
+        if (context.User.TryGetProperty("family_name", out var familyNameElement))
+        {
+            familyName = familyNameElement.GetString();
+        }
+
+        string? picture = null;
+        if (context.User.TryGetProperty("picture", out var pictureElement))
+        {
+            picture = pictureElement.GetString();
+        }
+
+        string? locale = null;
+        if (context.User.TryGetProperty("locale", out var localeElement))
+        {
+            locale = localeElement.GetString();
+        }
 
         if (string.IsNullOrEmpty(googleId) || string.IsNullOrEmpty(email))
         {
@@ -86,9 +113,31 @@ builder.Services.AddAuthentication(options =>
         var userInfo = new GoogleUserInfo(googleId, email, name, givenName, familyName, picture, locale);
         var user = await userService.CreateOrUpdateUserAsync(userInfo);
 
-        // Add user_id claim
+        // Add custom claims to the identity
         var identity = context.Principal?.Identity as ClaimsIdentity;
-        identity?.AddClaim(new Claim("user_id", user.Id.ToString()));
+        if (identity != null)
+        {
+            // Add user_id claim
+            identity.AddClaim(new Claim("user_id", user.Id.ToString()));
+
+            // Add email claim if not present
+            if (!string.IsNullOrEmpty(email) && !identity.HasClaim(c => c.Type == ClaimTypes.Email))
+            {
+                identity.AddClaim(new Claim(ClaimTypes.Email, email));
+            }
+
+            // Add name claim if not present
+            if (!string.IsNullOrEmpty(name) && !identity.HasClaim(c => c.Type == ClaimTypes.Name))
+            {
+                identity.AddClaim(new Claim(ClaimTypes.Name, name));
+            }
+
+            // Add picture claim if not present
+            if (!string.IsNullOrEmpty(picture) && !identity.HasClaim(c => c.Type == "picture"))
+            {
+                identity.AddClaim(new Claim("picture", picture));
+            }
+        }
 
         // If this is a Google Sheets auth flow, save the tokens
         if (isGoogleSheetsAuth)

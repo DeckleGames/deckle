@@ -100,18 +100,18 @@
   <div class="sidebar-footer">
     {#if user}
       <div class="user-menu">
-        <button class="user-info" onclick={toggleDropdown} title={collapsed ? user.Name : ''}>
-          {#if user.Picture}
-            <img src={user.Picture} alt={user.Name} class="user-avatar" />
+        <button class="user-info" onclick={toggleDropdown} title={collapsed ? user.name : ''}>
+          {#if user.picture}
+            <img src={user.picture} alt={user.name} class="user-avatar" />
           {:else}
             <div class="user-avatar-placeholder">
-              {user.Name?.charAt(0).toUpperCase()}
+              {user.name?.charAt(0).toUpperCase()}
             </div>
           {/if}
           {#if !collapsed}
             <div class="user-details">
-              <span class="user-name">{user.Name}</span>
-              <span class="user-email">{user.Email}</span>
+              <span class="user-name">{user.name}</span>
+              <span class="user-email">{user.email}</span>
             </div>
           {/if}
         </button>
@@ -119,8 +119,8 @@
         {#if showDropdown}
           <div class="dropdown-menu">
             <div class="dropdown-header">
-              <div class="dropdown-user-name">{user.Name}</div>
-              <div class="dropdown-user-email">{user.Email}</div>
+              <div class="dropdown-user-name">{user.name}</div>
+              <div class="dropdown-user-email">{user.email}</div>
             </div>
             <div class="dropdown-divider"></div>
             <a href="/account/settings" class="dropdown-item">

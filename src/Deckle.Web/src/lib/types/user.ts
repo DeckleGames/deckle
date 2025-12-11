@@ -13,3 +13,11 @@ export interface User {
   updatedAt: string;
   lastLoginAt?: string;
 }
+
+// Current user DTO from /auth/me endpoint
+export interface CurrentUser {
+  id?: string;
+  email?: string;
+  name?: string;
+  picture?: string;
+}

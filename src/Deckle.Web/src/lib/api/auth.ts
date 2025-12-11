@@ -1,5 +1,5 @@
 import { api } from './client';
-import type { User } from '$lib/types';
+import type { CurrentUser } from '$lib/types';
 
 /**
  * Google Sheets Auth Status Response
@@ -16,7 +16,7 @@ export const authApi = {
   /**
    * Get current user information
    */
-  me: (fetchFn?: typeof fetch) => api.get<User>('/auth/me', undefined, fetchFn),
+  me: (fetchFn?: typeof fetch) => api.get<CurrentUser>('/auth/me', undefined, fetchFn),
 
   /**
    * Check Google Sheets authorization status
