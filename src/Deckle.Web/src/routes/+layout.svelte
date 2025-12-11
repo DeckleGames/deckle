@@ -2,13 +2,12 @@
   import favicon from "$lib/assets/favicon.svg";
   import { page } from '$app/stores';
   import Sidebar from '$lib/components/Sidebar.svelte';
-  import TopBar from '$lib/components/TopBar.svelte';
   import type { LayoutData } from './$types';
   import "../app.css";
 
   let { children, data }: { children: any, data: LayoutData } = $props();
 
-  // Determine if we should show the dashboard layout (sidebar + topbar)
+  // Determine if we should show the dashboard layout (sidebar)
   const isAuthPage = $derived($page.url.pathname === '/' && !data.user);
 
   // Track sidebar collapsed state
@@ -25,16 +24,12 @@
     {@render children()}
   </main>
 {:else}
-  <!-- Dashboard layout (sidebar + topbar + content) -->
+  <!-- Dashboard layout (sidebar + content) -->
   {#if data.user}
     <Sidebar user={data.user} bind:collapsed={sidebarCollapsed} />
   {/if}
 
   <div class="dashboard-layout" class:with-sidebar={data.user} class:sidebar-collapsed={sidebarCollapsed}>
-    {#if data.user}
-      <TopBar user={data.user} />
-    {/if}
-
     <main class="main-content">
       {@render children()}
     </main>
