@@ -78,7 +78,7 @@ public static class ComponentEndpoints
 
             try
             {
-                var dice = await componentService.CreateDiceAsync(userId.Value, projectId, request.Name, request.Type, request.Style, request.BaseColor);
+                var dice = await componentService.CreateDiceAsync(userId.Value, projectId, request.Name, request.Type, request.Style, request.BaseColor, request.Number);
                 return Results.Created($"/projects/{projectId}/components/{dice.Id}", dice);
             }
             catch (UnauthorizedAccessException)

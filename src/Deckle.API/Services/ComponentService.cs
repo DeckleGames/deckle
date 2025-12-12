@@ -58,7 +58,8 @@ public class ComponentService
                     UpdatedAt = dice.UpdatedAt,
                     DiceType = dice.Type.ToString(),
                     DiceStyle = dice.Style.ToString(),
-                    DiceBaseColor = dice.BaseColor.ToString()
+                    DiceBaseColor = dice.BaseColor.ToString(),
+                    DiceNumber = dice.Number
                 };
             }
 
@@ -105,7 +106,8 @@ public class ComponentService
                 UpdatedAt = dice.UpdatedAt,
                 DiceType = dice.Type.ToString(),
                 DiceStyle = dice.Style.ToString(),
-                DiceBaseColor = dice.BaseColor.ToString()
+                DiceBaseColor = dice.BaseColor.ToString(),
+                DiceNumber = dice.Number
             };
         }
 
@@ -148,7 +150,7 @@ public class ComponentService
         };
     }
 
-    public async Task<DiceDto> CreateDiceAsync(Guid userId, Guid projectId, string name, DiceType type, DiceStyle style, DiceColor baseColor)
+    public async Task<DiceDto> CreateDiceAsync(Guid userId, Guid projectId, string name, DiceType type, DiceStyle style, DiceColor baseColor, int number)
     {
         var hasAccess = await _context.UserProjects
             .AnyAsync(up => up.UserId == userId && up.ProjectId == projectId);
@@ -166,6 +168,7 @@ public class ComponentService
             Type = type,
             Style = style,
             BaseColor = baseColor,
+            Number = number,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -181,6 +184,7 @@ public class ComponentService
             Type = dice.Type.ToString(),
             Style = dice.Style.ToString(),
             BaseColor = dice.BaseColor.ToString(),
+            Number = dice.Number,
             CreatedAt = dice.CreatedAt,
             UpdatedAt = dice.UpdatedAt
         };

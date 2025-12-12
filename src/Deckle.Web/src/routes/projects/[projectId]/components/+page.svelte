@@ -21,6 +21,7 @@
   let diceType = $state('D6');
   let diceStyle = $state('Numbered');
   let diceColor = $state('EarthGreen');
+  let diceNumber = $state(1);
 
   let isSubmitting = $state(false);
   let errorMessage = $state('');
@@ -33,6 +34,7 @@
     diceType = 'D6';
     diceStyle = 'Numbered';
     diceColor = 'EarthGreen';
+    diceNumber = 1;
     errorMessage = '';
   }
 
@@ -73,7 +75,8 @@
           name: componentName,
           type: diceType,
           style: diceStyle,
-          baseColor: diceColor
+          baseColor: diceColor,
+          number: diceNumber
         });
       }
 
@@ -125,7 +128,7 @@
     {#if selectedType === 'card'}
       <CardConfigForm bind:cardSize bind:componentName />
     {:else if selectedType === 'dice'}
-      <DiceConfigForm bind:diceType bind:diceStyle bind:diceColor bind:componentName />
+      <DiceConfigForm bind:diceType bind:diceStyle bind:diceColor bind:componentName bind:diceNumber />
     {/if}
 
     {#if errorMessage}

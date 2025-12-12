@@ -21,6 +21,7 @@ export interface DiceComponent extends Component {
   diceType: string;
   diceStyle: string;
   diceBaseColor: string;
+  diceNumber: number;
 }
 
 export type GameComponent = CardComponent | DiceComponent;
@@ -35,4 +36,5 @@ export interface CreateDiceDto {
   type: string;
   style: string;
   baseColor: string;
+  number: number;
 }

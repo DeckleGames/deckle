@@ -25,6 +25,7 @@
         • {DICE_STYLES.find((s) => s.value === component.diceStyle)?.label ||
           component.diceStyle}
       </p>
+      <p class="dice-number">Quantity: {component.diceNumber}</p>
       <div class="dice-color-display">
         <span
           class="color-indicator"
@@ -68,6 +69,13 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .dice-number {
+    font-size: 0.875rem;
+    color: var(--color-sage);
+    font-weight: 500;
+    margin: 0;
   }
 
   .dice-color-display {

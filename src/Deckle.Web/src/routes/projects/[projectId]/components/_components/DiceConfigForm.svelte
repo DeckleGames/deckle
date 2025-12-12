@@ -6,12 +6,14 @@
     diceType = $bindable(),
     diceStyle = $bindable(),
     diceColor = $bindable(),
-    componentName = $bindable()
+    componentName = $bindable(),
+    diceNumber = $bindable()
   }: {
     diceType: string;
     diceStyle: string;
     diceColor: string;
     componentName: string;
+    diceNumber: number;
   } = $props();
 </script>
 
@@ -21,6 +23,16 @@
       id="component-name"
       bind:value={componentName}
       placeholder="Enter component name"
+    />
+  </FormField>
+
+  <FormField label="Number of Dice" name="dice-number">
+    <Input
+      id="dice-number"
+      type="number"
+      bind:value={diceNumber}
+      placeholder="Enter number of dice"
+      min="1"
     />
   </FormField>
 

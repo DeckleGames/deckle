@@ -7,4 +7,6 @@ public class Dice : Component
     public DiceStyle Style { get; set; }
 
     public DiceColor BaseColor { get; set; }
+
+    public int Number { get; set; }
 }
