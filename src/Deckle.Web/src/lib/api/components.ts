@@ -12,6 +12,12 @@ export const componentsApi = {
     api.get<GameComponent[]>(`/projects/${projectId}/components`, undefined, fetchFn),
 
   /**
+   * Get a component by ID
+   */
+  getById: (projectId: string, componentId: string, fetchFn?: typeof fetch) =>
+    api.get<GameComponent>(`/projects/${projectId}/components/${componentId}`, undefined, fetchFn),
+
+  /**
    * Create a new card component
    */
   createCard: (projectId: string, data: CreateCardDto, fetchFn?: typeof fetch) =>

@@ -46,6 +46,20 @@
       Card • {CARD_SIZES.find((s) => s.value === component.cardSize)?.label ||
         component.cardSize}
     </p>
+    <div class="design-links">
+      <a
+        href="/projects/{component.projectId}/components/cards/{component.id}/front"
+        class="design-link"
+      >
+        Edit Front Design
+      </a>
+      <a
+        href="/projects/{component.projectId}/components/cards/{component.id}/back"
+        class="design-link"
+      >
+        Edit Back Design
+      </a>
+    </div>
   {:else}
     <p class="component-type">Component</p>
   {/if}
@@ -96,5 +110,26 @@
     font-size: 0.875rem;
     color: var(--color-sage);
     font-weight: 500;
+  }
+
+  .design-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .design-link {
+    display: inline-block;
+    font-size: 0.875rem;
+    color: var(--color-muted-teal);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .design-link:hover {
+    color: var(--color-sage);
+    text-decoration: underline;
   }
 </style>
