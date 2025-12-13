@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte';
+  import type { Snippet } from "svelte";
 
   interface Props {
     /** Snippet for header content (title, subtitle, etc.) */
@@ -36,13 +36,16 @@
   }
 
   .page-header {
-    background: linear-gradient(135deg, var(--color-teal-grey) 0%, var(--color-muted-teal) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-teal-grey) 0%,
+      var(--color-muted-teal) 100%
+    );
     padding: 2rem;
     border-bottom: 1px solid var(--color-border);
   }
 
   .header-content {
-    max-width: 1600px;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
@@ -56,8 +59,6 @@
 
   .page-content {
     padding: 2rem;
-    max-width: 1600px;
-    margin: 0 auto;
   }
 
   @media (max-width: 768px) {

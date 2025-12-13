@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores';
+  import { page } from "$app/stores";
 
   interface Tab {
     name: string;
@@ -12,25 +12,17 @@
     stickyTop?: string;
   }
 
-  let {
-    tabs,
-    sticky = true,
-    stickyTop = '64px'
-  }: Props = $props();
+  let { tabs, sticky = true, stickyTop = "64px" }: Props = $props();
 
   function isActiveTab(tabPath: string): boolean {
     return $page.url.pathname === tabPath;
   }
 </script>
 
-<div class="tabs-bar" class:sticky style={sticky ? `top: ${stickyTop}` : ''}>
+<div class="tabs-bar" class:sticky style={sticky ? `top: ${stickyTop}` : ""}>
   <div class="tabs-content">
     {#each tabs as tab}
-      <a
-        href={tab.path}
-        class="tab-link"
-        class:active={isActiveTab(tab.path)}
-      >
+      <a href={tab.path} class="tab-link" class:active={isActiveTab(tab.path)}>
         {tab.name}
       </a>
     {/each}
@@ -49,9 +41,7 @@
   }
 
   .tabs-content {
-    max-width: 1600px;
-    margin: 0 auto;
-    padding: 0 2rem;
+    padding: 0 0.75rem;
     display: flex;
     gap: 0.25rem;
   }
