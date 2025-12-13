@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { PageData } from './$types';
-  import { config } from '$lib/config';
-  import { onMount } from 'svelte';
-  import Card from '$lib/components/Card.svelte';
-  import Dialog from '$lib/components/Dialog.svelte';
+  import type { PageData } from "./$types";
+  import { config } from "$lib/config";
+  import { onMount } from "svelte";
+  import Card from "$lib/components/Card.svelte";
+  import Dialog from "$lib/components/Dialog.svelte";
 
   let { data }: { data: PageData } = $props();
 
@@ -21,10 +21,10 @@
   let dataSources = $state<DataSource[]>([]);
   let loading = $state(true);
   let showAddModal = $state(false);
-  let newSourceUrl = $state('');
-  let newSourceName = $state('');
+  let newSourceUrl = $state("");
+  let newSourceName = $state("");
   let addingSource = $state(false);
-  let errorMessage = $state('');
+  let errorMessage = $state("");
   let isGoogleSheetsAuthorized = $state(false);
   let checkingAuth = $state(true);
 
@@ -36,16 +36,19 @@
   async function checkGoogleSheetsAuth() {
     try {
       checkingAuth = true;
-      const response = await fetch(`${config.apiUrl}/google-sheets-auth/status`, {
-        credentials: 'include'
-      });
+      const response = await fetch(
+        `${config.apiUrl}/google-sheets-auth/status`,
+        {
+          credentials: "include",
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
         isGoogleSheetsAuthorized = data.authorized;
       }
     } catch (error) {
-      console.error('Failed to check Google Sheets authorization:', error);
+      console.error("Failed to check Google Sheets authorization:", error);
     } finally {
       checkingAuth = false;
     }
@@ -54,15 +57,18 @@
   async function loadDataSources() {
     try {
       loading = true;
-      const response = await fetch(`${config.apiUrl}/data-sources/project/${data.project.id}`, {
-        credentials: 'include'
-      });
+      const response = await fetch(
+        `${config.apiUrl}/data-sources/project/${data.project.id}`,
+        {
+          credentials: "include",
+        }
+      );
 
       if (response.ok) {
         dataSources = await response.json();
       }
     } catch (error) {
-      console.error('Failed to load data sources:', error);
+      console.error("Failed to load data sources:", error);
     } finally {
       loading = false;
     }
@@ -70,61 +76,61 @@
 
   async function addDataSource() {
     if (!newSourceUrl.trim()) {
-      errorMessage = 'Please enter a Google Sheets URL';
+      errorMessage = "Please enter a Google Sheets URL";
       return;
     }
 
     try {
       addingSource = true;
-      errorMessage = '';
+      errorMessage = "";
 
       const response = await fetch(`${config.apiUrl}/data-sources`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({
           projectId: data.project.id,
-          name: newSourceName.trim() || '',
-          url: newSourceUrl.trim()
-        })
+          name: newSourceName.trim() || "",
+          url: newSourceUrl.trim(),
+        }),
       });
 
       if (response.ok) {
         const newSource = await response.json();
         dataSources = [...dataSources, newSource];
         showAddModal = false;
-        newSourceUrl = '';
-        newSourceName = '';
+        newSourceUrl = "";
+        newSourceName = "";
       } else {
         const error = await response.json();
-        errorMessage = error.error || 'Failed to add data source';
+        errorMessage = error.error || "Failed to add data source";
       }
     } catch (error) {
-      console.error('Failed to add data source:', error);
-      errorMessage = 'Failed to add data source. Please try again.';
+      console.error("Failed to add data source:", error);
+      errorMessage = "Failed to add data source. Please try again.";
     } finally {
       addingSource = false;
     }
   }
 
   async function deleteDataSource(id: string) {
-    if (!confirm('Are you sure you want to delete this data source?')) {
+    if (!confirm("Are you sure you want to delete this data source?")) {
       return;
     }
 
     try {
       const response = await fetch(`${config.apiUrl}/data-sources/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
+        method: "DELETE",
+        credentials: "include",
       });
 
       if (response.ok) {
-        dataSources = dataSources.filter(ds => ds.id !== id);
+        dataSources = dataSources.filter((ds) => ds.id !== id);
       }
     } catch (error) {
-      console.error('Failed to delete data source:', error);
+      console.error("Failed to delete data source:", error);
     }
   }
 
@@ -135,9 +141,9 @@
     }
 
     showAddModal = true;
-    errorMessage = '';
-    newSourceUrl = '';
-    newSourceName = '';
+    errorMessage = "";
+    newSourceUrl = "";
+    newSourceName = "";
   }
 
   function authorizeGoogleSheets() {
@@ -148,13 +154,19 @@
 
 <svelte:head>
   <title>Data Sources · {data.project.name} · Deckle</title>
-  <meta name="description" content="Connect Google Sheets and other data sources to {data.project.name}. Link spreadsheets to populate your game components with data." />
+  <meta
+    name="description"
+    content="Connect Google Sheets and other data sources to {data.project
+      .name}. Link spreadsheets to populate your game components with data."
+  />
 </svelte:head>
 
 <div class="tab-content">
   <div class="tab-actions">
     <button class="add-button" onclick={openAddModal}>
-      {isGoogleSheetsAuthorized ? '+ Add Data Source' : 'Authorize Google Sheets'}
+      {isGoogleSheetsAuthorized
+        ? "+ Add Data Source"
+        : "Authorize Google Sheets"}
     </button>
   </div>
 
@@ -162,8 +174,9 @@
     <div class="auth-banner">
       <p class="banner-title">🔐 Google Sheets Authorization Required</p>
       <p class="banner-text">
-        To add Google Sheets as a data source, you need to authorize Deckle to access your spreadsheets.
-        Click the button above to connect your Google account.
+        To add Google Sheets as a data source, you need to authorize Deckle to
+        access your spreadsheets. Click the button above to connect your Google
+        account.
       </p>
     </div>
   {/if}
@@ -175,7 +188,9 @@
   {:else if dataSources.length === 0}
     <div class="empty-state">
       <p class="empty-message">No data sources yet</p>
-      <p class="empty-subtitle">Connect data sources to populate your game components</p>
+      <p class="empty-subtitle">
+        Connect data sources to populate your game components
+      </p>
     </div>
   {:else}
     <div class="data-sources-list">
@@ -186,16 +201,27 @@
               <h3>{source.name}</h3>
               <p class="source-type">{source.type}</p>
               {#if source.googleSheetsUrl}
-                <a href={source.googleSheetsUrl} target="_blank" rel="noopener noreferrer" class="source-link">
+                <a
+                  href={source.googleSheetsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="source-link"
+                >
                   Open in Google Sheets →
                 </a>
               {/if}
             </div>
             <div class="source-actions">
-              <a href={`/projects/${data.project.id}/data-sources/${source.id}`} class="view-button">
+              <a
+                href={`/projects/${data.project.id}/data-sources/${source.id}`}
+                class="view-button"
+              >
                 View
               </a>
-              <button class="delete-button" onclick={() => deleteDataSource(source.id)}>Delete</button>
+              <button
+                class="delete-button"
+                onclick={() => deleteDataSource(source.id)}>Delete</button
+              >
             </div>
           </div>
         </Card>
@@ -204,7 +230,11 @@
   {/if}
 </div>
 
-<Dialog bind:show={showAddModal} title="Add Google Sheets Data Source" onclose={() => showAddModal = false}>
+<Dialog
+  bind:show={showAddModal}
+  title="Add Google Sheets Data Source"
+  onclose={() => (showAddModal = false)}
+>
   {#if errorMessage}
     <div class="error-message">{errorMessage}</div>
   {/if}
@@ -232,11 +262,19 @@
   </div>
 
   {#snippet actions()}
-    <button class="secondary cancel-button" onclick={() => showAddModal = false} disabled={addingSource}>
+    <button
+      class="secondary cancel-button"
+      onclick={() => (showAddModal = false)}
+      disabled={addingSource}
+    >
       Cancel
     </button>
-    <button class="primary submit-button" onclick={addDataSource} disabled={addingSource}>
-      {addingSource ? 'Adding...' : 'Add Data Source'}
+    <button
+      class="primary submit-button"
+      onclick={addDataSource}
+      disabled={addingSource}
+    >
+      {addingSource ? "Adding..." : "Add Data Source"}
     </button>
   {/snippet}
 </Dialog>
@@ -244,6 +282,7 @@
 <style>
   .tab-content {
     min-height: 400px;
+    padding: 2rem;
   }
 
   .tab-actions {

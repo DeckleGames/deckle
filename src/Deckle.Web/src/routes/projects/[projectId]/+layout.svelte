@@ -43,7 +43,9 @@
 
 <style>
   .project-page {
-    min-height: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   .project-header {
@@ -94,16 +96,15 @@
   }
 
   .page-content {
-    padding: 2rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
   }
 
   @media (max-width: 768px) {
     .project-header {
       padding: 1rem;
-    }
-
-    .page-content {
-      padding: 1.5rem 1rem;
     }
   }
 </style>

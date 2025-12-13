@@ -57,16 +57,8 @@
     flex-shrink: 0;
   }
 
-  .page-content {
-    padding: 2rem;
-  }
-
   @media (max-width: 768px) {
     .page-header {
-      padding: 1.5rem 1rem;
-    }
-
-    .page-content {
       padding: 1.5rem 1rem;
     }
 

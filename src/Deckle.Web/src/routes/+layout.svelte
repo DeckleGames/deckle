@@ -1,14 +1,14 @@
 <script lang="ts">
   import favicon from "$lib/assets/favicon.svg";
-  import { page } from '$app/stores';
-  import Sidebar from '$lib/components/Sidebar.svelte';
-  import type { LayoutData } from './$types';
+  import { page } from "$app/stores";
+  import Sidebar from "$lib/components/Sidebar.svelte";
+  import type { LayoutData } from "./$types";
   import "../app.css";
 
-  let { children, data }: { children: any, data: LayoutData } = $props();
+  let { children, data }: { children: any; data: LayoutData } = $props();
 
   // Determine if we should show the dashboard layout (sidebar)
-  const isAuthPage = $derived($page.url.pathname === '/' && !data.user);
+  const isAuthPage = $derived($page.url.pathname === "/" && !data.user);
 
   // Track sidebar collapsed state
   let sidebarCollapsed = $state(false);
@@ -29,7 +29,11 @@
     <Sidebar user={data.user} bind:collapsed={sidebarCollapsed} />
   {/if}
 
-  <div class="dashboard-layout" class:with-sidebar={data.user} class:sidebar-collapsed={sidebarCollapsed}>
+  <div
+    class="dashboard-layout"
+    class:with-sidebar={data.user}
+    class:sidebar-collapsed={sidebarCollapsed}
+  >
     <main class="main-content">
       {@render children()}
     </main>
@@ -59,6 +63,8 @@
   .main-content {
     flex: 1;
     background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
   }
 
   @media (max-width: 768px) {

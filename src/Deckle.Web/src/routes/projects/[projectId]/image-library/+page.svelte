@@ -1,12 +1,16 @@
 <script lang="ts">
-  import type { PageData } from './$types';
+  import type { PageData } from "./$types";
 
   let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
   <title>Image Library · {data.project.name} · Deckle</title>
-  <meta name="description" content="Manage images and artwork for {data.project.name}. Upload and organize visual assets to use in your game components." />
+  <meta
+    name="description"
+    content="Manage images and artwork for {data.project
+      .name}. Upload and organize visual assets to use in your game components."
+  />
 </svelte:head>
 
 <div class="tab-content">
@@ -23,6 +27,7 @@
 <style>
   .tab-content {
     min-height: 400px;
+    padding: 2rem;
   }
 
   .tab-actions {

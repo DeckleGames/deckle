@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import ResizablePanelContainer from './ResizablePanelContainer.svelte';
-  import PreviewPanel from './PreviewPanel.svelte';
-  import EditorPanel from './EditorPanel.svelte';
-  import DataSourcePanel from './DataSourcePanel.svelte';
-  import { loadPanelLayout, savePanelLayout } from '$lib/utils/panelStorage';
-  import type { PanelLayout, DataSource } from '$lib/types';
+  import { onMount } from "svelte";
+  import ResizablePanelContainer from "./ResizablePanelContainer.svelte";
+  import PreviewPanel from "./PreviewPanel.svelte";
+  import EditorPanel from "./EditorPanel.svelte";
+  import DataSourcePanel from "./DataSourcePanel.svelte";
+  import { loadPanelLayout, savePanelLayout } from "$lib/utils/panelStorage";
+  import type { PanelLayout, DataSource } from "$lib/types";
 
   interface Props {
     componentId: string;
     projectId: string;
-    designType: 'front' | 'back';
+    designType: "front" | "back";
     initialHtml?: string;
     initialCss?: string;
     dataSource?: DataSource;
@@ -21,8 +21,8 @@
     componentId,
     projectId,
     designType,
-    initialHtml = '',
-    initialCss = '',
+    initialHtml = "",
+    initialCss = "",
     dataSource,
     onSave,
   }: Props = $props();
@@ -70,16 +70,16 @@
 
   function handleKeyDown(e: KeyboardEvent) {
     // Ctrl/Cmd + S to save
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    if ((e.ctrlKey || e.metaKey) && e.key === "s") {
       e.preventDefault();
       handleSave();
     }
   }
 
   onMount(() => {
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   });
 </script>
@@ -88,14 +88,18 @@
   <div class="editor-toolbar">
     <div class="toolbar-left">
       <h1 class="editor-title">
-        {designType === 'front' ? 'Front' : 'Back'} Design
+        {designType === "front" ? "Front" : "Back"} Design
       </h1>
     </div>
     <div class="toolbar-right">
       {#if hasUnsavedChanges}
         <span class="unsaved-indicator">Unsaved changes</span>
       {/if}
-      <button class="save-btn" onclick={handleSave} disabled={!hasUnsavedChanges}>
+      <button
+        class="save-btn"
+        onclick={handleSave}
+        disabled={!hasUnsavedChanges}
+      >
         <svg
           width="16"
           height="16"
@@ -106,7 +110,9 @@
           stroke-linecap="round"
           stroke-linejoin="round"
         >
-          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+          <path
+            d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+          />
           <polyline points="17 21 17 13 7 13 7 21" />
           <polyline points="7 3 7 8 15 8" />
         </svg>
@@ -169,7 +175,11 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.5rem;
-    background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-teal-grey) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-dark) 0%,
+      var(--color-teal-grey) 100%
+    );
     border-bottom: 1px solid var(--color-border);
     flex-shrink: 0;
   }

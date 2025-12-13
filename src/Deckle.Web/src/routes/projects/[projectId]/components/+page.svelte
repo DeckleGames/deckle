@@ -1,33 +1,33 @@
 <script lang="ts">
-  import type { PageData } from './$types';
-  import { componentsApi, ApiError } from '$lib/api';
-  import { invalidateAll } from '$app/navigation';
-  import Dialog from '$lib/components/Dialog.svelte';
-  import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
-  import ComponentCard from './_components/ComponentCard.svelte';
-  import ComponentTypeSelector from './_components/ComponentTypeSelector.svelte';
-  import CardConfigForm from './_components/CardConfigForm.svelte';
-  import DiceConfigForm from './_components/DiceConfigForm.svelte';
-  import type { GameComponent } from '$lib/types';
+  import type { PageData } from "./$types";
+  import { componentsApi, ApiError } from "$lib/api";
+  import { invalidateAll } from "$app/navigation";
+  import Dialog from "$lib/components/Dialog.svelte";
+  import ConfirmDialog from "$lib/components/ConfirmDialog.svelte";
+  import ComponentCard from "./_components/ComponentCard.svelte";
+  import ComponentTypeSelector from "./_components/ComponentTypeSelector.svelte";
+  import CardConfigForm from "./_components/CardConfigForm.svelte";
+  import DiceConfigForm from "./_components/DiceConfigForm.svelte";
+  import type { GameComponent } from "$lib/types";
 
   let { data }: { data: PageData } = $props();
 
   let showModal = $state(false);
-  let selectedType: 'card' | 'dice' | null = $state(null);
-  let componentName = $state('');
+  let selectedType: "card" | "dice" | null = $state(null);
+  let componentName = $state("");
   let editingComponent: GameComponent | null = $state(null);
 
   // Card configuration
-  let cardSize = $state('StandardPoker');
+  let cardSize = $state("StandardPoker");
 
   // Dice configuration
-  let diceType = $state('D6');
-  let diceStyle = $state('Numbered');
-  let diceColor = $state('EarthGreen');
+  let diceType = $state("D6");
+  let diceStyle = $state("Numbered");
+  let diceColor = $state("EarthGreen");
   let diceNumber = $state(1);
 
   let isSubmitting = $state(false);
-  let errorMessage = $state('');
+  let errorMessage = $state("");
 
   // Delete confirmation
   let showDeleteConfirm = $state(false);
@@ -36,38 +36,38 @@
   function openModal() {
     showModal = true;
     selectedType = null;
-    componentName = '';
+    componentName = "";
     editingComponent = null;
-    cardSize = 'StandardPoker';
-    diceType = 'D6';
-    diceStyle = 'Numbered';
-    diceColor = 'EarthGreen';
+    cardSize = "StandardPoker";
+    diceType = "D6";
+    diceStyle = "Numbered";
+    diceColor = "EarthGreen";
     diceNumber = 1;
-    errorMessage = '';
+    errorMessage = "";
   }
 
   function closeModal() {
     showModal = false;
     selectedType = null;
-    componentName = '';
+    componentName = "";
     editingComponent = null;
-    errorMessage = '';
+    errorMessage = "";
   }
 
-  function selectType(type: 'card' | 'dice') {
+  function selectType(type: "card" | "dice") {
     selectedType = type;
-    errorMessage = '';
+    errorMessage = "";
   }
 
   function handleEdit(component: GameComponent) {
     editingComponent = component;
     componentName = component.name;
 
-    if (component.type === 'Card') {
-      selectedType = 'card';
+    if (component.type === "Card") {
+      selectedType = "card";
       cardSize = component.cardSize;
     } else {
-      selectedType = 'dice';
+      selectedType = "dice";
       diceType = component.diceType;
       diceStyle = component.diceStyle;
       diceColor = component.diceBaseColor;
@@ -75,7 +75,7 @@
     }
 
     showModal = true;
-    errorMessage = '';
+    errorMessage = "";
   }
 
   function handleDeleteClick(component: GameComponent) {
@@ -92,7 +92,7 @@
       showDeleteConfirm = false;
       componentToDelete = null;
     } catch (err) {
-      console.error('Error deleting component:', err);
+      console.error("Error deleting component:", err);
       showDeleteConfirm = false;
       componentToDelete = null;
     }
@@ -105,25 +105,25 @@
 
   async function handleSubmit() {
     if (!componentName.trim()) {
-      errorMessage = 'Please enter a component name';
+      errorMessage = "Please enter a component name";
       return;
     }
 
     if (!selectedType) {
-      errorMessage = 'Please select a component type';
+      errorMessage = "Please select a component type";
       return;
     }
 
     isSubmitting = true;
-    errorMessage = '';
+    errorMessage = "";
 
     try {
       if (editingComponent) {
         // Update existing component
-        if (selectedType === 'card') {
+        if (selectedType === "card") {
           await componentsApi.updateCard(data.project.id, editingComponent.id, {
             name: componentName,
-            size: cardSize
+            size: cardSize,
           });
         } else {
           await componentsApi.updateDice(data.project.id, editingComponent.id, {
@@ -131,15 +131,15 @@
             type: diceType,
             style: diceStyle,
             baseColor: diceColor,
-            number: diceNumber
+            number: diceNumber,
           });
         }
       } else {
         // Create new component
-        if (selectedType === 'card') {
+        if (selectedType === "card") {
           await componentsApi.createCard(data.project.id, {
             name: componentName,
-            size: cardSize
+            size: cardSize,
           });
         } else {
           await componentsApi.createDice(data.project.id, {
@@ -147,7 +147,7 @@
             type: diceType,
             style: diceStyle,
             baseColor: diceColor,
-            number: diceNumber
+            number: diceNumber,
           });
         }
       }
@@ -155,11 +155,11 @@
       await invalidateAll();
       closeModal();
     } catch (err) {
-      console.error('Error saving component:', err);
+      console.error("Error saving component:", err);
       if (err instanceof ApiError) {
         errorMessage = err.message;
       } else {
-        errorMessage = `Failed to ${editingComponent ? 'update' : 'create'} component. Please try again.`;
+        errorMessage = `Failed to ${editingComponent ? "update" : "create"} component. Please try again.`;
       }
     } finally {
       isSubmitting = false;
@@ -169,7 +169,11 @@
 
 <svelte:head>
   <title>Components · {data.project.name} · Deckle</title>
-  <meta name="description" content="Manage game components for {data.project.name}. Design cards, tokens, and other game pieces from your data sources." />
+  <meta
+    name="description"
+    content="Manage game components for {data.project
+      .name}. Design cards, tokens, and other game pieces from your data sources."
+  />
 </svelte:head>
 
 <div class="tab-content">
@@ -180,29 +184,48 @@
   {#if data.components && data.components.length > 0}
     <div class="components-list">
       {#each data.components as component}
-        <ComponentCard {component} onEdit={handleEdit} onDelete={handleDeleteClick} />
+        <ComponentCard
+          {component}
+          onEdit={handleEdit}
+          onDelete={handleDeleteClick}
+        />
       {/each}
     </div>
   {:else}
     <div class="empty-state">
       <p class="empty-message">No components yet</p>
-      <p class="empty-subtitle">Add components to build your game's card decks</p>
+      <p class="empty-subtitle">
+        Add components to build your game's card decks
+      </p>
     </div>
   {/if}
 </div>
 
-<Dialog bind:show={showModal} title={editingComponent ? 'Edit Component' : 'New Component'} maxWidth="600px" onclose={closeModal}>
+<Dialog
+  bind:show={showModal}
+  title={editingComponent ? "Edit Component" : "New Component"}
+  maxWidth="600px"
+  onclose={closeModal}
+>
   {#if !selectedType}
     <ComponentTypeSelector onSelectType={selectType} />
   {:else}
     {#if !editingComponent}
-      <button class="back-button" onclick={() => selectedType = null}>← Back to component types</button>
+      <button class="back-button" onclick={() => (selectedType = null)}
+        >← Back to component types</button
+      >
     {/if}
 
-    {#if selectedType === 'card'}
+    {#if selectedType === "card"}
       <CardConfigForm bind:cardSize bind:componentName />
-    {:else if selectedType === 'dice'}
-      <DiceConfigForm bind:diceType bind:diceStyle bind:diceColor bind:componentName bind:diceNumber />
+    {:else if selectedType === "dice"}
+      <DiceConfigForm
+        bind:diceType
+        bind:diceStyle
+        bind:diceColor
+        bind:componentName
+        bind:diceNumber
+      />
     {/if}
 
     {#if errorMessage}
@@ -212,12 +235,20 @@
 
   {#snippet actions()}
     {#if selectedType}
-      <button class="secondary cancel-button" onclick={closeModal} disabled={isSubmitting}>Cancel</button>
-      <button class="primary submit-button" onclick={handleSubmit} disabled={isSubmitting}>
+      <button
+        class="secondary cancel-button"
+        onclick={closeModal}
+        disabled={isSubmitting}>Cancel</button
+      >
+      <button
+        class="primary submit-button"
+        onclick={handleSubmit}
+        disabled={isSubmitting}
+      >
         {#if isSubmitting}
-          {editingComponent ? 'Updating...' : 'Adding...'}
+          {editingComponent ? "Updating..." : "Adding..."}
         {:else}
-          {editingComponent ? 'Update Component' : 'Add Component'}
+          {editingComponent ? "Update Component" : "Add Component"}
         {/if}
       </button>
     {/if}
@@ -238,6 +269,7 @@
 <style>
   .tab-content {
     min-height: 400px;
+    padding: 2rem;
   }
 
   .tab-actions {

@@ -8,18 +8,16 @@
 
   interface Props {
     tabs: Tab[];
-    sticky?: boolean;
-    stickyTop?: string;
   }
 
-  let { tabs, sticky = true, stickyTop = "64px" }: Props = $props();
+  let { tabs }: Props = $props();
 
   function isActiveTab(tabPath: string): boolean {
     return $page.url.pathname === tabPath;
   }
 </script>
 
-<div class="tabs-bar" class:sticky style={sticky ? `top: ${stickyTop}` : ""}>
+<div class="tabs-bar">
   <div class="tabs-content">
     {#each tabs as tab}
       <a href={tab.path} class="tab-link" class:active={isActiveTab(tab.path)}>
@@ -34,10 +32,6 @@
     background: white;
     border-bottom: 1px solid var(--color-border);
     z-index: 50;
-  }
-
-  .tabs-bar.sticky {
-    position: sticky;
   }
 
   .tabs-content {

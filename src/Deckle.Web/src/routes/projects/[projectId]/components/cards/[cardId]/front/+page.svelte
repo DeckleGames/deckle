@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { PageData } from './$types';
-  import DesignEditor from '$lib/components/editor/DesignEditor.svelte';
+  import type { PageData } from "./$types";
+  import DesignEditor from "$lib/components/editor/DesignEditor.svelte";
 
   let { data }: { data: PageData } = $props();
 
@@ -14,14 +14,17 @@
 }`;
 
   function handleSave(html: string, css: string) {
-    console.log('Saving front design:', { html, css });
+    console.log("Saving front design:", { html, css });
     // TODO: Implement API call to save design
   }
 </script>
 
 <svelte:head>
   <title>Edit Front Design · {data.component.name} · Deckle</title>
-  <meta name="description" content="Design the front of {data.component.name}" />
+  <meta
+    name="description"
+    content="Design the front of {data.component.name}"
+  />
 </svelte:head>
 
 <DesignEditor
