@@ -3,6 +3,8 @@
   import { config } from '$lib/config';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { getBreadcrumbs } from '$lib/stores/breadcrumb';
+  import { buildDataSourceBreadcrumbs } from '$lib/utils/breadcrumbs';
 
   let { data }: { data: PageData } = $props();
 
@@ -36,6 +38,21 @@
   let errorMessage = $state('');
   let selectedSheetIndex = $state(0);
   let needsAuth = $state(false);
+
+  // Update breadcrumbs when dataSource is loaded
+  const breadcrumbs = getBreadcrumbs();
+  $effect(() => {
+    if (dataSource) {
+      breadcrumbs.set(
+        buildDataSourceBreadcrumbs(
+          data.projectId,
+          data.project.name,
+          dataSource.id,
+          dataSource.name
+        )
+      );
+    }
+  });
 
   onMount(async () => {
     await loadDataSource();

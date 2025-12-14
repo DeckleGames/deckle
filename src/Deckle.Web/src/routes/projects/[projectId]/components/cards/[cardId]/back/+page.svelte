@@ -1,8 +1,24 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import DesignEditor from '$lib/components/editor/DesignEditor.svelte';
+  import { getBreadcrumbs } from '$lib/stores/breadcrumb';
+  import { buildCardEditorBreadcrumbs } from '$lib/utils/breadcrumbs';
 
   let { data }: { data: PageData } = $props();
+
+  // Update breadcrumbs for this page
+  const breadcrumbs = getBreadcrumbs();
+  $effect(() => {
+    breadcrumbs.set(
+      buildCardEditorBreadcrumbs(
+        data.project.id,
+        data.project.name,
+        data.component.id,
+        data.component.name,
+        'Back'
+      )
+    );
+  });
 
   // Placeholder HTML/CSS - will be loaded from API later
   const initialHtml = `<div class="card">

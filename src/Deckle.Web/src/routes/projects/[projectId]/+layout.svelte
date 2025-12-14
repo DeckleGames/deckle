@@ -1,6 +1,9 @@
 <script lang="ts">
   import type { LayoutData } from "./$types";
   import Tabs from "$lib/components/Tabs.svelte";
+  import Breadcrumb from "$lib/components/Breadcrumb.svelte";
+  import { initBreadcrumbs } from "$lib/stores/breadcrumb";
+  import { buildProjectBreadcrumbs } from "$lib/utils/breadcrumbs";
 
   let { data, children }: { data: LayoutData; children: any } = $props();
 
@@ -12,22 +15,17 @@
       path: `/projects/${data.project.id}/image-library`,
     },
   ];
+
+  // Initialize breadcrumbs context
+  const breadcrumbs = initBreadcrumbs(
+    buildProjectBreadcrumbs(data.project.id, data.project.name)
+  );
 </script>
 
 <div class="project-page">
   <div class="project-header">
     <div class="header-content">
-      <div class="breadcrumb">
-        <a href="/projects">Projects</a>
-        <svg viewBox="0 0 20 20" fill="currentColor">
-          <path
-            fill-rule="evenodd"
-            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        <span class="current">{data.project.name}</span>
-      </div>
+      <Breadcrumb items={$breadcrumbs} />
       {#if data.project.description}
         <p class="project-description">{data.project.description}</p>
       {/if}
@@ -56,36 +54,6 @@
     );
     padding: 1.2rem 2rem;
     border-bottom: 1px solid var(--color-border);
-  }
-
-  .breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .breadcrumb a {
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    transition: color 0.2s ease;
-  }
-
-  .breadcrumb a:hover {
-    color: white;
-  }
-
-  .breadcrumb svg {
-    width: 14px;
-    height: 14px;
-    color: rgba(255, 255, 255, 0.6);
-    flex-shrink: 0;
-  }
-
-  .breadcrumb .current {
-    color: white;
-    font-weight: 600;
   }
 
   .project-description {

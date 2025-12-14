@@ -8,8 +8,16 @@
   import CardConfigForm from "./_components/CardConfigForm.svelte";
   import DiceConfigForm from "./_components/DiceConfigForm.svelte";
   import type { GameComponent } from "$lib/types";
+  import { getBreadcrumbs } from "$lib/stores/breadcrumb";
+  import { buildComponentsBreadcrumbs } from "$lib/utils/breadcrumbs";
 
   let { data }: { data: PageData } = $props();
+
+  // Update breadcrumbs for this page
+  const breadcrumbs = getBreadcrumbs();
+  $effect(() => {
+    breadcrumbs.set(buildComponentsBreadcrumbs(data.project.id, data.project.name));
+  });
 
   let showModal = $state(false);
   let selectedType: "card" | "dice" | null = $state(null);
