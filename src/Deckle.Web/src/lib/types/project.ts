@@ -13,3 +13,17 @@ export interface CreateProjectDto {
   name: string;
   description?: string;
 }
+
+export interface UpdateProjectDto {
+  name: string;
+  description?: string;
+}
+
+export interface ProjectUser {
+  userId: string;
+  email: string;
+  name?: string;
+  pictureUrl?: string;
+  role: string;
+  joinedAt: string;
+}

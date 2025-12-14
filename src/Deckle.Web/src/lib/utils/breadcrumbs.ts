@@ -23,6 +23,15 @@ export function buildComponentsBreadcrumbs(
 	]);
 }
 
+export function buildSettingsBreadcrumbs(
+	projectId: string,
+	projectName: string
+): BreadcrumbItem[] {
+	return extend(buildProjectBreadcrumbs(projectId, projectName), [
+		{ label: 'Settings', href: `/projects/${projectId}/settings`, isActive: true }
+	]);
+}
+
 export function buildCardEditorBreadcrumbs(
 	projectId: string,
 	projectName: string,

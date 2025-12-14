@@ -11,3 +11,15 @@ public record ProjectDto
 }
 
 public record CreateProjectRequest(string Name, string? Description);
+
+public record UpdateProjectRequest(string Name, string? Description);
+
+public record ProjectUserDto
+{
+    public required Guid UserId { get; init; }
+    public required string Email { get; init; }
+    public string? Name { get; init; }
+    public string? PictureUrl { get; init; }
+    public required string Role { get; init; }
+    public required DateTime JoinedAt { get; init; }
+}

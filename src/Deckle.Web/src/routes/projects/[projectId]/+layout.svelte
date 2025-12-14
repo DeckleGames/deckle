@@ -14,6 +14,10 @@
       name: "Image Library",
       path: `/projects/${data.project.id}/image-library`,
     },
+    {
+      name: "Settings",
+      path: `/projects/${data.project.id}/settings`,
+    },
   ];
 
   // Initialize breadcrumbs context
