@@ -1,17 +1,14 @@
 <script lang="ts">
   import favicon from "$lib/assets/favicon.svg";
   import { page } from "$app/stores";
-  import Sidebar from "$lib/components/Sidebar.svelte";
+  import TopBar from "$lib/components/TopBar.svelte";
   import type { LayoutData } from "./$types";
   import "../app.css";
 
   let { children, data }: { children: any; data: LayoutData } = $props();
 
-  // Determine if we should show the dashboard layout (sidebar)
+  // Determine if we should show the dashboard layout (topbar)
   const isAuthPage = $derived($page.url.pathname === "/" && !data.user);
-
-  // Track sidebar collapsed state
-  let sidebarCollapsed = $state(false);
 </script>
 
 <svelte:head>
@@ -19,21 +16,17 @@
 </svelte:head>
 
 {#if isAuthPage}
-  <!-- Landing page layout (no sidebar) -->
+  <!-- Landing page layout (no topbar) -->
   <main class="landing-content">
     {@render children()}
   </main>
 {:else}
-  <!-- Dashboard layout (sidebar + content) -->
+  <!-- Dashboard layout (topbar + content) -->
   {#if data.user}
-    <Sidebar user={data.user} bind:collapsed={sidebarCollapsed} />
+    <TopBar user={data.user} />
   {/if}
 
-  <div
-    class="dashboard-layout"
-    class:with-sidebar={data.user}
-    class:sidebar-collapsed={sidebarCollapsed}
-  >
+  <div class="dashboard-layout" class:with-topbar={data.user}>
     <main class="main-content">
       {@render children()}
     </main>
@@ -51,13 +44,8 @@
     flex-direction: column;
   }
 
-  .dashboard-layout.with-sidebar {
-    margin-left: 260px;
-    transition: margin-left 0.3s ease;
-  }
-
-  .dashboard-layout.with-sidebar.sidebar-collapsed {
-    margin-left: 72px;
+  .dashboard-layout.with-topbar {
+    padding-top: 60px;
   }
 
   .main-content {
@@ -65,11 +53,5 @@
     background-color: #f8f9fa;
     display: flex;
     flex-direction: column;
-  }
-
-  @media (max-width: 768px) {
-    .dashboard-layout.with-sidebar {
-      margin-left: 72px;
-    }
   }
 </style>
