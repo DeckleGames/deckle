@@ -3,7 +3,8 @@
     "allow": [
       "Bash(ls:*)",
       "Bash(npm run check:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(dotnet build:*)"
     ],
     "deny": [],
     "ask": []
