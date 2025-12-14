@@ -42,7 +42,7 @@ export function buildCardEditorBreadcrumbs(
 	const breadcrumbs: BreadcrumbItem[] = [
 		{
 			label: cardName,
-			href: `/projects/${projectId}/components/cards/${cardId}/front`,
+			href: `/projects/${projectId}/components/${cardId}/front`,
 			isActive: !side
 		}
 	];
@@ -50,7 +50,7 @@ export function buildCardEditorBreadcrumbs(
 	if (side) {
 		breadcrumbs.push({
 			label: side,
-			href: `/projects/${projectId}/components/cards/${cardId}/${side.toLowerCase()}`,
+			href: `/projects/${projectId}/components/${cardId}/${side.toLowerCase()}`,
 			isActive: true
 		});
 	}

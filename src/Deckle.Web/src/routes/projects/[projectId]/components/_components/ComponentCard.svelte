@@ -107,13 +107,13 @@
     </p>
     <div class="design-links">
       <a
-        href="/projects/{component.projectId}/components/cards/{component.id}/front"
+        href="/projects/{component.projectId}/components/{component.id}/front"
         class="design-link"
       >
         Edit Front Design
       </a>
       <a
-        href="/projects/{component.projectId}/components/cards/{component.id}/back"
+        href="/projects/{component.projectId}/components/{component.id}/back"
         class="design-link"
       >
         Edit Back Design
