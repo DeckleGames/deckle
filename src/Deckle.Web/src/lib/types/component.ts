@@ -3,9 +3,11 @@
 export interface Dimensions {
   widthMm: number;
   heightMm: number;
+  bleedMm: number;
   dpi: number;
   widthPx: number;
   heightPx: number;
+  bleedPx: number;
 }
 
 export interface Component {

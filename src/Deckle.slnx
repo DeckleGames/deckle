@@ -7,4 +7,5 @@
   </Folder>
   <Project Path="Deckle.AppHost/Deckle.AppHost.csproj" />
   <Project Path="Deckle.ServiceDefaults/Deckle.ServiceDefaults.csproj" />
+  <Project Path="Deckle.Utils/Deckle.Utils.csproj" Id="0ea2af3a-16c1-4e95-9d0a-7e7cd16ebbe1" />
 </Solution>

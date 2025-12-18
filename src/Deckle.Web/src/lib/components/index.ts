@@ -8,6 +8,5 @@ export { default as Dialog } from './Dialog.svelte';
 export { default as EmptyState } from './EmptyState.svelte';
 export { default as PageLayout } from './layout/PageLayout.svelte';
 export { default as PageHeader } from './layout/PageHeader.svelte';
-export { default as Sidebar } from './Sidebar.svelte';
 export { default as Tabs } from './Tabs.svelte';
 export { default as TopBar } from './TopBar.svelte';

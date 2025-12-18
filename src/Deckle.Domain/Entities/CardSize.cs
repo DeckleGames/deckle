@@ -44,6 +44,7 @@ public static class CardSizeExtensions
         {
             WidthMm = horizontal ? height : width,
             HeightMm = horizontal ? width : height,
+            BleedMm = 3
         };
     }
 }
