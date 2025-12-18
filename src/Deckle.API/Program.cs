@@ -219,6 +219,7 @@ builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<GoogleSheetsService>();
 builder.Services.AddScoped<DataSourceService>();
 builder.Services.AddScoped<ComponentService>();
+builder.Services.AddScoped<McpAccessTokenService>();
 
 var app = builder.Build();
 
@@ -253,5 +254,6 @@ app.MapProjectEndpoints();
 app.MapDataSourceEndpoints();
 app.MapGoogleSheetsAuthEndpoints();
 app.MapComponentEndpoints();
+app.MapMcpAccessTokenEndpoints();
 
 app.Run();

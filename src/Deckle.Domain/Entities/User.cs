@@ -27,4 +27,5 @@ public class User
     public ICollection<Project> Projects { get; set; } = [];
     public ICollection<UserProject> UserProjects { get; set; } = [];
     public ICollection<GoogleCredential> GoogleCredentials { get; set; } = [];
+    public ICollection<McpAccessToken> McpAccessTokens { get; set; } = [];
 }

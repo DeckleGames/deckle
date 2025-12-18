@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<Component> Components { get; set; }
     public DbSet<Card> Cards { get; set; }
     public DbSet<Dice> Dices { get; set; }
+    public DbSet<McpAccessToken> McpAccessTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -172,6 +173,39 @@ public class AppDbContext : DbContext
             entity.HasOne(gc => gc.User)
                 .WithMany(u => u.GoogleCredentials)
                 .HasForeignKey(gc => gc.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<McpAccessToken>(entity =>
+        {
+            entity.HasKey(mat => mat.Id);
+
+            entity.HasIndex(mat => mat.UserId);
+
+            entity.HasIndex(mat => mat.TokenHash);
+
+            entity.Property(mat => mat.Name)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            entity.Property(mat => mat.TokenHash)
+                .IsRequired()
+                .HasMaxLength(64); // SHA256 hash is 64 characters in hex
+
+            entity.Property(mat => mat.TokenSuffix)
+                .IsRequired()
+                .HasMaxLength(4);
+
+            entity.Property(mat => mat.Description)
+                .HasMaxLength(1000);
+
+            entity.Property(mat => mat.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.HasOne(mat => mat.User)
+                .WithMany(u => u.McpAccessTokens)
+                .HasForeignKey(mat => mat.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
