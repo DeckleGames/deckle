@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { PageData } from './$types';
-  import { config } from '$lib/config';
-  import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
-  import { getBreadcrumbs } from '$lib/stores/breadcrumb';
-  import { buildDataSourceBreadcrumbs } from '$lib/utils/breadcrumbs';
+  import type { PageData } from "./$types";
+  import { config } from "$lib/config";
+  import { onMount } from "svelte";
+  import { goto } from "$app/navigation";
+  import { buildDataSourceBreadcrumbs } from "$lib/utils/breadcrumbs";
+  import { setBreadcrumbs } from "$lib/stores/breadcrumb";
 
   let { data }: { data: PageData } = $props();
 
@@ -35,18 +35,16 @@
   let dataSource = $state<DataSource | null>(null);
   let metadata = $state<SpreadsheetMetadata | null>(null);
   let loading = $state(true);
-  let errorMessage = $state('');
+  let errorMessage = $state("");
   let selectedSheetIndex = $state(0);
   let needsAuth = $state(false);
 
   // Update breadcrumbs when dataSource is loaded
-  const breadcrumbs = getBreadcrumbs();
   $effect(() => {
     if (dataSource) {
-      breadcrumbs.set(
+      setBreadcrumbs(
         buildDataSourceBreadcrumbs(
-          data.projectId,
-          data.project.name,
+          { id: data.projectId, name: data.project.name },
           dataSource.id,
           dataSource.name
         )
@@ -61,47 +59,60 @@
   async function loadDataSource() {
     try {
       loading = true;
-      errorMessage = '';
+      errorMessage = "";
 
       // Get data source details
-      const dsResponse = await fetch(`${config.apiUrl}/data-sources/${data.dataSourceId}`, {
-        credentials: 'include'
-      });
+      const dsResponse = await fetch(
+        `${config.apiUrl}/data-sources/${data.dataSourceId}`,
+        {
+          credentials: "include",
+        }
+      );
 
       if (!dsResponse.ok) {
         if (dsResponse.status === 404) {
-          errorMessage = 'Data source not found';
+          errorMessage = "Data source not found";
           return;
         }
-        throw new Error('Failed to load data source');
+        throw new Error("Failed to load data source");
       }
 
       dataSource = await dsResponse.json();
 
       // Get spreadsheet metadata
-      const metadataResponse = await fetch(`${config.apiUrl}/data-sources/${data.dataSourceId}/metadata`, {
-        credentials: 'include'
-      });
+      const metadataResponse = await fetch(
+        `${config.apiUrl}/data-sources/${data.dataSourceId}/metadata`,
+        {
+          credentials: "include",
+        }
+      );
 
       if (metadataResponse.ok) {
         metadata = await metadataResponse.json();
-      } else if (metadataResponse.status === 401 || metadataResponse.status === 403) {
+      } else if (
+        metadataResponse.status === 401 ||
+        metadataResponse.status === 403
+      ) {
         // Check if it's an auth issue
-        const authResponse = await fetch(`${config.apiUrl}/google-sheets-auth/status`, {
-          credentials: 'include'
-        });
+        const authResponse = await fetch(
+          `${config.apiUrl}/google-sheets-auth/status`,
+          {
+            credentials: "include",
+          }
+        );
 
         if (authResponse.ok) {
           const authData = await authResponse.json();
           if (!authData.authorized) {
             needsAuth = true;
-            errorMessage = 'Google Sheets authorization required to view this data source.';
+            errorMessage =
+              "Google Sheets authorization required to view this data source.";
           }
         }
       }
     } catch (error) {
-      console.error('Failed to load data source:', error);
-      errorMessage = 'Failed to load data source. Please try again.';
+      console.error("Failed to load data source:", error);
+      errorMessage = "Failed to load data source. Please try again.";
     } finally {
       loading = false;
     }
@@ -114,7 +125,7 @@
 
   function getEmbedUrl(): string {
     if (!dataSource?.googleSheetsId || !metadata) {
-      return '';
+      return "";
     }
 
     const sheetGid = metadata.sheets[selectedSheetIndex]?.sheetId ?? 0;
@@ -122,32 +133,44 @@
   }
 
   async function deleteDataSource() {
-    if (!confirm('Are you sure you want to delete this data source?')) {
+    if (!confirm("Are you sure you want to delete this data source?")) {
       return;
     }
 
     try {
-      const response = await fetch(`${config.apiUrl}/data-sources/${data.dataSourceId}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
+      const response = await fetch(
+        `${config.apiUrl}/data-sources/${data.dataSourceId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
 
       if (response.ok) {
         goto(`/projects/${data.projectId}/data-sources`);
       }
     } catch (error) {
-      console.error('Failed to delete data source:', error);
+      console.error("Failed to delete data source:", error);
     }
   }
 </script>
 
 <svelte:head>
   {#if dataSource}
-    <title>{dataSource.name} · Data Sources · {data.project.name} · Deckle</title>
-    <meta name="description" content="View and manage {dataSource.name} data source for {data.project.name}. Preview spreadsheet data and configure how it connects to your game components." />
+    <title
+      >{dataSource.name} · Data Sources · {data.project.name} · Deckle</title
+    >
+    <meta
+      name="description"
+      content="View and manage {dataSource.name} data source for {data.project
+        .name}. Preview spreadsheet data and configure how it connects to your game components."
+    />
   {:else}
     <title>Data Source · {data.project.name} · Deckle</title>
-    <meta name="description" content="View data source details for {data.project.name}." />
+    <meta
+      name="description"
+      content="View data source details for {data.project.name}."
+    />
   {/if}
 </svelte:head>
 
@@ -162,7 +185,9 @@
           Authorize Google Sheets
         </button>
       {/if}
-      <a href={`/projects/${data.projectId}/data-sources`}>Back to Data Sources</a>
+      <a href={`/projects/${data.projectId}/data-sources`}
+        >Back to Data Sources</a
+      >
     </div>
   {:else if dataSource}
     <div class="header">
@@ -173,7 +198,12 @@
 
       <div class="actions">
         {#if dataSource.googleSheetsUrl}
-          <a href={dataSource.googleSheetsUrl} target="_blank" rel="noopener noreferrer" class="open-button">
+          <a
+            href={dataSource.googleSheetsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="open-button"
+          >
             Open in Google Sheets
           </a>
         {/if}

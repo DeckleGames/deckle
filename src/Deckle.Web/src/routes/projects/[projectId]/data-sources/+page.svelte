@@ -3,17 +3,14 @@
   import { config } from "$lib/config";
   import { onMount } from "svelte";
   import { Card, Dialog, Button, EmptyState } from "$lib/components";
-  import { getBreadcrumbs } from "$lib/stores/breadcrumb";
   import { buildDataSourcesBreadcrumbs } from "$lib/utils/breadcrumbs";
+  import { setBreadcrumbs } from "$lib/stores/breadcrumb";
 
   let { data }: { data: PageData } = $props();
 
   // Update breadcrumbs for this page
-  const breadcrumbs = getBreadcrumbs();
   $effect(() => {
-    breadcrumbs.set(
-      buildDataSourcesBreadcrumbs(data.project.id, data.project.name)
-    );
+    setBreadcrumbs(buildDataSourcesBreadcrumbs(data.project));
   });
 
   interface DataSource {

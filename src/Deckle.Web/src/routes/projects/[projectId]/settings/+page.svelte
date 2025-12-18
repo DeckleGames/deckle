@@ -3,17 +3,14 @@
   import { projectsApi, ApiError } from "$lib/api";
   import { goto, invalidateAll } from "$app/navigation";
   import { Button, Dialog, Card, Badge } from "$lib/components";
-  import { getBreadcrumbs } from "$lib/stores/breadcrumb";
+  import { setBreadcrumbs } from "$lib/stores/breadcrumb";
   import { buildSettingsBreadcrumbs } from "$lib/utils/breadcrumbs";
 
   let { data }: { data: PageData } = $props();
 
   // Update breadcrumbs for this page
-  const breadcrumbs = getBreadcrumbs();
   $effect(() => {
-    breadcrumbs.set(
-      buildSettingsBreadcrumbs(data.project.id, data.project.name)
-    );
+    setBreadcrumbs(buildSettingsBreadcrumbs(data.project));
   });
 
   // Project details editing

@@ -22,9 +22,7 @@
   ];
 
   // Initialize breadcrumbs context
-  const breadcrumbs = initBreadcrumbs(
-    buildProjectBreadcrumbs(data.project.id, data.project.name)
-  );
+  const breadcrumbs = initBreadcrumbs(buildProjectBreadcrumbs(data.project));
 
   // Check if we're on the editor page (hide tabs on editor)
   const isEditorPage = $derived(
@@ -42,7 +40,7 @@
   <Tabs {tabs} />
 {/if}
 
-<div class="project-page-content">
+<div class="project-page-content" class:nopadding={isEditorPage}>
   {@render children()}
 </div>
 
@@ -52,5 +50,10 @@
     min-height: 0;
     overflow: auto;
     padding: 2rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .project-page-content.nopadding {
+    padding: 0;
   }
 </style>

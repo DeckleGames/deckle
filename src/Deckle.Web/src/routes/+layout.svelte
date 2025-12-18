@@ -42,13 +42,15 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
 
   .main-content {
     flex: 1;
-    padding-top: 60px;
     background-color: #f8f9fa;
     display: flex;
     flex-direction: column;
+    min-height: 0;
+    overflow: auto;
   }
 </style>

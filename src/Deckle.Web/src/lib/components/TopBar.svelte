@@ -100,10 +100,6 @@
 
 <style>
   .topbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
     height: 60px;
     background-color: var(--color-sage);
     border-bottom: 1px solid rgba(255, 255, 255, 0.15);

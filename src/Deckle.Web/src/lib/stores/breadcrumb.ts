@@ -17,3 +17,7 @@ export function getBreadcrumbs(): Writable<BreadcrumbItem[]> {
 	}
 	return store;
 }
+
+export function setBreadcrumbs(value:BreadcrumbItem[]) {
+	getBreadcrumbs().set(value);
+}

@@ -1,4 +1,8 @@
+import type { Component, Project } from '$lib/types';
 import type { BreadcrumbItem } from '$lib/types/breadcrumb';
+
+type ProjectIdName = Project | { id: string, name: string};
+type ComponentIdName = Component | { id: string, name: string};
 
 function extend(breadcrumbs:BreadcrumbItem[], additions:BreadcrumbItem[]): BreadcrumbItem[] {
 	return [
@@ -7,76 +11,70 @@ function extend(breadcrumbs:BreadcrumbItem[], additions:BreadcrumbItem[]): Bread
 	];
 }
 
-export function buildProjectBreadcrumbs(projectId: string, projectName: string): BreadcrumbItem[] {
+export function buildProjectBreadcrumbs(project:ProjectIdName): BreadcrumbItem[] {
 	return [
 		{ label: 'Projects', href: '/projects' },
-		{ label: projectName, href: `/projects/${projectId}`, isActive: true }
+		{ label: project.name, href: `/projects/${project.id}`, isActive: true }
 	];
 }
 
 export function buildComponentsBreadcrumbs(
-	projectId: string,
-	projectName: string
+	project: ProjectIdName
 ): BreadcrumbItem[] {
-	return extend(buildProjectBreadcrumbs(projectId, projectName), [
-		{ label: 'Components', href: `/projects/${projectId}/components`, isActive: true }
+	return extend(buildProjectBreadcrumbs(project), [
+		{ label: 'Components', href: `/projects/${project.id}/components`, isActive: true }
 	]);
 }
 
 export function buildSettingsBreadcrumbs(
-	projectId: string,
-	projectName: string
+	project: ProjectIdName
 ): BreadcrumbItem[] {
-	return extend(buildProjectBreadcrumbs(projectId, projectName), [
-		{ label: 'Settings', href: `/projects/${projectId}/settings`, isActive: true }
+	return extend(buildProjectBreadcrumbs(project), [
+		{ label: 'Settings', href: `/projects/${project.id}/settings`, isActive: true }
 	]);
 }
 
-export function buildCardEditorBreadcrumbs(
-	projectId: string,
-	projectName: string,
-	cardId: string,
-	cardName: string,
-	side?: 'Front' | 'Back'
+export function buildEditorBreadcrumbs(
+	project: ProjectIdName,
+	component: ComponentIdName,
+	part?: string
 ): BreadcrumbItem[] {
 	const breadcrumbs: BreadcrumbItem[] = [
 		{
-			label: cardName,
-			href: `/projects/${projectId}/components/${cardId}/front`,
-			isActive: !side
+			label: component.name,
+			href: `/projects/${project.id}/components/${component.id}/front`,
+			isActive: !part
 		}
 	];
 
-	if (side) {
+	if (part) {
 		breadcrumbs.push({
-			label: side,
-			href: `/projects/${projectId}/components/${cardId}/${side.toLowerCase()}`,
+			label: part,
+			href: `/projects/${project.name}/components/${component.id}/${part.toLowerCase()}`,
 			isActive: true
 		});
 	}
 
-	return extend(buildComponentsBreadcrumbs(projectId, projectName), breadcrumbs);
+	return extend(buildComponentsBreadcrumbs(project), breadcrumbs);
 }
 
 export function buildDataSourcesBreadcrumbs(
-	projectId: string,
-	projectName: string
+	project:ProjectIdName
 ): BreadcrumbItem[] {
-	return extend(buildProjectBreadcrumbs(projectId, projectName), [
-		{ label: 'Data Sources', href: `/projects/${projectId}/data-sources`, isActive: true }
+	return extend(buildProjectBreadcrumbs(project), [
+		{ label: 'Data Sources', href: `/projects/${project.id}/data-sources`, isActive: true }
 	]);
 }
 
 export function buildDataSourceBreadcrumbs(
-	projectId: string,
-	projectName: string,
+	project: ProjectIdName,
 	dataSourceId: string,
 	dataSourceName: string
 ): BreadcrumbItem[] {
-	return extend(buildProjectBreadcrumbs(projectId, projectName), [
+	return extend(buildProjectBreadcrumbs(project), [
 		{
 			label: dataSourceName,
-			href: `/projects/${projectId}/data-sources/${dataSourceId}`,
+			href: `/projects/${project.id}/data-sources/${dataSourceId}`,
 			isActive: true
 		}
 	]);
