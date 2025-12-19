@@ -14,7 +14,7 @@
   const scale = $derived(() => {
     if (!containerWidth || !containerHeight) return 1;
 
-    const padding = 40; // padding in pixels
+    const padding = 20; // padding in pixels
     const availableWidth = containerWidth - padding * 2;
     const availableHeight = containerHeight - padding * 2;
 
