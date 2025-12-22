@@ -26,6 +26,7 @@
   const hasChildren = $derived(element.type === 'container' && element.children.length > 0);
   const isSelected = $derived(selectedId === element.id);
   const isHovered = $derived($templateStore.hoveredElementId === element.id);
+  const isInvisible = $derived(element.visible === false);
 
   function toggleExpanded() {
     if (hasChildren) {
@@ -175,6 +176,7 @@
       class:hovered={isHovered && !isSelected}
       class:root={isRoot}
       class:drag-over={isDragOver && !isRoot}
+      class:invisible={isInvisible}
       draggable={!isRoot}
       ondragstart={handleDragStart}
       onclick={handleSelect}
@@ -337,6 +339,10 @@
   .node-content.root.drag-over {
     background: #d4edda;
     border: 2px dashed #28a745;
+  }
+
+  .node-content.invisible {
+    opacity: 0.5;
   }
 
   .expand-button {

@@ -12,6 +12,17 @@
 <div class="config-section">
   <h3 class="section-title">Text Settings</h3>
 
+  <div class="field checkbox-field">
+    <label>
+      <input
+        type="checkbox"
+        checked={element.visible !== false}
+        onchange={(e) => updateElement({ visible: e.currentTarget.checked })}
+      />
+      <span>Visible</span>
+    </label>
+  </div>
+
   <div class="field">
     <label for="content">Content</label>
     <textarea
@@ -193,6 +204,23 @@
     font-weight: 500;
     color: #666;
     margin-bottom: 0.25rem;
+  }
+
+  .checkbox-field label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+
+  .checkbox-field input[type="checkbox"] {
+    width: auto;
+    cursor: pointer;
+  }
+
+  .checkbox-field span {
+    font-size: 0.813rem;
+    color: #333;
   }
 
   .field input[type="text"],

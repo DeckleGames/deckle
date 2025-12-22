@@ -61,7 +61,8 @@
 
     // Visibility
     if (element.visible === false) {
-      styles.push('visibility: hidden');
+      styles.push('display: none');
+      return styles.join('; ');
     }
 
     // Type-specific styles
