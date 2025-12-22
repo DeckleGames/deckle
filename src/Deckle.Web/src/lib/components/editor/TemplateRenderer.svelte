@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { TemplateElement, ContainerElement, TextElement, ImageElement, Shadow } from './types';
   import TemplateRenderer from './TemplateRenderer.svelte';
+  import ResizeHandles from './_components/ResizeHandles.svelte';
   import { templateStore } from '$lib/stores/templateElements';
 
   let { element }: { element: TemplateElement } = $props();
@@ -241,6 +242,9 @@
     {#each (element as ContainerElement).children as child (child.id)}
       <TemplateRenderer element={child} />
     {/each}
+    {#if isSelected}
+      <ResizeHandles element={element} />
+    {/if}
   </div>
 {:else if element.type === 'text'}
   <div
@@ -256,22 +260,32 @@
     tabindex="0"
   >
     {(element as TextElement).content}
+    {#if isSelected}
+      <ResizeHandles element={element} />
+    {/if}
   </div>
 {:else if element.type === 'image'}
-  <img
-    src={(element as ImageElement).imageId}
-    alt=""
-    style={buildStyle(element)}
+  <div
+    style="position: relative; display: inline-block;"
     data-element-id={element.id}
-    class="editable-element"
-    class:hovered={isHovered}
-    class:selected={isSelected}
-    onmouseenter={handleMouseEnter}
-    onmouseleave={handleMouseLeave}
-    onclick={handleClick}
-    role="button"
-    tabindex="0"
-  />
+  >
+    <img
+      src={(element as ImageElement).imageId}
+      alt=""
+      style={buildStyle(element)}
+      class="editable-element"
+      class:hovered={isHovered}
+      class:selected={isSelected}
+      onmouseenter={handleMouseEnter}
+      onmouseleave={handleMouseLeave}
+      onclick={handleClick}
+      role="button"
+      tabindex="0"
+    />
+    {#if isSelected}
+      <ResizeHandles element={element} />
+    {/if}
+  </div>
 {/if}
 
 <style>
