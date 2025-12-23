@@ -26,7 +26,7 @@
     </button>
     <ZoomControls bind:zoom />
   {/snippet}
-  <ComponentViewer {dimensions} {zoom}>
+  <ComponentViewer {dimensions} bind:zoom>
     <EditableComponent {dimensions} {showBleedSafeArea} />
   </ComponentViewer>
 </Panel>
