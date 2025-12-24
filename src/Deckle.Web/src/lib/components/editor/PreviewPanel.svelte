@@ -3,11 +3,11 @@
   import Panel from "$lib/components/editor/_components/Panel.svelte";
   import UndoRedoControls from "$lib/components/editor/_components/UndoRedoControls.svelte";
   import ZoomControls from "$lib/components/editor/_components/ZoomControls.svelte";
-  import type { ComponentWithDimensions } from "$lib/types";
-  import EditableComponent from "./EditableComponent.svelte";
+  import type { EditableComponent } from "$lib/types";
+  import EditableComponentView from "./EditableComponent.svelte";
   import type { PanzoomObject } from "@panzoom/panzoom";
 
-  let { component }: { component: ComponentWithDimensions } = $props();
+  let { component }: { component: EditableComponent } = $props();
   let dimensions = component.dimensions;
 
   let showBleedSafeArea = $state(false);
@@ -32,7 +32,7 @@
     <ZoomControls {panzoomInstance} />
   {/snippet}
   <ComponentViewer {dimensions} onPanzoomReady={handlePanzoomReady}>
-    <EditableComponent {dimensions} {showBleedSafeArea} />
+    <EditableComponentView {dimensions} {showBleedSafeArea} />
   </ComponentViewer>
 </Panel>
 

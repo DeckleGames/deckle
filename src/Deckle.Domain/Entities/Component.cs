@@ -1,6 +1,6 @@
 namespace Deckle.Domain.Entities;
 
-public interface IComponentWithDimensions
+public interface IEditableComponent
 {
     Dimensions GetDimensions();
 }

@@ -19,11 +19,11 @@ export interface Component {
   updatedAt: string;
 }
 
-export interface ComponentWithDimensions extends Component {
+export interface EditableComponent extends Component {
   dimensions: Dimensions;
 }
 
-export interface CardComponent extends ComponentWithDimensions {
+export interface CardComponent extends EditableComponent {
   type: 'Card';
   size: string;
   frontDesign?: string | null;

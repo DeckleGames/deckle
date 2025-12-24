@@ -1,6 +1,6 @@
 namespace Deckle.Domain.Entities;
 
-public class Card : Component, IComponentWithDimensions
+public class Card : Component, IEditableComponent
 {
     public CardSize Size { get; set; }
 
