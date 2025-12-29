@@ -9,6 +9,10 @@
   const zoomContext = getContext<{ getScale: () => number }>('zoomScale');
   const getZoomScale = () => zoomContext?.getScale() ?? 1;
 
+  // Get panzoom instance from context to disable/enable panning
+  const panzoomContext = getContext<{ getInstance: () => any }>('panzoom');
+  const getPanzoom = () => panzoomContext?.getInstance();
+
   // Track if we're currently resizing
   let isResizing = $state(false);
   let resizeHandle = $state<string | null>(null);
@@ -60,6 +64,12 @@
     previewHeight = startHeight;
     previewX = startLeft;
     previewY = startTop;
+
+    // Disable panning during resize
+    const panzoom = getPanzoom();
+    if (panzoom) {
+      panzoom.setOptions({ disablePan: true });
+    }
 
     // Save to history once at the start of the drag operation
     // This ensures undo reverts to the initial size, not each pixel change
@@ -155,6 +165,12 @@
     isResizing = false;
     resizeHandle = null;
 
+    // Re-enable panning
+    const panzoom = getPanzoom();
+    if (panzoom) {
+      panzoom.setOptions({ disablePan: false });
+    }
+
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
   }
@@ -168,28 +184,28 @@
   });
 </script>
 
-<div class="resize-handles">
+<div class="resize-handles panzoom-exclude">
   <!-- Corner handles -->
   <div
-    class="resize-handle nw"
+    class="resize-handle panzoom-exclude nw"
     onmousedown={(e) => handleMouseDown('nw', e)}
     role="button"
     tabindex="-1"
   ></div>
   <div
-    class="resize-handle ne"
+    class="resize-handle panzoom-exclude ne"
     onmousedown={(e) => handleMouseDown('ne', e)}
     role="button"
     tabindex="-1"
   ></div>
   <div
-    class="resize-handle se"
+    class="resize-handle panzoom-exclude se"
     onmousedown={(e) => handleMouseDown('se', e)}
     role="button"
     tabindex="-1"
   ></div>
   <div
-    class="resize-handle sw"
+    class="resize-handle panzoom-exclude sw"
     onmousedown={(e) => handleMouseDown('sw', e)}
     role="button"
     tabindex="-1"
@@ -197,25 +213,25 @@
 
   <!-- Edge handles -->
   <div
-    class="resize-handle n"
+    class="resize-handle panzoom-exclude n"
     onmousedown={(e) => handleMouseDown('n', e)}
     role="button"
     tabindex="-1"
   ></div>
   <div
-    class="resize-handle e"
+    class="resize-handle panzoom-exclude e"
     onmousedown={(e) => handleMouseDown('e', e)}
     role="button"
     tabindex="-1"
   ></div>
   <div
-    class="resize-handle s"
+    class="resize-handle panzoom-exclude s"
     onmousedown={(e) => handleMouseDown('s', e)}
     role="button"
     tabindex="-1"
   ></div>
   <div
-    class="resize-handle w"
+    class="resize-handle panzoom-exclude w"
     onmousedown={(e) => handleMouseDown('w', e)}
     role="button"
     tabindex="-1"
@@ -238,6 +254,8 @@
     border-radius: 2px;
     pointer-events: auto;
     z-index: 10;
+    touch-action: none;
+    user-select: none;
   }
 
   /* Corner handles */

@@ -2,6 +2,7 @@
   import type { TemplateElement, ContainerElement, TextElement, ImageElement, Shadow } from './types';
   import TemplateRenderer from './TemplateRenderer.svelte';
   import ResizeHandles from './_components/ResizeHandles.svelte';
+  import DragHandles from './_components/DragHandles.svelte';
   import { templateStore } from '$lib/stores/templateElements';
 
   let { element }: { element: TemplateElement } = $props();
@@ -245,6 +246,9 @@
     {/each}
     {#if isSelected}
       <ResizeHandles element={element} />
+      {#if element.position === 'absolute'}
+        <DragHandles element={element} />
+      {/if}
     {/if}
   </div>
 {:else if element.type === 'text'}
@@ -263,6 +267,9 @@
     {(element as TextElement).content}
     {#if isSelected}
       <ResizeHandles element={element} />
+      {#if element.position === 'absolute'}
+        <DragHandles element={element} />
+      {/if}
     {/if}
   </div>
 {:else if element.type === 'image'}
@@ -285,6 +292,9 @@
     />
     {#if isSelected}
       <ResizeHandles element={element} />
+      {#if element.position === 'absolute'}
+        <DragHandles element={element} />
+      {/if}
     {/if}
   </div>
 {/if}

@@ -21,9 +21,13 @@
   // Create a reactive state for the current zoom scale
   let currentScale = $state(1);
 
-  // Provide zoom scale via context so ResizeHandles can access it
+  // Provide zoom scale and panzoom instance via context so handles can access them
   setContext('zoomScale', {
     getScale: () => currentScale
+  });
+
+  setContext('panzoom', {
+    getInstance: () => panzoomInstance
   });
 
   // Function to update scale (defined outside onMount for cleanup access)
@@ -56,8 +60,8 @@
         startScale: fitScale,
         step: 0.1,
         cursor: "grab",
-        // Exclude resize handles and other interactive elements from triggering pan
-        excludeClass: "resize-handle",
+        // Exclude resize handles, drag handles, and other interactive elements from triggering pan
+        excludeClass: "panzoom-exclude",
       });
 
       // Set initial scale
