@@ -76,7 +76,6 @@
 
   .dimension-input {
     display: flex;
-    gap: 0.5rem;
     align-items: center;
   }
 
@@ -85,24 +84,33 @@
     min-width: 0;
     padding: 0.375rem 0.5rem;
     font-size: 0.813rem;
+    line-height: 1.25rem;
+    height: 2.125rem;
     border: 1px solid #d1d5db;
-    border-radius: 4px;
+    border-radius: 4px 0 0 4px;
+    border-right: none;
     background: white;
+    box-sizing: border-box;
   }
 
   .dimension-input input[type="number"]:focus {
     outline: none;
     border-color: #0066cc;
+    border-right: none;
+    z-index: 1;
   }
 
   .dimension-input .unit-select {
     width: 60px;
     padding: 0.375rem 0.5rem;
     font-size: 0.813rem;
+    line-height: 1.25rem;
+    height: 2.125rem;
     border: 1px solid #d1d5db;
-    border-radius: 4px;
+    border-radius: 0 4px 4px 0;
     background: white;
     cursor: pointer;
+    box-sizing: border-box;
   }
 
   .dimension-input .unit-select.disabled-unit {

@@ -8,7 +8,7 @@
 
   let {
     padding,
-    onchange
+    onchange,
   }: {
     padding?: Padding;
     onchange: (newPadding: Padding) => void;
@@ -16,18 +16,19 @@
 </script>
 
 <div class="field">
-  <label class="section-label">Padding:</label>
+  <label class="section-label">Padding</label>
   <div class="padding-grid">
     <div class="padding-input">
       <label for="padding-top">Top</label>
       <input
         type="number"
         id="padding-top"
-        value={padding?.top ?? ''}
-        oninput={(e) => onchange({
-          ...padding,
-          top: parseInt(e.currentTarget.value) || 0
-        })}
+        value={padding?.top ?? ""}
+        oninput={(e) =>
+          onchange({
+            ...padding,
+            top: parseInt(e.currentTarget.value) || 0,
+          })}
       />
       <span class="unit">px</span>
     </div>
@@ -37,11 +38,12 @@
       <input
         type="number"
         id="padding-right"
-        value={padding?.right ?? ''}
-        oninput={(e) => onchange({
-          ...padding,
-          right: parseInt(e.currentTarget.value) || 0
-        })}
+        value={padding?.right ?? ""}
+        oninput={(e) =>
+          onchange({
+            ...padding,
+            right: parseInt(e.currentTarget.value) || 0,
+          })}
       />
       <span class="unit">px</span>
     </div>
@@ -51,11 +53,12 @@
       <input
         type="number"
         id="padding-bottom"
-        value={padding?.bottom ?? ''}
-        oninput={(e) => onchange({
-          ...padding,
-          bottom: parseInt(e.currentTarget.value) || 0
-        })}
+        value={padding?.bottom ?? ""}
+        oninput={(e) =>
+          onchange({
+            ...padding,
+            bottom: parseInt(e.currentTarget.value) || 0,
+          })}
       />
       <span class="unit">px</span>
     </div>
@@ -65,11 +68,12 @@
       <input
         type="number"
         id="padding-left"
-        value={padding?.left ?? ''}
-        oninput={(e) => onchange({
-          ...padding,
-          left: parseInt(e.currentTarget.value) || 0
-        })}
+        value={padding?.left ?? ""}
+        oninput={(e) =>
+          onchange({
+            ...padding,
+            left: parseInt(e.currentTarget.value) || 0,
+          })}
       />
       <span class="unit">px</span>
     </div>
@@ -92,7 +96,8 @@
   .padding-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
+    gap: 1rem;
+    row-gap: 0.5rem;
   }
 
   .padding-input {
@@ -113,9 +118,12 @@
     min-width: 0;
     padding: 0.375rem 0.5rem;
     font-size: 0.813rem;
+    line-height: 1.25rem;
+    height: 2.125rem;
     border: 1px solid #d1d5db;
     border-radius: 4px;
     background: white;
+    box-sizing: border-box;
   }
 
   .padding-input input[type="number"]:focus {

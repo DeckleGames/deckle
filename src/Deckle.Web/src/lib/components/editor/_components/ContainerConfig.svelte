@@ -1,11 +1,15 @@
 <script lang="ts">
-  import type { ContainerElement } from '../types';
-  import { templateStore } from '$lib/stores/templateElements';
-  import VisibilityCheckbox from './VisibilityCheckbox.svelte';
-  import PositionControls from './PositionControls.svelte';
-  import DimensionInput from './DimensionInput.svelte';
-  import ColorPicker from './ColorPicker.svelte';
-  import PaddingControls from './PaddingControls.svelte';
+  import type { ContainerElement } from "../types";
+  import { templateStore } from "$lib/stores/templateElements";
+  import ConfigSection from "./ConfigSection.svelte";
+  import FieldWrapper from "./FieldWrapper.svelte";
+  import SelectField from "./SelectField.svelte";
+  import VisibilityCheckbox from "./VisibilityCheckbox.svelte";
+  import PositionControls from "./PositionControls.svelte";
+  import DimensionInput from "./DimensionInput.svelte";
+  import ColorPicker from "./ColorPicker.svelte";
+  import PaddingControls from "./PaddingControls.svelte";
+  import Fields from "./Fields.svelte";
 
   let { element }: { element: ContainerElement } = $props();
 
@@ -15,84 +19,84 @@
 
   // Determine if flex direction is column-based
   const isColumn = $derived(
-    element.flexConfig?.direction === 'column' ||
-    element.flexConfig?.direction === 'column-reverse'
+    element.flexConfig?.direction === "column" ||
+      element.flexConfig?.direction === "column-reverse"
   );
 
   // Get current X and Y values based on direction
   const currentX = $derived(() => {
-    const justify = element.flexConfig?.justifyContent || 'flex-start';
-    const align = element.flexConfig?.alignItems || 'flex-start';
+    const justify = element.flexConfig?.justifyContent || "flex-start";
+    const align = element.flexConfig?.alignItems || "flex-start";
 
     if (isColumn) {
       // In column mode, X controls alignItems
-      return cssToUserValue(align, 'cross');
+      return cssToUserValue(align, "cross");
     } else {
       // In row mode, X controls justifyContent
-      return cssToUserValue(justify, 'main');
+      return cssToUserValue(justify, "main");
     }
   });
 
   const currentY = $derived(() => {
-    const justify = element.flexConfig?.justifyContent || 'flex-start';
-    const align = element.flexConfig?.alignItems || 'flex-start';
+    const justify = element.flexConfig?.justifyContent || "flex-start";
+    const align = element.flexConfig?.alignItems || "flex-start";
 
     if (isColumn) {
       // In column mode, Y controls justifyContent
-      return cssToUserValue(justify, 'main');
+      return cssToUserValue(justify, "main");
     } else {
       // In row mode, Y controls alignItems
-      return cssToUserValue(align, 'cross');
+      return cssToUserValue(align, "cross");
     }
   });
 
   // Convert CSS values to user-friendly values
-  function cssToUserValue(cssValue: string, axis: 'main' | 'cross'): string {
-    if (axis === 'main') {
+  function cssToUserValue(cssValue: string, axis: "main" | "cross"): string {
+    if (axis === "main") {
       // Main axis can have space-between, space-around
       const map: Record<string, string> = {
-        'flex-start': isColumn ? 'top' : 'left',
-        'flex-end': isColumn ? 'bottom' : 'right',
-        'center': 'center',
-        'space-between': 'space-between',
-        'space-around': 'space-around',
-        'space-evenly': 'space-around' // Map space-evenly to space-around
+        "flex-start": isColumn ? "top" : "left",
+        "flex-end": isColumn ? "bottom" : "right",
+        center: "center",
+        "space-between": "space-between",
+        "space-around": "space-around",
+        "space-evenly": "space-around", // Map space-evenly to space-around
       };
       return map[cssValue] || cssValue;
     } else {
       // Cross axis
       const map: Record<string, string> = {
-        'flex-start': isColumn ? 'left' : 'top',
-        'flex-end': isColumn ? 'right' : 'bottom',
-        'center': 'center',
-        'stretch': 'stretch',
-        'baseline': 'stretch' // Map baseline to stretch
+        "flex-start": isColumn ? "left" : "top",
+        "flex-end": isColumn ? "right" : "bottom",
+        center: "center",
+        stretch: "stretch",
+        baseline: "stretch", // Map baseline to stretch
       };
       return map[cssValue] || cssValue;
     }
   }
 
   // Convert user-friendly values to CSS values
-  function userValueToCss(userValue: string, axis: 'main' | 'cross'): string {
-    if (axis === 'main') {
+  function userValueToCss(userValue: string, axis: "main" | "cross"): string {
+    if (axis === "main") {
       const map: Record<string, string> = {
-        'left': 'flex-start',
-        'right': 'flex-end',
-        'top': 'flex-start',
-        'bottom': 'flex-end',
-        'center': 'center',
-        'space-between': 'space-between',
-        'space-around': 'space-around'
+        left: "flex-start",
+        right: "flex-end",
+        top: "flex-start",
+        bottom: "flex-end",
+        center: "center",
+        "space-between": "space-between",
+        "space-around": "space-around",
       };
       return map[userValue] || userValue;
     } else {
       const map: Record<string, string> = {
-        'left': 'flex-start',
-        'right': 'flex-end',
-        'top': 'flex-start',
-        'bottom': 'flex-end',
-        'center': 'center',
-        'stretch': 'stretch'
+        left: "flex-start",
+        right: "flex-end",
+        top: "flex-start",
+        bottom: "flex-end",
+        center: "center",
+        stretch: "stretch",
       };
       return map[userValue] || userValue;
     }
@@ -100,8 +104,8 @@
 
   // Update alignment based on X/Y values
   function updateAlignment(x?: string, y?: string) {
-    const currentJustify = element.flexConfig?.justifyContent || 'flex-start';
-    const currentAlign = element.flexConfig?.alignItems || 'flex-start';
+    const currentJustify = element.flexConfig?.justifyContent || "flex-start";
+    const currentAlign = element.flexConfig?.alignItems || "flex-start";
 
     let newJustify = currentJustify;
     let newAlign = currentAlign;
@@ -109,18 +113,18 @@
     if (isColumn) {
       // In column mode: X = alignItems, Y = justifyContent
       if (x !== undefined) {
-        newAlign = userValueToCss(x, 'cross');
+        newAlign = userValueToCss(x, "cross");
       }
       if (y !== undefined) {
-        newJustify = userValueToCss(y, 'main');
+        newJustify = userValueToCss(y, "main");
       }
     } else {
       // In row mode: X = justifyContent, Y = alignItems
       if (x !== undefined) {
-        newJustify = userValueToCss(x, 'main');
+        newJustify = userValueToCss(x, "main");
       }
       if (y !== undefined) {
-        newAlign = userValueToCss(y, 'cross');
+        newAlign = userValueToCss(y, "cross");
       }
     }
 
@@ -128,8 +132,8 @@
       flexConfig: {
         ...element.flexConfig,
         justifyContent: newJustify as any,
-        alignItems: newAlign as any
-      }
+        alignItems: newAlign as any,
+      },
     });
   }
 
@@ -137,18 +141,18 @@
   const xOptions = $derived(() => {
     if (isColumn) {
       return [
-        { value: 'left', label: 'Left' },
-        { value: 'center', label: 'Center' },
-        { value: 'right', label: 'Right' },
-        { value: 'stretch', label: 'Stretch' }
+        { value: "left", label: "Left" },
+        { value: "center", label: "Center" },
+        { value: "right", label: "Right" },
+        { value: "stretch", label: "Stretch" },
       ];
     } else {
       return [
-        { value: 'left', label: 'Left' },
-        { value: 'center', label: 'Center' },
-        { value: 'right', label: 'Right' },
-        { value: 'space-between', label: 'Space Between' },
-        { value: 'space-around', label: 'Space Around' }
+        { value: "left", label: "Left" },
+        { value: "center", label: "Center" },
+        { value: "right", label: "Right" },
+        { value: "space-between", label: "Space Between" },
+        { value: "space-around", label: "Space Around" },
       ];
     }
   });
@@ -156,18 +160,18 @@
   const yOptions = $derived(() => {
     if (isColumn) {
       return [
-        { value: 'top', label: 'Top' },
-        { value: 'center', label: 'Center' },
-        { value: 'bottom', label: 'Bottom' },
-        { value: 'space-between', label: 'Space Between' },
-        { value: 'space-around', label: 'Space Around' }
+        { value: "top", label: "Top" },
+        { value: "center", label: "Center" },
+        { value: "bottom", label: "Bottom" },
+        { value: "space-between", label: "Space Between" },
+        { value: "space-around", label: "Space Around" },
       ];
     } else {
       return [
-        { value: 'top', label: 'Top' },
-        { value: 'center', label: 'Center' },
-        { value: 'bottom', label: 'Bottom' },
-        { value: 'stretch', label: 'Stretch' }
+        { value: "top", label: "Top" },
+        { value: "center", label: "Center" },
+        { value: "bottom", label: "Bottom" },
+        { value: "stretch", label: "Stretch" },
       ];
     }
   });
@@ -177,8 +181,12 @@
     const cells: Array<{ x: string; y: string }> = [];
 
     // Only show the 3x3 grid with basic alignments
-    const xValues = isColumn ? ['left', 'center', 'right'] : ['left', 'center', 'right'];
-    const yValues = isColumn ? ['top', 'center', 'bottom'] : ['top', 'center', 'bottom'];
+    const xValues = isColumn
+      ? ["left", "center", "right"]
+      : ["left", "center", "right"];
+    const yValues = isColumn
+      ? ["top", "center", "bottom"]
+      : ["top", "center", "bottom"];
 
     for (const y of yValues) {
       for (const x of xValues) {
@@ -194,15 +202,13 @@
   }
 </script>
 
-<div class="config-section">
-  <h3 class="section-title">Container Settings</h3>
-
+<ConfigSection>
   <VisibilityCheckbox
     visible={element.visible}
     onchange={(visible) => updateElement({ visible })}
   />
 
-  {#if element.position === 'absolute'}
+  {#if element.position === "absolute"}
     <PositionControls
       x={element.x}
       y={element.y}
@@ -210,40 +216,58 @@
     />
   {/if}
 
-  <div class="field">
-    <label for="display">Display:</label>
-    <select
-      id="display"
-      value={element.display || 'flex'}
-      onchange={(e) => updateElement({ display: e.currentTarget.value as 'flex' | 'block' })}
-    >
-      <option value="flex">Flex</option>
-      <option value="block">Block</option>
-    </select>
-  </div>
+  <SelectField
+    label="Display"
+    id="display"
+    value={element.display || "flex"}
+    options={[
+      { value: "flex", label: "Flex" },
+      { value: "block", label: "Block" },
+    ]}
+    onchange={(value) => updateElement({ display: value as "flex" | "block" })}
+  />
 
-  {#if element.display === 'flex'}
-    <div class="field">
-      <label for="flex-direction">Direction:</label>
-      <select
+  {#if element.display === "flex"}
+    <Fields>
+      <SelectField
+        label="Direction"
         id="flex-direction"
-        value={element.flexConfig?.direction || 'row'}
-        onchange={(e) => updateElement({
-          flexConfig: {
-            ...element.flexConfig,
-            direction: e.currentTarget.value as any
-          }
-        })}
-      >
-        <option value="row">Left to Right</option>
-        <option value="row-reverse">Right to Left</option>
-        <option value="column">Top to Bottom</option>
-        <option value="column-reverse">Bottom to Top</option>
-      </select>
-    </div>
+        value={element.flexConfig?.direction || "row"}
+        options={[
+          { value: "row", label: "Left to Right" },
+          { value: "row-reverse", label: "Right to Left" },
+          { value: "column", label: "Top to Bottom" },
+          { value: "column-reverse", label: "Bottom to Top" },
+        ]}
+        onchange={(value) =>
+          updateElement({
+            flexConfig: {
+              ...element.flexConfig,
+              direction: value as any,
+            },
+          })}
+      />
 
-    <div class="field">
-      <label class="section-label">Align children:</label>
+      <SelectField
+        label="Flex wrap"
+        id="flex-wrap"
+        value={element.flexConfig?.wrap || "nowrap"}
+        options={[
+          { value: "nowrap", label: "No Wrap" },
+          { value: "wrap", label: "Wrap" },
+          { value: "wrap-reverse", label: "Wrap Reverse" },
+        ]}
+        onchange={(value) =>
+          updateElement({
+            flexConfig: {
+              ...element.flexConfig,
+              wrap: value as any,
+            },
+          })}
+      />
+    </Fields>
+
+    <FieldWrapper label="Align children" htmlFor="align-children">
       <div class="alignment-container">
         <div class="alignment-grid">
           {#each gridCells() as cell}
@@ -264,7 +288,8 @@
             <select
               id="align-x"
               value={currentX()}
-              onchange={(e) => updateAlignment(e.currentTarget.value, undefined)}
+              onchange={(e) =>
+                updateAlignment(e.currentTarget.value, undefined)}
             >
               {#each xOptions() as option}
                 <option value={option.value}>{option.label}</option>
@@ -276,7 +301,8 @@
             <select
               id="align-y"
               value={currentY()}
-              onchange={(e) => updateAlignment(undefined, e.currentTarget.value)}
+              onchange={(e) =>
+                updateAlignment(undefined, e.currentTarget.value)}
             >
               {#each yOptions() as option}
                 <option value={option.value}>{option.label}</option>
@@ -285,28 +311,9 @@
           </div>
         </div>
       </div>
-    </div>
+    </FieldWrapper>
 
-    <div class="field">
-      <label for="flex-wrap">Flex wrap:</label>
-      <select
-        id="flex-wrap"
-        value={element.flexConfig?.wrap || 'nowrap'}
-        onchange={(e) => updateElement({
-          flexConfig: {
-            ...element.flexConfig,
-            wrap: e.currentTarget.value as any
-          }
-        })}
-      >
-        <option value="nowrap">No Wrap</option>
-        <option value="wrap">Wrap</option>
-        <option value="wrap-reverse">Wrap Reverse</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label for="gap">Gap:</label>
+    <FieldWrapper label="Gap" htmlFor="gap">
       <div class="gap-control">
         <input
           type="range"
@@ -314,40 +321,43 @@
           min="0"
           max="50"
           value={element.flexConfig?.gap || 0}
-          oninput={(e) => updateElement({
-            flexConfig: {
-              ...element.flexConfig,
-              gap: parseInt(e.currentTarget.value) || 0
-            }
-          })}
+          oninput={(e) =>
+            updateElement({
+              flexConfig: {
+                ...element.flexConfig,
+                gap: parseInt(e.currentTarget.value) || 0,
+              },
+            })}
         />
         <input
           type="number"
           class="gap-number"
           min="0"
           value={element.flexConfig?.gap || 0}
-          oninput={(e) => updateElement({
-            flexConfig: {
-              ...element.flexConfig,
-              gap: parseInt(e.currentTarget.value) || 0
-            }
-          })}
+          oninput={(e) =>
+            updateElement({
+              flexConfig: {
+                ...element.flexConfig,
+                gap: parseInt(e.currentTarget.value) || 0,
+              },
+            })}
         />
         <span class="unit">px</span>
       </div>
-    </div>
+    </FieldWrapper>
   {/if}
 
   <ColorPicker
     label="Background Color"
     id="bg-color"
-    value={element.background?.color || '#ffffff'}
-    onchange={(color) => updateElement({
-      background: {
-        ...element.background,
-        color
-      }
-    })}
+    value={element.background?.color || "#ffffff"}
+    onchange={(color) =>
+      updateElement({
+        background: {
+          ...element.background,
+          color,
+        },
+      })}
   />
 
   <PaddingControls
@@ -355,81 +365,36 @@
     onchange={(padding) => updateElement({ padding })}
   />
 
-  <DimensionInput
-    label="Width"
-    id="width"
-    value={element.dimensions?.width?.toString()}
-    onchange={(width) => updateElement({
-      dimensions: {
-        ...element.dimensions,
-        width
-      }
-    })}
-  />
+  <Fields>
+    <DimensionInput
+      label="Width"
+      id="width"
+      value={element.dimensions?.width?.toString()}
+      onchange={(width) =>
+        updateElement({
+          dimensions: {
+            ...element.dimensions,
+            width,
+          },
+        })}
+    />
 
-  <DimensionInput
-    label="Height"
-    id="height"
-    value={element.dimensions?.height?.toString()}
-    onchange={(height) => updateElement({
-      dimensions: {
-        ...element.dimensions,
-        height
-      }
-    })}
-  />
-</div>
+    <DimensionInput
+      label="Height"
+      id="height"
+      value={element.dimensions?.height?.toString()}
+      onchange={(height) =>
+        updateElement({
+          dimensions: {
+            ...element.dimensions,
+            height,
+          },
+        })}
+    />
+  </Fields>
+</ConfigSection>
 
 <style>
-  .config-section {
-    padding: 1rem;
-  }
-
-  .section-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin: 0 0 1rem 0;
-    color: #333;
-  }
-
-  .field {
-    margin-bottom: 1rem;
-  }
-
-  .field label {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: #666;
-    margin-bottom: 0.25rem;
-  }
-
-  .field input[type="text"],
-  .field input[type="number"],
-  .field select {
-    width: 100%;
-    padding: 0.375rem 0.5rem;
-    font-size: 0.813rem;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-    background: white;
-  }
-
-  .field input[type="text"]:focus,
-  .field input[type="number"]:focus,
-  .field select:focus {
-    outline: none;
-    border-color: #0066cc;
-  }
-
-  .section-label {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: #666;
-    margin-bottom: 0.5rem;
-  }
-
   .alignment-container {
     display: flex;
     gap: 1rem;
@@ -478,7 +443,7 @@
 
   /* Create visual indicators using CSS */
   .alignment-icon::before {
-    content: '';
+    content: "";
     width: 8px;
     height: 8px;
     background: #888;
@@ -570,9 +535,12 @@
     flex: 1;
     padding: 0.375rem 0.5rem;
     font-size: 0.813rem;
+    line-height: 1.25rem;
+    height: 2.125rem;
     border: 1px solid #d1d5db;
     border-radius: 4px;
     background: white;
+    box-sizing: border-box;
   }
 
   .gap-control {
@@ -613,10 +581,13 @@
     width: 60px;
     padding: 0.375rem 0.5rem;
     font-size: 0.813rem;
+    line-height: 1.25rem;
+    height: 2.125rem;
     border: 1px solid #d1d5db;
     border-radius: 4px;
     background: white;
     text-align: center;
+    box-sizing: border-box;
   }
 
   .gap-control .unit {

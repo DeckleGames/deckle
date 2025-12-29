@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { EditableComponent, CardComponent, RectangleShape } from '$lib/types';
+  import ConfigSection from './ConfigSection.svelte';
 
   let { component, part }: { component: EditableComponent; part?: string } = $props();
 
@@ -10,8 +11,7 @@
   );
 </script>
 
-<div class="config-section">
-  <h3 class="section-title">Component Info</h3>
+<ConfigSection title="Component Info">
 
   <div class="info-group">
     <div class="info-item">
@@ -76,20 +76,9 @@
       </div>
     </div>
   {/if}
-</div>
+</ConfigSection>
 
 <style>
-  .config-section {
-    padding: 1rem;
-  }
-
-  .section-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin: 0 0 1rem 0;
-    color: #333;
-  }
-
   .subsection-title {
     font-size: 0.813rem;
     font-weight: 600;
