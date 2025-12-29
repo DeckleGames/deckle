@@ -203,6 +203,35 @@
     </label>
   </div>
 
+  {#if element.position === 'absolute'}
+    <div class="field">
+      <label class="section-label">Position:</label>
+      <div class="padding-grid">
+        <div class="padding-input">
+          <label for="position-x">Left</label>
+          <input
+            type="number"
+            id="position-x"
+            value={element.x ?? 0}
+            oninput={(e) => updateElement({ x: parseInt(e.currentTarget.value) || 0 })}
+          />
+          <span class="unit">px</span>
+        </div>
+
+        <div class="padding-input">
+          <label for="position-y">Top</label>
+          <input
+            type="number"
+            id="position-y"
+            value={element.y ?? 0}
+            oninput={(e) => updateElement({ y: parseInt(e.currentTarget.value) || 0 })}
+          />
+          <span class="unit">px</span>
+        </div>
+      </div>
+    </div>
+  {/if}
+
   <div class="field">
     <label for="display">Display:</label>
     <select

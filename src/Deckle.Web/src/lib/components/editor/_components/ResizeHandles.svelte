@@ -87,38 +87,38 @@
     // Calculate new dimensions based on which handle is being dragged
     switch (resizeHandle) {
       case 'nw':
-        newWidth = Math.max(20, startWidth - deltaX);
-        newHeight = Math.max(20, startHeight - deltaY);
-        newX = startLeft + (startWidth - newWidth);
-        newY = startTop + (startHeight - newHeight);
+        newWidth = Math.round(Math.max(20, startWidth - deltaX));
+        newHeight = Math.round(Math.max(20, startHeight - deltaY));
+        newX = Math.round(startLeft + (startWidth - newWidth));
+        newY = Math.round(startTop + (startHeight - newHeight));
         break;
       case 'n':
-        newHeight = Math.max(20, startHeight - deltaY);
-        newY = startTop + (startHeight - newHeight);
+        newHeight = Math.round(Math.max(20, startHeight - deltaY));
+        newY = Math.round(startTop + (startHeight - newHeight));
         break;
       case 'ne':
-        newWidth = Math.max(20, startWidth + deltaX);
-        newHeight = Math.max(20, startHeight - deltaY);
-        newY = startTop + (startHeight - newHeight);
+        newWidth = Math.round(Math.max(20, startWidth + deltaX));
+        newHeight = Math.round(Math.max(20, startHeight - deltaY));
+        newY = Math.round(startTop + (startHeight - newHeight));
         break;
       case 'e':
-        newWidth = Math.max(20, startWidth + deltaX);
+        newWidth = Math.round(Math.max(20, startWidth + deltaX));
         break;
       case 'se':
-        newWidth = Math.max(20, startWidth + deltaX);
-        newHeight = Math.max(20, startHeight + deltaY);
+        newWidth = Math.round(Math.max(20, startWidth + deltaX));
+        newHeight = Math.round(Math.max(20, startHeight + deltaY));
         break;
       case 's':
-        newHeight = Math.max(20, startHeight + deltaY);
+        newHeight = Math.round(Math.max(20, startHeight + deltaY));
         break;
       case 'sw':
-        newWidth = Math.max(20, startWidth - deltaX);
-        newHeight = Math.max(20, startHeight + deltaY);
-        newX = startLeft + (startWidth - newWidth);
+        newWidth = Math.round(Math.max(20, startWidth - deltaX));
+        newHeight = Math.round(Math.max(20, startHeight + deltaY));
+        newX = Math.round(startLeft + (startWidth - newWidth));
         break;
       case 'w':
-        newWidth = Math.max(20, startWidth - deltaX);
-        newX = startLeft + (startWidth - newWidth);
+        newWidth = Math.round(Math.max(20, startWidth - deltaX));
+        newX = Math.round(startLeft + (startWidth - newWidth));
         break;
     }
 

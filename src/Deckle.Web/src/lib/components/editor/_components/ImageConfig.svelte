@@ -23,6 +23,35 @@
     </label>
   </div>
 
+  {#if element.position === 'absolute'}
+    <div class="field">
+      <label class="section-label">Position:</label>
+      <div class="padding-grid">
+        <div class="padding-input">
+          <label for="position-x">Left</label>
+          <input
+            type="number"
+            id="position-x"
+            value={element.x ?? 0}
+            oninput={(e) => updateElement({ x: parseInt(e.currentTarget.value) || 0 })}
+          />
+          <span class="unit">px</span>
+        </div>
+
+        <div class="padding-input">
+          <label for="position-y">Top</label>
+          <input
+            type="number"
+            id="position-y"
+            value={element.y ?? 0}
+            oninput={(e) => updateElement({ y: parseInt(e.currentTarget.value) || 0 })}
+          />
+          <span class="unit">px</span>
+        </div>
+      </div>
+    </div>
+  {/if}
+
   <div class="field">
     <label for="image-url">Image URL</label>
     <input
@@ -239,5 +268,43 @@
 
   .color-input input[type="text"] {
     flex: 1;
+  }
+
+  .section-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 0.5rem;
+  }
+
+  .padding-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .padding-input {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .padding-input label {
+    font-size: 0.75rem;
+    color: #666;
+    margin: 0;
+    min-width: 40px;
+  }
+
+  .padding-input input[type="number"] {
+    flex: 1;
+    min-width: 0;
+    padding: 0.375rem 0.5rem;
+  }
+
+  .padding-input .unit {
+    font-size: 0.75rem;
+    color: #666;
   }
 </style>
