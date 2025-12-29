@@ -8,5 +8,7 @@ public class Card : Component, IEditableComponent
 
     public string? BackDesign { get; set; }
 
+    public ComponentShape Shape { get; set; } = new RectangleShape(3);
+
     public Dimensions GetDimensions() => Size.GetDimensions(false);
 }

@@ -3,6 +3,7 @@ namespace Deckle.Domain.Entities;
 public interface IEditableComponent
 {
     Dimensions GetDimensions();
+    ComponentShape Shape { get; set; }
 }
 
 public abstract class Component

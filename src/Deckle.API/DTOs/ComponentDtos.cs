@@ -51,6 +51,7 @@ public record CardDto : ComponentDto
     public required Dimensions Dimensions { get; init; }
     public string? FrontDesign { get; init; }
     public string? BackDesign { get; init; }
+    public required ComponentShape Shape { get; init; }
 
     public CardDto() : base("Card") { }
 
@@ -61,6 +62,7 @@ public record CardDto : ComponentDto
         Dimensions = card.Size.GetDimensions(false);
         FrontDesign = card.FrontDesign;
         BackDesign = card.BackDesign;
+        Shape = card.Shape;
     }
 }
 

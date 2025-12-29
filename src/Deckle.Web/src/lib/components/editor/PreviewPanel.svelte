@@ -3,12 +3,16 @@
   import Panel from "$lib/components/editor/_components/Panel.svelte";
   import UndoRedoControls from "$lib/components/editor/_components/UndoRedoControls.svelte";
   import ZoomControls from "$lib/components/editor/_components/ZoomControls.svelte";
-  import type { EditableComponent } from "$lib/types";
+  import type { EditableComponent, ComponentShape, CardComponent } from "$lib/types";
   import EditableComponentView from "./EditableComponent.svelte";
   import type { PanzoomObject } from "@panzoom/panzoom";
 
   let { component }: { component: EditableComponent } = $props();
   let dimensions = component.dimensions;
+  // Extract shape if this is a CardComponent
+  let shape = $derived<ComponentShape | undefined>(
+    'shape' in component ? (component as CardComponent).shape : undefined
+  );
 
   let showBleedSafeArea = $state(false);
   let panzoomInstance = $state<PanzoomObject | null>(null);
@@ -32,7 +36,7 @@
     <ZoomControls {panzoomInstance} />
   {/snippet}
   <ComponentViewer {dimensions} onPanzoomReady={handlePanzoomReady}>
-    <EditableComponentView {dimensions} {showBleedSafeArea} />
+    <EditableComponentView {dimensions} {shape} {showBleedSafeArea} />
   </ComponentViewer>
 </Panel>
 

@@ -1,5 +1,6 @@
 using Deckle.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Deckle.Domain.Data;
 
@@ -212,6 +213,14 @@ public class AppDbContext : DbContext
 
             entity.Property(c => c.BackDesign)
                 .HasColumnType("text");
+
+            entity.Property(c => c.Shape)
+                .IsRequired()
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<ComponentShape>(v, (JsonSerializerOptions?)null)!
+                );
         });
 
         modelBuilder.Entity<Dice>(entity =>

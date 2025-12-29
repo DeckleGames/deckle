@@ -10,6 +10,15 @@ export interface Dimensions {
   bleedPx: number;
 }
 
+export interface ComponentShape {
+  type: string;
+}
+
+export interface RectangleShape extends ComponentShape {
+  type: 'rectangle';
+  borderRadiusMm: number;
+}
+
 export interface Component {
   id: string;
   projectId: string;
@@ -28,6 +37,7 @@ export interface CardComponent extends EditableComponent {
   size: string;
   frontDesign?: string | null;
   backDesign?: string | null;
+  shape: ComponentShape;
 }
 
 export interface DiceComponent extends Component {
