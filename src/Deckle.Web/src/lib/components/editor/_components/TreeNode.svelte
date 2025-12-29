@@ -1,9 +1,10 @@
 <script lang="ts">
   import { slide } from 'svelte/transition';
   import { templateStore } from '$lib/stores/templateElements';
-  import type { TemplateElement, ElementType } from '../types';
+  import type { TemplateElement, ElementType, MenuItem } from '../types';
   import DropTarget from './DropTarget.svelte';
-  import ContextMenu, { type MenuItem } from './ContextMenu.svelte';
+  import ContextMenu from './ContextMenu.svelte';
+  import TreeNode from './TreeNode.svelte';
 
   let {
     element,
@@ -371,7 +372,7 @@
             insertIndex={index}
             depth={depth + 1}
           />
-          <svelte:self
+          <TreeNode
             element={child}
             depth={depth + 1}
             selectedId={selectedId}

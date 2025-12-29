@@ -37,48 +37,50 @@
     }
   };
 
-  onMount(async () => {
-    if (contentElement && viewerElement) {
-      // Dynamic import to avoid SSR issues - panzoom is browser-only
-      const { default: Panzoom } = await import("@panzoom/panzoom");
+  onMount(() => {
+    (async () => {
+      if (contentElement && viewerElement) {
+        // Dynamic import to avoid SSR issues - panzoom is browser-only
+        const { default: Panzoom } = await import("@panzoom/panzoom");
 
-      // Calculate the scale needed to fit the component in the viewer
-      const padding = 40; // padding in pixels
-      const viewerWidth = viewerElement.clientWidth - padding * 2;
-      const viewerHeight = viewerElement.clientHeight - padding * 2;
+        // Calculate the scale needed to fit the component in the viewer
+        const padding = 40; // padding in pixels
+        const viewerWidth = viewerElement.clientWidth - padding * 2;
+        const viewerHeight = viewerElement.clientHeight - padding * 2;
 
-      const scaleX = viewerWidth / dimensions.widthPx;
-      const scaleY = viewerHeight / dimensions.heightPx;
+        const scaleX = viewerWidth / dimensions.widthPx;
+        const scaleY = viewerHeight / dimensions.heightPx;
 
-      // Use the smaller scale to ensure it fits both dimensions
-      // Don't scale up beyond 100%
-      const fitScale = Math.min(scaleX, scaleY, 1);
+        // Use the smaller scale to ensure it fits both dimensions
+        // Don't scale up beyond 100%
+        const fitScale = Math.min(scaleX, scaleY, 1);
 
-      panzoomInstance = Panzoom(contentElement, {
-        maxScale: 5,
-        minScale: 0.1,
-        startScale: fitScale,
-        step: 0.1,
-        cursor: "grab",
-        // Exclude resize handles, drag handles, and other interactive elements from triggering pan
-        excludeClass: "panzoom-exclude",
-      });
+        panzoomInstance = Panzoom(contentElement, {
+          maxScale: 5,
+          minScale: 0.1,
+          startScale: fitScale,
+          step: 0.1,
+          cursor: "grab",
+          // Exclude resize handles, drag handles, and other interactive elements from triggering pan
+          excludeClass: "panzoom-exclude",
+        });
 
-      // Set initial scale
-      currentScale = fitScale;
+        // Set initial scale
+        currentScale = fitScale;
 
-      // Listen for zoom changes to update the context
-      contentElement.addEventListener('panzoomzoom', updateScale);
-      contentElement.addEventListener('panzoomchange', updateScale);
+        // Listen for zoom changes to update the context
+        contentElement.addEventListener('panzoomzoom', updateScale);
+        contentElement.addEventListener('panzoomchange', updateScale);
 
-      // Enable mouse wheel zooming
-      viewerElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
+        // Enable mouse wheel zooming
+        viewerElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
 
-      // Notify parent component that panzoom is ready
-      if (onPanzoomReady && panzoomInstance) {
-        onPanzoomReady(panzoomInstance, contentElement);
+        // Notify parent component that panzoom is ready
+        if (onPanzoomReady && panzoomInstance) {
+          onPanzoomReady(panzoomInstance, contentElement);
+        }
       }
-    }
+    })();
 
     return () => {
       if (panzoomInstance && contentElement) {
@@ -106,9 +108,5 @@
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-
-  .panzoom-content {
-    /* Panzoom will handle transforms */
   }
 </style>

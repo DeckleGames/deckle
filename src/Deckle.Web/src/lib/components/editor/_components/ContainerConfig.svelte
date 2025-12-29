@@ -107,8 +107,8 @@
     const currentJustify = element.flexConfig?.justifyContent || "flex-start";
     const currentAlign = element.flexConfig?.alignItems || "flex-start";
 
-    let newJustify = currentJustify;
-    let newAlign = currentAlign;
+    let newJustify: string = currentJustify;
+    let newAlign: string = currentAlign;
 
     if (isColumn) {
       // In column mode: X = alignItems, Y = justifyContent
@@ -556,6 +556,7 @@
     border-radius: 2px;
     outline: none;
     -webkit-appearance: none;
+    appearance: none;
   }
 
   .gap-control input[type="range"]::-webkit-slider-thumb {

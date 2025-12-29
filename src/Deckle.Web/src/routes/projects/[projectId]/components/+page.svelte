@@ -30,7 +30,7 @@
   let diceType = $state("D6");
   let diceStyle = $state("Numbered");
   let diceColor = $state("EarthGreen");
-  let diceNumber = $state(1);
+  let diceNumber = $state("1");
 
   let isSubmitting = $state(false);
   let errorMessage = $state("");
@@ -48,7 +48,7 @@
     diceType = "D6";
     diceStyle = "Numbered";
     diceColor = "EarthGreen";
-    diceNumber = 1;
+    diceNumber = "1";
     errorMessage = "";
   }
 
@@ -77,7 +77,7 @@
       diceType = component.diceType;
       diceStyle = component.diceStyle;
       diceColor = component.diceBaseColor;
-      diceNumber = component.diceNumber;
+      diceNumber = String(component.diceNumber);
     }
 
     showModal = true;
@@ -137,7 +137,7 @@
             type: diceType,
             style: diceStyle,
             baseColor: diceColor,
-            number: diceNumber,
+            number: Number(diceNumber),
           });
         }
       } else {
@@ -153,7 +153,7 @@
             type: diceType,
             style: diceStyle,
             baseColor: diceColor,
-            number: diceNumber,
+            number: Number(diceNumber),
           });
         }
       }

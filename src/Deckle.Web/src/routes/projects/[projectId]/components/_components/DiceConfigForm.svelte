@@ -13,7 +13,7 @@
     diceStyle: string;
     diceColor: string;
     componentName: string;
-    diceNumber: number;
+    diceNumber: string;
   } = $props();
 </script>
 
@@ -32,7 +32,6 @@
       type="number"
       bind:value={diceNumber}
       placeholder="Enter number of dice"
-      min="1"
     />
   </FormField>
 

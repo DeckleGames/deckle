@@ -11,7 +11,7 @@
   );
 </script>
 
-<ConfigSection title="Component Info">
+<ConfigSection>
 
   <div class="info-group">
     <div class="info-item">

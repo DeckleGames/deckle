@@ -53,13 +53,6 @@
 </PageLayout>
 
 <style>
-  .header-text h1 {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: white;
-    margin-bottom: 0.25rem;
-  }
-
   .subtitle {
     font-size: 0.9375rem;
     color: rgba(255, 255, 255, 0.9);

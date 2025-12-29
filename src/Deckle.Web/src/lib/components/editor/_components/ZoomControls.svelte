@@ -19,22 +19,23 @@
       currentZoom = Math.round(scale * 100);
 
       // Listen for zoom changes (from wheel, pinch, or programmatic changes)
-      const handleZoomChange = (event: CustomEvent) => {
+      const handleZoomChange = (event: Event) => {
         // Panzoom events are CustomEvents with detail: { x, y, scale }
-        const scale = event.detail.scale;
+        const customEvent = event as CustomEvent;
+        const scale = customEvent.detail.scale;
         currentZoom = Math.round(scale * 100);
       };
 
       // Listen to panzoom events to catch all zoom changes
       // panzoomzoom fires when zoom changes
       // panzoomchange fires for all transform changes (pan/zoom)
-      panzoomElement.addEventListener('panzoomzoom', handleZoomChange);
-      panzoomElement.addEventListener('panzoomchange', handleZoomChange);
+      panzoomElement.addEventListener('panzoomzoom', handleZoomChange as EventListener);
+      panzoomElement.addEventListener('panzoomchange', handleZoomChange as EventListener);
 
       // Cleanup listeners when effect re-runs or component unmounts
       return () => {
-        panzoomElement.removeEventListener('panzoomzoom', handleZoomChange);
-        panzoomElement.removeEventListener('panzoomchange', handleZoomChange);
+        panzoomElement.removeEventListener('panzoomzoom', handleZoomChange as EventListener);
+        panzoomElement.removeEventListener('panzoomchange', handleZoomChange as EventListener);
       };
     }
   });
@@ -169,6 +170,7 @@
 
   .zoom-input[type="number"] {
     -moz-appearance: textfield;
+    appearance: textfield;
   }
 
   .zoom-percent {

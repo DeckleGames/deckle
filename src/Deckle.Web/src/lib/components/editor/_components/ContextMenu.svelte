@@ -1,13 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-
-	export interface MenuItem {
-		label?: string;
-		action?: () => void;
-		submenu?: MenuItem[];
-		divider?: boolean;
-		disabled?: boolean;
-	}
+	import type { MenuItem } from '../types';
 
 	interface Props {
 		x: number;
