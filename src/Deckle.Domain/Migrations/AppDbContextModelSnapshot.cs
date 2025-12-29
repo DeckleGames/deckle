@@ -56,7 +56,7 @@ namespace Deckle.Domain.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Components");
+                    b.ToTable("Components", (string)null);
 
                     b.HasDiscriminator<string>("ComponentType").HasValue("Component");
 
@@ -108,7 +108,7 @@ namespace Deckle.Domain.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("DataSources");
+                    b.ToTable("DataSources", (string)null);
                 });
 
             modelBuilder.Entity("Deckle.Domain.Entities.GoogleCredential", b =>
@@ -157,7 +157,7 @@ namespace Deckle.Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("GoogleCredentials");
+                    b.ToTable("GoogleCredentials", (string)null);
                 });
 
             modelBuilder.Entity("Deckle.Domain.Entities.Project", b =>
@@ -187,7 +187,7 @@ namespace Deckle.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("Deckle.Domain.Entities.User", b =>
@@ -246,7 +246,7 @@ namespace Deckle.Domain.Migrations
                     b.HasIndex("GoogleId")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Deckle.Domain.Entities.UserProject", b =>
@@ -270,7 +270,7 @@ namespace Deckle.Domain.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("UserProjects");
+                    b.ToTable("UserProjects", (string)null);
                 });
 
             modelBuilder.Entity("Deckle.Domain.Entities.Card", b =>

@@ -46,4 +46,10 @@ export const componentsApi = {
    */
   delete: (projectId: string, componentId: string, fetchFn?: typeof fetch) =>
     api.delete(`/projects/${projectId}/components/${componentId}`, undefined, fetchFn),
+
+  /**
+   * Save card design for a specific part (front/back)
+   */
+  saveCardDesign: (projectId: string, cardId: string, part: string, design: string | null, fetchFn?: typeof fetch) =>
+    api.put<GameComponent>(`/projects/${projectId}/components/cards/${cardId}/design/${part}`, { design }, undefined, fetchFn),
 };

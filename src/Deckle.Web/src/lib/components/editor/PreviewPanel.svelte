@@ -10,8 +10,10 @@
   } from "$lib/types";
   import EditableComponentView from "./EditableComponent.svelte";
   import type { PanzoomObject } from "@panzoom/panzoom";
+  import { templateStore } from "$lib/stores/templateElements";
+  import { componentsApi } from "$lib/api";
 
-  let { component }: { component: EditableComponent } = $props();
+  let { component, projectId, part }: { component: EditableComponent; projectId: string; part: string } = $props();
   let dimensions = component.dimensions;
   // Extract shape if this is a CardComponent
   let shape = $derived<ComponentShape | undefined>(
@@ -21,6 +23,8 @@
   let showBleedSafeArea = $state(true);
   let panzoomInstance = $state<PanzoomObject | null>(null);
   let panzoomElement = $state<HTMLDivElement | null>(null);
+  let isSaving = $state(false);
+  let saveSuccess = $state(false);
 
   function handlePanzoomReady(
     instance: PanzoomObject,
@@ -28,6 +32,38 @@
   ) {
     panzoomInstance = instance;
     panzoomElement = element;
+  }
+
+  async function handleSave() {
+    // Only allow saving for cards
+    if (component.type !== 'Card') {
+      alert('Only card designs can be saved.');
+      return;
+    }
+
+    isSaving = true;
+    saveSuccess = false;
+
+    try {
+      // Get the current template design from the store
+      let design: string | null = null;
+      templateStore.subscribe((store) => {
+        design = JSON.stringify(store.root);
+      })();
+
+      // Save the design via API
+      await componentsApi.saveCardDesign(projectId, component.id, part.toLowerCase(), design);
+
+      saveSuccess = true;
+      setTimeout(() => {
+        saveSuccess = false;
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to save design:', error);
+      alert('Failed to save design. Please try again.');
+    } finally {
+      isSaving = false;
+    }
   }
 </script>
 
@@ -42,6 +78,16 @@
         : "Show Bleed/Safe Area"}
     >
       {showBleedSafeArea ? "Hide" : "Show"} Bleed/Safe Area
+    </button>
+    <button
+      onclick={handleSave}
+      class="save-button"
+      class:saving={isSaving}
+      class:success={saveSuccess}
+      disabled={isSaving}
+      title="Save Design"
+    >
+      {isSaving ? "Saving..." : saveSuccess ? "Saved!" : "Save"}
     </button>
     <ZoomControls {panzoomInstance} {panzoomElement} />
   {/snippet}
@@ -65,5 +111,39 @@
   .bleed-safe-area-toggle:hover {
     background: #f3f4f6;
     border-color: #9ca3af;
+  }
+
+  .save-button {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    border: 1px solid #d1d5db;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .save-button:hover:not(:disabled) {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+  }
+
+  .save-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .save-button.saving {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+  }
+
+  .save-button.success {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
   }
 </style>

@@ -6,6 +6,7 @@
   import PreviewPanel from "./PreviewPanel.svelte";
   import StructureTreePanel from "./StructureTreePanel.svelte";
   import { templateStore } from "$lib/stores/templateElements";
+  import type { CardComponent, DiceComponent } from "$lib/types";
 
   let { data }: { data: PageData } = $props();
 
@@ -14,9 +15,38 @@
 
   const sidebarWidth = 20;
 
-  // Select root by default when the editor loads
+  // Load the saved design when the editor initializes
   $effect(() => {
-    templateStore.selectElement('root');
+    let savedDesign: string | null = null;
+
+    // Only load designs for cards
+    if (data.component.type === 'Card') {
+      const card = data.component as CardComponent;
+      savedDesign = (data.part === 'front' ? card.frontDesign : card.backDesign) ?? null;
+    }
+
+    // Load the design into the template store
+    if (savedDesign) {
+      try {
+        const design = JSON.parse(savedDesign);
+        templateStore.set({
+          root: design,
+          selectedElementId: 'root',
+          hoveredElementId: null,
+          canUndo: false,
+          canRedo: false
+        });
+      } catch (error) {
+        console.error('Failed to parse saved design:', error);
+        // If parsing fails, just use the default empty design
+        templateStore.reset();
+        templateStore.selectElement('root');
+      }
+    } else {
+      // No saved design, start with empty template
+      templateStore.reset();
+      templateStore.selectElement('root');
+    }
   });
 
   // Keyboard shortcuts for undo/redo
@@ -50,7 +80,7 @@
           initialSplit={100 - (sidebarWidth / (100 - sidebarWidth)) * 100}
         >
           {#snippet leftOrTop()}
-            <PreviewPanel component={data.component} />
+            <PreviewPanel component={data.component} projectId={data.project.id} part={data.part} />
           {/snippet}
           {#snippet rightOrBottom()}
             <ElementConfigPanel component={data.component} part={partLabel} />

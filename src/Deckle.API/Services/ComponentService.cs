@@ -161,4 +161,35 @@ public class ComponentService
 
         return true;
     }
+
+    public async Task<CardDto?> SaveCardDesignAsync(Guid userId, Guid componentId, string part, string? design)
+    {
+        var card = await _context.Cards
+            .Where(c => c.Id == componentId &&
+                        c.Project.Users.Any(u => u.Id == userId))
+            .FirstOrDefaultAsync();
+
+        if (card == null)
+        {
+            return null;
+        }
+
+        if (part.ToLower() == "front")
+        {
+            card.FrontDesign = design;
+        }
+        else if (part.ToLower() == "back")
+        {
+            card.BackDesign = design;
+        }
+        else
+        {
+            throw new ArgumentException($"Invalid part '{part}' for card. Must be 'front' or 'back'.");
+        }
+
+        card.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        return new CardDto(card);
+    }
 }

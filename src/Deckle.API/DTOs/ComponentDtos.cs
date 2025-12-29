@@ -90,3 +90,4 @@ public record CreateDiceRequest(string Name, DiceType Type, DiceStyle Style, Dic
 public record UpdateCardRequest(string Name, CardSize Size);
 
 public record UpdateDiceRequest(string Name, DiceType Type, DiceStyle Style, DiceColor BaseColor, int Number);
+

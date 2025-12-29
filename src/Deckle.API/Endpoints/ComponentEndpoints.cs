@@ -109,6 +109,30 @@ public static class ComponentEndpoints
         })
         .WithName("DeleteComponent");
 
+        group.MapPut("cards/{id:guid}/design/{part}", async (Guid projectId, Guid id, string part, HttpContext httpContext, ComponentService componentService, SaveCardDesignRequest request) =>
+        {
+            var userId = httpContext.GetUserId();
+
+            try
+            {
+                var card = await componentService.SaveCardDesignAsync(userId, id, part, request.Design);
+
+                if (card == null || card.ProjectId != projectId)
+                {
+                    return Results.NotFound();
+                }
+
+                return Results.Ok(card);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+        })
+        .WithName("SaveCardDesign");
+
         return group;
     }
 }
+
+public record SaveCardDesignRequest(string? Design);
