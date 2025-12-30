@@ -18,4 +18,6 @@ public record DataSourceDto
 
 public record CreateDataSourceRequest(Guid ProjectId, string Name, string Url, int? SheetGid = null);
 
+public record UpdateDataSourceRequest(string Name);
+
 public record SyncDataSourceMetadataRequest(List<string> Headers, int RowCount);

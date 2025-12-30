@@ -82,6 +82,28 @@ public static class DataSourceEndpoints
         })
         .WithName("CreateDataSource");
 
+        group.MapPut("{id:guid}", async (Guid id, HttpContext httpContext, DataSourceService dataSourceService, UpdateDataSourceRequest request) =>
+        {
+            var userId = httpContext.GetUserId();
+
+            try
+            {
+                var dataSource = await dataSourceService.UpdateDataSourceAsync(userId, id, request.Name);
+
+                if (dataSource == null)
+                {
+                    return Results.NotFound();
+                }
+
+                return Results.Ok(dataSource);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Results.Forbid();
+            }
+        })
+        .WithName("UpdateDataSource");
+
         group.MapDelete("{id:guid}", async (Guid id, HttpContext httpContext, DataSourceService dataSourceService) =>
         {
             var userId = httpContext.GetUserId();

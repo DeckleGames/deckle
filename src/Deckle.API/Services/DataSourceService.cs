@@ -161,6 +161,48 @@ public class DataSourceService
         };
     }
 
+    public async Task<DataSourceDto?> UpdateDataSourceAsync(Guid userId, Guid dataSourceId, string name)
+    {
+        var dataSource = await _dbContext.DataSources
+            .Include(ds => ds.Project)
+                .ThenInclude(p => p.UserProjects)
+            .FirstOrDefaultAsync(ds => ds.Id == dataSourceId);
+
+        if (dataSource == null)
+        {
+            return null;
+        }
+
+        // Verify user has access to the project
+        var hasAccess = dataSource.Project.UserProjects.Any(up => up.UserId == userId);
+        if (!hasAccess)
+        {
+            throw new UnauthorizedAccessException("User does not have access to this data source");
+        }
+
+        // Update name
+        dataSource.Name = name;
+        dataSource.UpdatedAt = DateTime.UtcNow;
+
+        await _dbContext.SaveChangesAsync();
+
+        return new DataSourceDto
+        {
+            Id = dataSource.Id,
+            ProjectId = dataSource.ProjectId,
+            Name = dataSource.Name,
+            Type = dataSource.Type.ToString(),
+            GoogleSheetsId = dataSource.GoogleSheetsId,
+            GoogleSheetsUrl = dataSource.GoogleSheetsUrl,
+            SheetGid = dataSource.SheetGid,
+            CsvExportUrl = dataSource.CsvExportUrl,
+            Headers = dataSource.Headers,
+            RowCount = dataSource.RowCount,
+            CreatedAt = dataSource.CreatedAt,
+            UpdatedAt = dataSource.UpdatedAt
+        };
+    }
+
     public async Task<DataSourceDto> SyncDataSourceMetadataAsync(Guid userId, Guid dataSourceId, List<string> headers, int rowCount)
     {
         var dataSource = await _dbContext.DataSources

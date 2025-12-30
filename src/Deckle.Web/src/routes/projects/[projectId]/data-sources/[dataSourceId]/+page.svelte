@@ -5,6 +5,7 @@
   import { goto } from "$app/navigation";
   import { buildDataSourceBreadcrumbs } from "$lib/utils/breadcrumbs";
   import { setBreadcrumbs } from "$lib/stores/breadcrumb";
+  import { Button } from "$lib/components";
 
   let { data }: { data: PageData } = $props();
 
@@ -15,29 +16,25 @@
     type: string;
     googleSheetsId?: string;
     googleSheetsUrl?: string;
+    headers?: string[];
+    rowCount?: number;
     createdAt: string;
     updatedAt: string;
   }
 
-  interface SheetMetadata {
-    sheetId: number;
-    title: string;
-    rowCount: number;
-    columnCount: number;
-  }
-
-  interface SpreadsheetMetadata {
-    spreadsheetId: string;
-    title: string;
-    sheets: SheetMetadata[];
-  }
-
   let dataSource = $state<DataSource | null>(null);
-  let metadata = $state<SpreadsheetMetadata | null>(null);
+  let spreadsheetData = $state<string[][] | null>(null);
   let loading = $state(true);
   let errorMessage = $state("");
-  let selectedSheetIndex = $state(0);
-  let needsAuth = $state(false);
+
+  // Sorting state
+  let sortColumn = $state<number | null>(null);
+  let sortDirection = $state<'asc' | 'desc'>('asc');
+
+  // Name editing state
+  let isEditingName = $state(false);
+  let editedName = $state("");
+  let savingName = $state(false);
 
   // Update breadcrumbs when dataSource is loaded
   $effect(() => {
@@ -79,36 +76,19 @@
 
       dataSource = await dsResponse.json();
 
-      // Get spreadsheet metadata
-      const metadataResponse = await fetch(
-        `${config.apiUrl}/data-sources/${data.dataSourceId}/metadata`,
+      // Get spreadsheet data
+      const dataResponse = await fetch(
+        `${config.apiUrl}/data-sources/${data.dataSourceId}/data`,
         {
           credentials: "include",
         }
       );
 
-      if (metadataResponse.ok) {
-        metadata = await metadataResponse.json();
-      } else if (
-        metadataResponse.status === 401 ||
-        metadataResponse.status === 403
-      ) {
-        // Check if it's an auth issue
-        const authResponse = await fetch(
-          `${config.apiUrl}/google-sheets-auth/status`,
-          {
-            credentials: "include",
-          }
-        );
-
-        if (authResponse.ok) {
-          const authData = await authResponse.json();
-          if (!authData.authorized) {
-            needsAuth = true;
-            errorMessage =
-              "Google Sheets authorization required to view this data source.";
-          }
-        }
+      if (dataResponse.ok) {
+        const result = await dataResponse.json();
+        spreadsheetData = result.data;
+      } else {
+        errorMessage = "Failed to load spreadsheet data. Please try syncing the data source.";
       }
     } catch (error) {
       console.error("Failed to load data source:", error);
@@ -116,20 +96,6 @@
     } finally {
       loading = false;
     }
-  }
-
-  function authorizeGoogleSheets() {
-    const returnUrl = encodeURIComponent(window.location.pathname);
-    window.location.href = `${config.apiUrl}/google-sheets-auth/authorize?returnUrl=${returnUrl}`;
-  }
-
-  function getEmbedUrl(): string {
-    if (!dataSource?.googleSheetsId || !metadata) {
-      return "";
-    }
-
-    const sheetGid = metadata.sheets[selectedSheetIndex]?.sheetId ?? 0;
-    return `https://docs.google.com/spreadsheets/d/${dataSource.googleSheetsId}/preview?gid=${sheetGid}&single=true&widget=true&headers=false`;
   }
 
   async function deleteDataSource() {
@@ -153,6 +119,96 @@
       console.error("Failed to delete data source:", error);
     }
   }
+
+  function handleSort(columnIndex: number) {
+    if (sortColumn === columnIndex) {
+      // Toggle direction
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      // New column, default to ascending
+      sortColumn = columnIndex;
+      sortDirection = 'asc';
+    }
+  }
+
+  function getSortedData(): string[][] | null {
+    if (!spreadsheetData || spreadsheetData.length === 0) {
+      return spreadsheetData;
+    }
+
+    if (sortColumn === null) {
+      return spreadsheetData;
+    }
+
+    const headers = spreadsheetData[0];
+    const rows = spreadsheetData.slice(1);
+
+    const sorted = [...rows].sort((a, b) => {
+      const aVal = a[sortColumn] || '';
+      const bVal = b[sortColumn] || '';
+
+      // Try to parse as numbers for numeric comparison
+      const aNum = parseFloat(aVal);
+      const bNum = parseFloat(bVal);
+
+      if (!isNaN(aNum) && !isNaN(bNum)) {
+        return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
+      }
+
+      // String comparison
+      const comparison = aVal.localeCompare(bVal);
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+
+    return [headers, ...sorted];
+  }
+
+  function startEditingName() {
+    if (dataSource) {
+      editedName = dataSource.name;
+      isEditingName = true;
+    }
+  }
+
+  function cancelEditingName() {
+    isEditingName = false;
+    editedName = "";
+  }
+
+  async function saveName() {
+    if (!dataSource || !editedName.trim()) {
+      return;
+    }
+
+    try {
+      savingName = true;
+      const response = await fetch(
+        `${config.apiUrl}/data-sources/${data.dataSourceId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ name: editedName.trim() }),
+        }
+      );
+
+      if (response.ok) {
+        const updated = await response.json();
+        dataSource = updated;
+        isEditingName = false;
+        editedName = "";
+      } else {
+        errorMessage = "Failed to update name";
+      }
+    } catch (error) {
+      console.error("Failed to update name:", error);
+      errorMessage = "Failed to update name";
+    } finally {
+      savingName = false;
+    }
+  }
 </script>
 
 <svelte:head>
@@ -174,90 +230,128 @@
   {/if}
 </svelte:head>
 
-<div class="data-source-detail">
-  {#if loading}
-    <div class="loading">Loading...</div>
-  {:else if errorMessage}
-    <div class="error">
-      <p>{errorMessage}</p>
-      {#if needsAuth}
-        <button class="auth-button" onclick={authorizeGoogleSheets}>
-          Authorize Google Sheets
-        </button>
+{#if loading}
+  <div class="loading">Loading...</div>
+{:else if errorMessage}
+  <div class="error">
+    <p>{errorMessage}</p>
+    <a href={`/projects/${data.projectId}/data-sources`}
+      >Back to Data Sources</a
+    >
+  </div>
+{:else if dataSource}
+  <div class="header">
+    <div class="title-area">
+      {#if isEditingName}
+        <div class="name-edit-container">
+          <input
+            type="text"
+            bind:value={editedName}
+            class="name-input"
+            placeholder="Data source name"
+            disabled={savingName}
+          />
+          <div class="edit-actions">
+            <button
+              class="save-button"
+              onclick={saveName}
+              disabled={savingName || !editedName.trim()}
+            >
+              {savingName ? "Saving..." : "Save"}
+            </button>
+            <button
+              class="cancel-button"
+              onclick={cancelEditingName}
+              disabled={savingName}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      {:else}
+        <div class="name-display">
+          <h1>{dataSource.name}</h1>
+          <button class="edit-icon-button" onclick={startEditingName} title="Edit name">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </button>
+        </div>
       {/if}
-      <a href={`/projects/${data.projectId}/data-sources`}
-        >Back to Data Sources</a
-      >
+      <p class="type">{dataSource.type}</p>
     </div>
-  {:else if dataSource}
-    <div class="header">
-      <div class="title-area">
-        <h1>{dataSource.name}</h1>
-        <p class="type">{dataSource.type}</p>
-      </div>
 
-      <div class="actions">
-        {#if dataSource.googleSheetsUrl}
-          <a
-            href={dataSource.googleSheetsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="open-button"
-          >
+    <div class="actions">
+      {#if dataSource.googleSheetsUrl}
+        <a
+          href={dataSource.googleSheetsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button variant="secondary" size="sm">
             Open in Google Sheets
-          </a>
-        {/if}
-        <button class="delete-button" onclick={deleteDataSource}>Delete</button>
-      </div>
+          </Button>
+        </a>
+      {/if}
+      <Button variant="danger" size="sm" onclick={deleteDataSource}>
+        Delete
+      </Button>
+    </div>
+  </div>
+
+  {#if spreadsheetData && spreadsheetData.length > 0}
+    {@const sortedData = getSortedData()}
+    <div class="data-info">
+      <p class="data-summary">
+        {spreadsheetData.length > 1 ? spreadsheetData.length - 1 : 0} rows
+        {spreadsheetData[0] ? `· ${spreadsheetData[0].length} columns` : ''}
+        · Last updated {new Date(dataSource.updatedAt).toLocaleDateString()}
+      </p>
     </div>
 
-    {#if metadata && metadata.sheets.length > 0}
-      <div class="sheet-selector">
-        <label for="sheet-select">Sheet:</label>
-        <select id="sheet-select" bind:value={selectedSheetIndex}>
-          {#each metadata.sheets as sheet, index}
-            <option value={index}>{sheet.title}</option>
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            {#each sortedData?.[0] || [] as header, index}
+              <th onclick={() => handleSort(index)} class="sortable">
+                <div class="header-content">
+                  <span>{header}</span>
+                  {#if sortColumn === index}
+                    <span class="sort-indicator">
+                      {sortDirection === 'asc' ? '↑' : '↓'}
+                    </span>
+                  {/if}
+                </div>
+              </th>
+            {/each}
+          </tr>
+        </thead>
+        <tbody>
+          {#each sortedData?.slice(1) || [] as row}
+            <tr>
+              {#each row as cell}
+                <td>{cell}</td>
+              {/each}
+            </tr>
           {/each}
-        </select>
-      </div>
-
-      <div class="embed-container">
-        <iframe
-          src={getEmbedUrl()}
-          title={`Google Sheets: ${dataSource.name}`}
-          frameborder="0"
-          allowfullscreen
-        ></iframe>
-      </div>
-
-      <div class="info-panel">
-        <h3>Sheet Information</h3>
-        <dl>
-          <dt>Sheet Name:</dt>
-          <dd>{metadata.sheets[selectedSheetIndex]?.title}</dd>
-
-          <dt>Rows:</dt>
-          <dd>{metadata.sheets[selectedSheetIndex]?.rowCount}</dd>
-
-          <dt>Columns:</dt>
-          <dd>{metadata.sheets[selectedSheetIndex]?.columnCount}</dd>
-
-          <dt>Last Updated:</dt>
-          <dd>{new Date(dataSource.updatedAt).toLocaleDateString()}</dd>
-        </dl>
-      </div>
-    {/if}
+        </tbody>
+      </table>
+    </div>
+  {:else}
+    <div class="empty-state">
+      <p>No data available</p>
+      <p class="empty-subtitle">
+        Sync this data source from the{" "}
+        <a href={`/projects/${data.projectId}/data-sources`}>Data Sources page</a>{" "}
+        to load spreadsheet data.
+      </p>
+    </div>
   {/if}
-</div>
+{/if}
 
 <style>
-  .data-source-detail {
-    background-color: white;
-    border: 2px solid var(--color-teal-grey);
-    border-radius: 12px;
-    padding: 2rem;
-  }
-
   .loading,
   .error {
     text-align: center;
@@ -270,39 +364,112 @@
     text-decoration: underline;
   }
 
-  .auth-button {
-    background-color: var(--color-muted-teal);
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 8px;
-    cursor: pointer;
-    margin: 1rem 0;
-    transition: all 0.2s ease;
-  }
-
-  .auth-button:hover {
-    background-color: var(--color-sage);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(120, 160, 131, 0.3);
-  }
-
   .header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 2px solid var(--color-teal-grey);
+    margin-bottom: 1.5rem;
+  }
+
+  .title-area {
+    flex: 1;
+  }
+
+  .name-display {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 
   .title-area h1 {
     font-size: 2rem;
     font-weight: 700;
     color: var(--color-sage);
-    margin: 0 0 0.5rem 0;
+    margin: 0;
+  }
+
+  .edit-icon-button {
+    background: none;
+    border: none;
+    color: var(--color-muted-teal);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .edit-icon-button:hover {
+    color: var(--color-sage);
+    background-color: var(--color-teal-grey);
+  }
+
+  .name-edit-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .name-input {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-sage);
+    padding: 0.5rem;
+    border: 2px solid var(--color-teal-grey);
+    border-radius: 6px;
+    background-color: white;
+    transition: border-color 0.2s ease;
+  }
+
+  .name-input:focus {
+    outline: none;
+    border-color: var(--color-muted-teal);
+  }
+
+  .name-input:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+  }
+
+  .edit-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .save-button,
+  .cancel-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .save-button {
+    background-color: var(--color-muted-teal);
+    color: white;
+  }
+
+  .save-button:hover:not(:disabled) {
+    background-color: var(--color-sage);
+  }
+
+  .save-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .cancel-button {
+    background-color: #e0e0e0;
+    color: #333;
+  }
+
+  .cancel-button:hover:not(:disabled) {
+    background-color: #d0d0d0;
   }
 
   .type {
@@ -311,127 +478,114 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin: 0;
+    margin: 0.5rem 0 0 0;
   }
 
   .actions {
     display: flex;
     gap: 0.75rem;
-  }
-
-  .open-button {
-    background-color: var(--color-muted-teal);
-    color: white;
-    border: none;
-    padding: 0.625rem 1.25rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    border-radius: 8px;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-
-  .open-button:hover {
-    background-color: var(--color-sage);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(120, 160, 131, 0.3);
-  }
-
-  .delete-button {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 0.625rem 1.25rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .delete-button:hover {
-    background-color: #c0392b;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
-  }
-
-  .sheet-selector {
-    margin-bottom: 1.5rem;
-    display: flex;
     align-items: center;
-    gap: 1rem;
   }
 
-  .sheet-selector label {
-    font-weight: 600;
-    color: var(--color-sage);
+  .actions a {
+    text-decoration: none;
+  }
+
+  .data-info {
+    margin-bottom: 1rem;
+  }
+
+  .data-summary {
     font-size: 0.875rem;
-  }
-
-  .sheet-selector select {
-    padding: 0.5rem 1rem;
-    border: 2px solid var(--color-teal-grey);
-    border-radius: 6px;
-    font-size: 1rem;
-    color: var(--color-sage);
-    background-color: white;
-    cursor: pointer;
-    transition: border-color 0.2s ease;
-  }
-
-  .sheet-selector select:focus {
-    outline: none;
-    border-color: var(--color-muted-teal);
-  }
-
-  .embed-container {
-    position: relative;
-    width: 100%;
-    padding-bottom: 75%; /* 4:3 aspect ratio */
-    border: 2px solid var(--color-teal-grey);
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 2rem;
-  }
-
-  .embed-container iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .info-panel {
-    background-color: var(--color-teal-grey);
-    padding: 1.5rem;
-    border-radius: 8px;
-  }
-
-  .info-panel h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--color-sage);
-    margin: 0 0 1rem 0;
-  }
-
-  .info-panel dl {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.75rem 1.5rem;
-    margin: 0;
-  }
-
-  .info-panel dt {
-    font-weight: 600;
-    color: var(--color-sage);
-    font-size: 0.875rem;
-  }
-
-  .info-panel dd {
     color: var(--color-muted-teal);
     margin: 0;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
     font-size: 0.875rem;
+  }
+
+  .data-table thead {
+    background-color: var(--color-teal-grey);
+  }
+
+  .data-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--color-sage);
+    border-bottom: 1px solid var(--color-teal-grey);
+    white-space: nowrap;
+  }
+
+  .data-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .data-table th.sortable:hover {
+    background-color: rgba(120, 160, 131, 0.1);
+  }
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .sort-indicator {
+    font-size: 1rem;
+    color: var(--color-sage);
+    font-weight: bold;
+  }
+
+  .data-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    color: var(--color-muted-teal);
+  }
+
+  .data-table tbody tr:hover {
+    background-color: #fafafa;
+  }
+
+  .data-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .empty-state p {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-sage);
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-subtitle {
+    font-size: 1rem;
+    color: var(--color-muted-teal);
+  }
+
+  .empty-subtitle a {
+    color: var(--color-muted-teal);
+    text-decoration: underline;
+  }
+
+  .empty-subtitle a:hover {
+    color: var(--color-sage);
   }
 </style>

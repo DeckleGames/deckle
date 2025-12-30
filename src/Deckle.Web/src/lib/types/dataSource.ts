@@ -27,6 +27,10 @@ export interface CreateDataSourceDto {
   sheetGid?: number;
 }
 
+export interface UpdateDataSourceDto {
+  name: string;
+}
+
 export interface SyncDataSourceMetadataRequest {
   headers: string[];
   rowCount: number;

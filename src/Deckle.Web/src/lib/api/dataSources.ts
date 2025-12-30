@@ -1,5 +1,5 @@
 import { api } from './client';
-import type { DataSource, CreateDataSourceDto, SyncDataSourceMetadataRequest } from '$lib/types';
+import type { DataSource, CreateDataSourceDto, UpdateDataSourceDto, SyncDataSourceMetadataRequest } from '$lib/types';
 
 /**
  * Data Sources API
@@ -28,6 +28,12 @@ export const dataSourcesApi = {
    */
   create: (data: CreateDataSourceDto, fetchFn?: typeof fetch) =>
     api.post<DataSource>('/data-sources', data, undefined, fetchFn),
+
+  /**
+   * Update a data source
+   */
+  update: (id: string, data: UpdateDataSourceDto, fetchFn?: typeof fetch) =>
+    api.put<DataSource>(`/data-sources/${id}`, data, undefined, fetchFn),
 
   /**
    * Sync data source metadata (headers and row count)
