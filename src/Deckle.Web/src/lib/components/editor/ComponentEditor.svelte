@@ -1,6 +1,6 @@
 <script lang="ts">
   import ResizablePanelContainer from "$lib/components/ResizablePanelContainer.svelte";
-  import Panel from "$lib/components/editor/_components/Panel.svelte";
+  import DataSourcePanel from "./DataSourcePanel.svelte";
   import type { PageData } from "../../../routes/projects/[projectId]/components/[componentId]/[part]/$types";
   import ElementConfigPanel from "./ElementConfigPanel.svelte";
   import PreviewPanel from "./PreviewPanel.svelte";
@@ -121,6 +121,10 @@
     </ResizablePanelContainer>
   {/snippet}
   {#snippet rightOrBottom()}
-    <Panel title="Data Source" />
+    <DataSourcePanel
+      dataSource={data.dataSource}
+      projectId={data.project.id}
+      componentId={data.component.id}
+    />
   {/snippet}
 </ResizablePanelContainer>
