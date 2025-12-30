@@ -5,7 +5,7 @@
   import VisibilityCheckbox from "./VisibilityCheckbox.svelte";
   import PositionControls from "./PositionControls.svelte";
   import DimensionInput from "./DimensionInput.svelte";
-  import ColorPicker from "./ColorPicker.svelte";
+  import BorderConfig from "./BorderConfig.svelte";
   import TextField from "./TextField.svelte";
   import NumberField from "./NumberField.svelte";
   import SelectField from "./SelectField.svelte";
@@ -92,63 +92,8 @@
     />
   </Fields>
 
-  <Fields>
-    <NumberField
-      label="Border Radius (px)"
-      id="border-radius"
-      value={element.borderRadius ?? ""}
-      oninput={(e) =>
-        updateElement({
-          borderRadius: parseInt(e.currentTarget.value) || undefined,
-        })}
-    />
-
-    <NumberField
-      label="Border Width (px)"
-      id="border-width"
-      value={element.border?.width ?? ""}
-      oninput={(e) =>
-        updateElement({
-          border: {
-            ...element.border,
-            width: parseInt(e.currentTarget.value) || undefined,
-          },
-        })}
-    />
-  </Fields>
-
-  <Fields>
-    <ColorPicker
-      label="Border Color"
-      id="border-color"
-      value={element.border?.color || "#000000"}
-      onchange={(color) =>
-        updateElement({
-          border: {
-            ...element.border,
-            color,
-          },
-        })}
-    />
-
-    <SelectField
-      label="Border Style"
-      id="border-style"
-      value={element.border?.style || "solid"}
-      options={[
-        { value: "solid", label: "Solid" },
-        { value: "dashed", label: "Dashed" },
-        { value: "dotted", label: "Dotted" },
-        { value: "double", label: "Double" },
-        { value: "none", label: "None" },
-      ]}
-      onchange={(value) =>
-        updateElement({
-          border: {
-            ...element.border,
-            style: value as any,
-          },
-        })}
-    />
-  </Fields>
+  <BorderConfig
+    border={element.border}
+    onchange={(border) => updateElement({ border })}
+  />
 </ConfigSection>

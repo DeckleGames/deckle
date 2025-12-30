@@ -34,10 +34,25 @@ export interface Spacing {
   left?: number;
 }
 
-export interface Border {
+export interface BorderSide {
   width?: number;
   style?: BorderStyle;
   color?: string;
+}
+
+export interface Border {
+  // For "all sides" mode - when these are set, apply to all sides
+  width?: number;
+  style?: BorderStyle;
+  color?: string;
+
+  // For "separate sides" mode - when these are set, they override the above
+  top?: BorderSide;
+  right?: BorderSide;
+  bottom?: BorderSide;
+  left?: BorderSide;
+
+  // Border radius (always applies)
   radius?: number | {
     topLeft?: number;
     topRight?: number;
@@ -145,6 +160,9 @@ export interface TextElement extends BaseElement {
 
   // Background
   backgroundColor?: string;
+
+  // Border
+  border?: Border;
 
   // Dimensions (block mode only)
   dimensions?: Dimensions;

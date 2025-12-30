@@ -37,6 +37,50 @@
     return value;
   }
 
+  // Helper to convert border to CSS
+  function borderToCss(border: any | undefined): string[] {
+    if (!border) return [];
+
+    const styles: string[] = [];
+
+    // Check if individual sides are defined
+    const hasIndividualSides = border.top || border.right || border.bottom || border.left;
+
+    if (hasIndividualSides) {
+      // Use individual side properties
+      const sides = ['top', 'right', 'bottom', 'left'] as const;
+      for (const side of sides) {
+        const sideProps = border[side];
+        if (sideProps) {
+          if (sideProps.width !== undefined) {
+            styles.push(`border-${side}-width: ${sideProps.width}px`);
+          }
+          if (sideProps.style) {
+            styles.push(`border-${side}-style: ${sideProps.style}`);
+          }
+          if (sideProps.color) {
+            styles.push(`border-${side}-color: ${sideProps.color}`);
+          }
+        }
+      }
+    } else {
+      // Use main border properties (all sides)
+      if (border.width !== undefined) styles.push(`border-width: ${border.width}px`);
+      if (border.style) styles.push(`border-style: ${border.style}`);
+      if (border.color) styles.push(`border-color: ${border.color}`);
+    }
+
+    // Border radius (always applies)
+    if (typeof border.radius === 'number') {
+      styles.push(`border-radius: ${border.radius}px`);
+    } else if (border.radius) {
+      const r = border.radius;
+      styles.push(`border-radius: ${r.topLeft || 0}px ${r.topRight || 0}px ${r.bottomRight || 0}px ${r.bottomLeft || 0}px`);
+    }
+
+    return styles;
+  }
+
   // Helper to build style object
   function buildStyle(element: TemplateElement): string {
     const styles: string[] = [];
@@ -92,16 +136,7 @@
 
       // Border
       if (container.border) {
-        const b = container.border;
-        if (b.width) styles.push(`border-width: ${b.width}px`);
-        if (b.style) styles.push(`border-style: ${b.style}`);
-        if (b.color) styles.push(`border-color: ${b.color}`);
-        if (typeof b.radius === 'number') {
-          styles.push(`border-radius: ${b.radius}px`);
-        } else if (b.radius) {
-          const r = b.radius;
-          styles.push(`border-radius: ${r.topLeft || 0}px ${r.topRight || 0}px ${r.bottomRight || 0}px ${r.bottomLeft || 0}px`);
-        }
+        styles.push(...borderToCss(container.border));
       }
 
       // Background
@@ -167,6 +202,11 @@
       // Background
       if (text.backgroundColor) styles.push(`background-color: ${text.backgroundColor}`);
 
+      // Border
+      if (text.border) {
+        styles.push(...borderToCss(text.border));
+      }
+
       // Dimensions (block mode)
       if (text.dimensions) {
         const d = text.dimensions;
@@ -199,16 +239,7 @@
 
       // Border
       if (image.border) {
-        const b = image.border;
-        if (b.width) styles.push(`border-width: ${b.width}px`);
-        if (b.style) styles.push(`border-style: ${b.style}`);
-        if (b.color) styles.push(`border-color: ${b.color}`);
-        if (typeof b.radius === 'number') {
-          styles.push(`border-radius: ${b.radius}px`);
-        } else if (b.radius) {
-          const r = b.radius;
-          styles.push(`border-radius: ${r.topLeft || 0}px ${r.topRight || 0}px ${r.bottomRight || 0}px ${r.bottomLeft || 0}px`);
-        }
+        styles.push(...borderToCss(image.border));
       }
 
       // Border radius (simplified)

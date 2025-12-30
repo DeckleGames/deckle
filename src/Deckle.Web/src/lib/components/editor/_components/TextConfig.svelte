@@ -7,6 +7,7 @@
   import DimensionInput from "./DimensionInput.svelte";
   import ColorPicker from "./ColorPicker.svelte";
   import PaddingControls from "./PaddingControls.svelte";
+  import BorderConfig from "./BorderConfig.svelte";
   import TextAreaField from "./TextAreaField.svelte";
   import TextField from "./TextField.svelte";
   import NumberField from "./NumberField.svelte";
@@ -159,6 +160,11 @@
   <PaddingControls
     padding={element.padding}
     onchange={(padding) => updateElement({ padding })}
+  />
+
+  <BorderConfig
+    border={element.border}
+    onchange={(border) => updateElement({ border })}
   />
 
   <Fields>

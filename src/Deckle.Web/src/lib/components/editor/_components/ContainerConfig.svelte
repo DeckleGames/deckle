@@ -9,6 +9,7 @@
   import DimensionInput from "./DimensionInput.svelte";
   import ColorPicker from "./ColorPicker.svelte";
   import PaddingControls from "./PaddingControls.svelte";
+  import BorderConfig from "./BorderConfig.svelte";
   import Fields from "./Fields.svelte";
 
   let { element }: { element: ContainerElement } = $props();
@@ -363,6 +364,11 @@
   <PaddingControls
     padding={element.padding}
     onchange={(padding) => updateElement({ padding })}
+  />
+
+  <BorderConfig
+    border={element.border}
+    onchange={(border) => updateElement({ border })}
   />
 
   <Fields>

@@ -1,18 +1,26 @@
 <script lang="ts">
-  import type { EditableComponent, CardComponent, RectangleShape } from '$lib/types';
-  import ConfigSection from './ConfigSection.svelte';
+  import type {
+    EditableComponent,
+    CardComponent,
+    RectangleShape,
+  } from "$lib/types";
+  import ConfigSection from "./ConfigSection.svelte";
 
-  let { component, part }: { component: EditableComponent; part?: string } = $props();
+  let { component, part }: { component: EditableComponent; part?: string } =
+    $props();
 
   // Check if this is a card component with shape info
-  let cardComponent = $derived('shape' in component ? component as CardComponent : null);
+  let cardComponent = $derived(
+    "shape" in component ? (component as CardComponent) : null
+  );
   let rectangleShape = $derived(
-    cardComponent?.shape?.type === 'rectangle' ? cardComponent.shape as RectangleShape : null
+    cardComponent?.shape?.type === "rectangle"
+      ? (cardComponent.shape as RectangleShape)
+      : null
   );
 </script>
 
 <ConfigSection>
-
   <div class="info-group">
     <div class="info-item">
       <span class="info-label">Name</span>
@@ -43,17 +51,23 @@
   <div class="info-group">
     <div class="info-item">
       <span class="info-label">Width</span>
-      <span class="info-value">{component.dimensions.widthMm.toFixed(2)} mm</span>
+      <span class="info-value"
+        >{component.dimensions.widthMm.toFixed(2)} mm</span
+      >
     </div>
 
     <div class="info-item">
       <span class="info-label">Height</span>
-      <span class="info-value">{component.dimensions.heightMm.toFixed(2)} mm</span>
+      <span class="info-value"
+        >{component.dimensions.heightMm.toFixed(2)} mm</span
+      >
     </div>
 
     <div class="info-item">
       <span class="info-label">Bleed</span>
-      <span class="info-value">{component.dimensions.bleedMm.toFixed(2)} mm</span>
+      <span class="info-value"
+        >{component.dimensions.bleedMm.toFixed(2)} mm</span
+      >
     </div>
 
     <div class="info-item">
@@ -72,7 +86,9 @@
 
       <div class="info-item">
         <span class="info-label">Border Radius</span>
-        <span class="info-value">{rectangleShape.borderRadiusMm.toFixed(2)} mm</span>
+        <span class="info-value"
+          >{rectangleShape.borderRadiusMm.toFixed(2)} mm</span
+        >
       </div>
     </div>
   {/if}
@@ -89,7 +105,6 @@
   .info-group {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
   }
 
   .info-item {
@@ -97,8 +112,11 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem;
-    background: #f9fafb;
-    border-radius: 4px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+  }
+  .info-item:hover {
+    border-color: rgba(0, 0, 0, 0.05);
   }
 
   .info-label {

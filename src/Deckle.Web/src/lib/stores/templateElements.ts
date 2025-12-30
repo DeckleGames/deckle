@@ -89,6 +89,9 @@ function createTemplateStore() {
 					// Use immutable update to create new references for entire path
 					store.root = addElementToContainer(store.root, parentId, element);
 				}
+				// Auto-select the newly added element
+				store.selectedElementId = element.id;
+
 				return store;
 			});
 		},
