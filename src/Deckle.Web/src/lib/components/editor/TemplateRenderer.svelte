@@ -277,6 +277,7 @@
     style={buildStyle(element)}
     data-element-id={element.id}
     class="editable-element"
+    class:locked={element.locked}
     class:hovered={isHovered}
     class:selected={isSelected}
     onmouseenter={handleMouseEnter}
@@ -301,6 +302,7 @@
     style={buildStyle(element)}
     data-element-id={element.id}
     class="editable-element"
+    class:locked={element.locked}
     class:hovered={isHovered}
     class:selected={isSelected}
     onmouseenter={handleMouseEnter}
@@ -328,6 +330,7 @@
       alt=""
       style={buildStyle(element)}
       class="editable-element"
+      class:locked={element.locked}
       class:hovered={isHovered}
       class:selected={isSelected}
       onmouseenter={handleMouseEnter}
@@ -350,6 +353,10 @@
   .editable-element {
     cursor: pointer;
     transition: outline 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .editable-element.locked {
+    cursor: default;
   }
 
   .editable-element.hovered {

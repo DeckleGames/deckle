@@ -229,6 +229,14 @@
     templateStore.addElement(newElement, element.id);
   }
 
+  function handleToggleVisibility() {
+    templateStore.updateElement(element.id, { visible: !element.visible });
+  }
+
+  function handleToggleLock() {
+    templateStore.updateElement(element.id, { locked: !element.locked });
+  }
+
   function getContextMenuItems(): MenuItem[] {
     const items: MenuItem[] = [];
 
@@ -258,6 +266,19 @@
         ]
       });
     }
+
+    // Visibility toggle
+    items.push({ divider: true });
+    items.push({
+      label: element.visible === false ? 'Show' : 'Hide',
+      action: handleToggleVisibility
+    });
+
+    // Lock toggle
+    items.push({
+      label: element.locked === true ? 'Unlock' : 'Lock',
+      action: handleToggleLock
+    });
 
     // Delete action (with divider before it)
     items.push({ divider: true });

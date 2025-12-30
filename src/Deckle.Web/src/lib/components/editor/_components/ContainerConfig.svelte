@@ -206,15 +206,17 @@
 </script>
 
 <ConfigSection>
-  <VisibilityCheckbox
-    visible={element.visible}
-    onchange={(visible) => updateElement({ visible })}
-  />
+  <div class="icon-toggle-group">
+    <VisibilityCheckbox
+      visible={element.visible}
+      onchange={(visible) => updateElement({ visible })}
+    />
 
-  <LockCheckbox
-    locked={element.locked}
-    onchange={(locked) => updateElement({ locked })}
-  />
+    <LockCheckbox
+      locked={element.locked}
+      onchange={(locked) => updateElement({ locked })}
+    />
+  </div>
 
   {#if element.position === "absolute"}
     <PositionControls
@@ -618,5 +620,11 @@
   .gap-control .unit {
     font-size: 0.75rem;
     color: #666;
+  }
+
+  .icon-toggle-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
   }
 </style>

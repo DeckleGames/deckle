@@ -20,15 +20,17 @@
 </script>
 
 <ConfigSection>
-  <VisibilityCheckbox
-    visible={element.visible}
-    onchange={(visible) => updateElement({ visible })}
-  />
+  <div class="icon-toggle-group">
+    <VisibilityCheckbox
+      visible={element.visible}
+      onchange={(visible) => updateElement({ visible })}
+    />
 
-  <LockCheckbox
-    locked={element.locked}
-    onchange={(locked) => updateElement({ locked })}
-  />
+    <LockCheckbox
+      locked={element.locked}
+      onchange={(locked) => updateElement({ locked })}
+    />
+  </div>
 
   {#if element.position === "absolute"}
     <PositionControls
@@ -114,3 +116,11 @@
     onchange={(border) => updateElement({ border })}
   />
 </ConfigSection>
+
+<style>
+  .icon-toggle-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+</style>
