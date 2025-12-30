@@ -29,6 +29,13 @@
   let previewX = $state(0);
   let previewY = $state(0);
 
+  // Reference to the resize handles container
+  let resizeHandlesEl: HTMLDivElement;
+
+  // Track which dimensions need to be converted from percentage to pixels
+  let convertWidthToPx = $state(false);
+  let convertHeightToPx = $state(false);
+
   // Get current dimensions
   function getCurrentDimensions() {
     const dims = element.type === 'container' || element.type === 'text' || element.type === 'image'
@@ -44,6 +51,25 @@
     };
   }
 
+  // Get actual rendered dimensions from the DOM element
+  function getRenderedDimensions(targetElement: HTMLElement) {
+    // For images, we need to get the img element's dimensions
+    if (element.type === 'image') {
+      const imgElement = targetElement.querySelector('img');
+      if (imgElement) {
+        return {
+          width: imgElement.offsetWidth,
+          height: imgElement.offsetHeight
+        };
+      }
+    }
+
+    return {
+      width: targetElement.offsetWidth,
+      height: targetElement.offsetHeight
+    };
+  }
+
   function handleMouseDown(handle: string, e: MouseEvent) {
     e.stopPropagation();
     e.preventDefault();
@@ -54,10 +80,36 @@
     startY = e.clientY;
 
     const dims = getCurrentDimensions();
-    startWidth = dims.width;
-    startHeight = dims.height;
     startLeft = element.x || 0;
     startTop = element.y || 0;
+
+    // Get the actual element being resized (parent of resize handles)
+    const targetElement = resizeHandlesEl?.parentElement;
+
+    // Check if dimensions are percentages and need conversion
+    const elementDims = element.type === 'container' || element.type === 'text' || element.type === 'image'
+      ? (element as any).dimensions
+      : undefined;
+
+    const widthIsPercentage = typeof elementDims?.width === 'string' && elementDims.width.includes('%');
+    const heightIsPercentage = typeof elementDims?.height === 'string' && elementDims.height.includes('%');
+
+    // If dimensions are percentages, get the actual rendered pixel size
+    if (targetElement && (widthIsPercentage || heightIsPercentage)) {
+      const rendered = getRenderedDimensions(targetElement);
+
+      startWidth = widthIsPercentage ? rendered.width : dims.width;
+      startHeight = heightIsPercentage ? rendered.height : dims.height;
+
+      // Mark which dimensions need to be converted to pixels
+      convertWidthToPx = widthIsPercentage;
+      convertHeightToPx = heightIsPercentage;
+    } else {
+      startWidth = dims.width;
+      startHeight = dims.height;
+      convertWidthToPx = false;
+      convertHeightToPx = false;
+    }
 
     // Initialize preview dimensions
     previewWidth = startWidth;
@@ -143,11 +195,27 @@
     // History is saved once at the start of the drag operation
     const updates: any = {
       dimensions: {
-        ...(element.type === 'container' || element.type === 'text' || element.type === 'image' ? (element as any).dimensions : {}),
-        width: newWidth,
-        height: newHeight
+        ...(element.type === 'container' || element.type === 'text' || element.type === 'image' ? (element as any).dimensions : {})
       }
     };
+
+    // Only update dimensions that are actually being changed by the resize handle
+    // This preserves the unit (px vs %) of dimensions that aren't being resized
+    const widthChanged = newWidth !== startWidth;
+    const heightChanged = newHeight !== startHeight;
+
+    // Always update if we're converting from percentage to pixels (even if size hasn't changed yet)
+    // This prevents the element from jumping when starting to drag a percentage dimension
+    if (widthChanged || convertWidthToPx) {
+      updates.dimensions.width = newWidth;
+    }
+    if (heightChanged || convertHeightToPx) {
+      updates.dimensions.height = newHeight;
+    }
+
+    // After first update, clear the conversion flags
+    if (convertWidthToPx) convertWidthToPx = false;
+    if (convertHeightToPx) convertHeightToPx = false;
 
     // If position changed (for handles that move the element), update x/y
     if (newX !== startLeft) {
@@ -184,7 +252,7 @@
   });
 </script>
 
-<div class="resize-handles panzoom-exclude">
+<div bind:this={resizeHandlesEl} class="resize-handles panzoom-exclude">
   <!-- Corner handles -->
   <div
     class="resize-handle panzoom-exclude nw"

@@ -52,7 +52,7 @@
 <style>
   .component {
     background-color: #fff;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     border-radius: var(--border-radius-component);
   }
