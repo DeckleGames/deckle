@@ -16,6 +16,19 @@
 
   const sidebarWidth = 20;
 
+  // Panel size control
+  let dataSourcePanelSplit = $state(80); // Start at 80% for the main editor area
+  const MINIMIZED_HEIGHT = 10; // Minimal height for data source panel
+  const MAXIMIZED_HEIGHT = 50; // 50% split
+
+  function minimizeDataSourcePanel() {
+    dataSourcePanelSplit = 100 - MINIMIZED_HEIGHT;
+  }
+
+  function maximizeDataSourcePanel() {
+    dataSourcePanelSplit = MAXIMIZED_HEIGHT;
+  }
+
   // Load the saved design when the editor initializes
   $effect(() => {
     let savedDesign: string | null = null;
@@ -100,7 +113,7 @@
 
 <svelte:window onkeydown={handleKeydown} onbeforeunload={handleBeforeUnload} />
 
-<ResizablePanelContainer orientation="vertical" initialSplit={80}>
+<ResizablePanelContainer orientation="vertical" bind:splitPercentage={dataSourcePanelSplit}>
   {#snippet leftOrTop()}
     <ResizablePanelContainer initialSplit={sidebarWidth}>
       {#snippet leftOrTop()}
@@ -126,6 +139,8 @@
       dataSources={data.dataSources}
       projectId={data.project.id}
       componentId={data.component.id}
+      onMinimize={minimizeDataSourcePanel}
+      onMaximize={maximizeDataSourcePanel}
     />
   {/snippet}
 </ResizablePanelContainer>

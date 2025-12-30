@@ -12,9 +12,11 @@
     dataSources: DataSource[];
     projectId: string;
     componentId: string;
+    onMinimize?: () => void;
+    onMaximize?: () => void;
   }
 
-  let { dataSource, dataSources, projectId, componentId }: Props = $props();
+  let { dataSource, dataSources, projectId, componentId, onMinimize, onMaximize }: Props = $props();
 
   let showLinkDataSourceModal = $state(false);
   let isSyncing = $state(false);
@@ -154,6 +156,36 @@
         </div>
       </div>
     {/if}
+    <div class="panel-controls">
+      <button
+        class="icon-button"
+        onclick={onMaximize}
+        title="Maximize panel"
+        aria-label="Maximize panel"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <!-- Arrows pointing outward -->
+          <path d="M2 6L2 2L6 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10 2L14 2L14 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 10L14 14L10 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6 14L2 14L2 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button
+        class="icon-button"
+        onclick={onMinimize}
+        title="Minimize panel"
+        aria-label="Minimize panel"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <!-- Arrows pointing inward -->
+          <path d="M6 2L6 6L2 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10 2L10 6L14 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 10L10 10L10 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 10L6 10L6 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
   {/snippet}
   {#if dataSource}
     {#if loadingData}
@@ -256,6 +288,33 @@
   .sync-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  .panel-controls {
+    display: flex;
+    gap: 0.25rem;
+    margin-left: auto;
+  }
+
+  .icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.15s ease;
+  }
+
+  .icon-button:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+    color: #374151;
   }
 
   .loading-state,

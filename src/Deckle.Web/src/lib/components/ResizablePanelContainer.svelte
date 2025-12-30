@@ -6,6 +6,7 @@
     leftOrTop: Snippet;
     rightOrBottom: Snippet;
     initialSplit?: number; // percentage for left/top panel
+    splitPercentage?: number; // bindable split percentage
     minSize?: number; // minimum percentage
     maxSize?: number; // maximum percentage
     onResize?: (splitPercentage: number) => void;
@@ -16,12 +17,11 @@
     leftOrTop,
     rightOrBottom,
     initialSplit = 50,
+    splitPercentage = $bindable(initialSplit),
     minSize = 10,
     maxSize = 90,
     onResize,
   }: Props = $props();
-
-  let splitPercentage = $state(initialSplit);
   let isDragging = $state(false);
   let containerRef: HTMLDivElement | undefined = $state();
 
