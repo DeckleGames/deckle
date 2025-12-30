@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from "$app/stores";
   import ErrorDisplay from "$lib/components/ErrorDisplay.svelte";
+  import Button from "$lib/components/Button.svelte";
   import { ApiError } from "$lib/api";
 
   // SvelteKit's error page receives error and status via $page.error and $page.status
@@ -27,13 +28,12 @@
     <ErrorDisplay error={error()} />
 
     <div class="error-actions">
-      <a href="/" class="button">Return Home</a>
-      <button
-        onclick={() => window.history.back()}
-        class="button button-secondary"
-      >
+      <a href="/" class="home-link">
+        <Button variant="primary" size="md">Return Home</Button>
+      </a>
+      <Button variant="secondary" size="md" onclick={() => window.history.back()}>
         Go Back
-      </button>
+      </Button>
     </div>
   </div>
 </div>
@@ -43,43 +43,45 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: calc(100vh - 60px);
     padding: 2rem;
+    background-color: var(--color-bg-primary);
   }
 
   .error-container {
     max-width: 600px;
     width: 100%;
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
   }
 
   .error-actions {
     display: flex;
     gap: 1rem;
-    margin-top: 1.5rem;
+    margin-top: 2rem;
     justify-content: center;
+    flex-wrap: wrap;
   }
 
-  .button {
-    padding: 0.75rem 1.5rem;
-    background-color: #1976d2;
-    color: white;
+  .home-link {
     text-decoration: none;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9375rem;
-    font-weight: 500;
-    transition: background-color 0.2s;
   }
 
-  .button:hover {
-    background-color: #1565c0;
-  }
+  @media (max-width: 768px) {
+    .error-page {
+      padding: 1rem;
+    }
 
-  .button-secondary {
-    background-color: #757575;
-  }
+    .error-container {
+      padding: 1.5rem;
+    }
 
-  .button-secondary:hover {
-    background-color: #616161;
+    .error-actions {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
   }
 </style>
