@@ -16,4 +16,4 @@ export { default as Tabs } from './Tabs.svelte';
 export { default as TopBar } from './TopBar.svelte';
 
 // Form components
-export * from './form';
+export * from './forms';

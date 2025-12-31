@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Border, BorderStyle } from "../types";
   import BorderSideControl from "./BorderSideControl.svelte";
-  import { NumberInput } from "$lib/components/form";
+  import { NumberInput } from "$lib/components/forms";
 
   let {
     border,
