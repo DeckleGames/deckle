@@ -23,6 +23,7 @@
   let isSyncing = $state(false);
   let spreadsheetData = $state<string[][] | null>(null);
   let loadingData = $state(false);
+  let selectedRowIndex = $state(0); // Default to first row
 
   // Load data when component mounts or dataSource changes
   $effect(() => {
@@ -40,11 +41,34 @@
       loadingData = true;
       const result = await dataSourcesApi.getData(dataSource.id);
       spreadsheetData = result.data;
+      // Reset to first row when new data is loaded
+      selectedRowIndex = 0;
     } catch (err) {
       console.error("Error loading data source data:", err);
       spreadsheetData = null;
     } finally {
       loadingData = false;
+    }
+  }
+
+  function handleRowSelect(rowIndex: number) {
+    selectedRowIndex = rowIndex;
+
+    // Get the selected row data as a JSON object
+    if (spreadsheetData && spreadsheetData.length > 0) {
+      const headers = spreadsheetData[0];
+      const rows = spreadsheetData.slice(1);
+      const selectedRow = rows[rowIndex];
+
+      if (selectedRow) {
+        // Map headers to values to create an object
+        const rowObject = headers.reduce((obj, header, index) => {
+          obj[header] = selectedRow[index] || '';
+          return obj;
+        }, {} as Record<string, string>);
+
+        console.log('Selected row:', JSON.stringify(rowObject, null, 2));
+      }
     }
   }
 
@@ -91,6 +115,22 @@
       isSyncing = false;
     }
   }
+
+  function navigateToPreviousRow() {
+    if (!spreadsheetData || spreadsheetData.length <= 1) return;
+
+    const totalRows = spreadsheetData.length - 1; // Exclude header row
+    const newIndex = selectedRowIndex === 0 ? totalRows - 1 : selectedRowIndex - 1;
+    handleRowSelect(newIndex);
+  }
+
+  function navigateToNextRow() {
+    if (!spreadsheetData || spreadsheetData.length <= 1) return;
+
+    const totalRows = spreadsheetData.length - 1; // Exclude header row
+    const newIndex = selectedRowIndex === totalRows - 1 ? 0 : selectedRowIndex + 1;
+    handleRowSelect(newIndex);
+  }
 </script>
 
 <Panel title="Data Source">
@@ -125,6 +165,30 @@
             Change Data Source
           </button>
         </div>
+        {#if spreadsheetData && spreadsheetData.length > 1}
+          <div class="navigation-buttons">
+            <button
+              class="nav-button"
+              onclick={navigateToPreviousRow}
+              title="Previous row"
+              aria-label="Previous row"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button
+              class="nav-button"
+              onclick={navigateToNextRow}
+              title="Next row"
+              aria-label="Next row"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        {/if}
       </div>
     {/if}
     <div class="panel-controls">
@@ -162,7 +226,15 @@
     {#if loadingData}
       <div class="loading-state">Loading data...</div>
     {:else if spreadsheetData && spreadsheetData.length > 0}
-      <DataTable data={spreadsheetData} sortable={false} maxRows={10} stickyHeader={true} />
+      <DataTable
+        data={spreadsheetData}
+        sortable={false}
+        maxRows={10}
+        stickyHeader={true}
+        selectable={true}
+        selectedRowIndex={selectedRowIndex}
+        onRowSelect={handleRowSelect}
+      />
     {:else if dataSource.headers && dataSource.headers.length > 0}
       <div class="no-data-state">
         <p>No data loaded yet. Click "Sync" to load the latest data.</p>
@@ -233,6 +305,32 @@
   .sync-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  .navigation-buttons {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .nav-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.15s ease;
+  }
+
+  .nav-button:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+    color: #374151;
   }
 
   .panel-controls {

@@ -3,12 +3,18 @@
     data,
     sortable = true,
     maxRows,
-    stickyHeader = true
+    stickyHeader = true,
+    selectable = false,
+    selectedRowIndex = 0,
+    onRowSelect
   }: {
     data: string[][];
     sortable?: boolean;
     maxRows?: number;
     stickyHeader?: boolean;
+    selectable?: boolean;
+    selectedRowIndex?: number;
+    onRowSelect?: (rowIndex: number) => void;
   } = $props();
 
   // Sorting state
@@ -64,12 +70,23 @@
       sortDirection = 'asc';
     }
   }
+
+  function handleRowSelect(rowIndex: number) {
+    if (onRowSelect) {
+      onRowSelect(rowIndex);
+    }
+  }
 </script>
 
 <div class="data-table-container">
   <table class="data-table">
     <thead class:sticky={stickyHeader}>
       <tr>
+        {#if selectable}
+          <th class="radio-column">
+            <!-- Empty header for radio button column -->
+          </th>
+        {/if}
         {#each headers as header, index}
           <th
             class:sortable
@@ -90,8 +107,18 @@
       </tr>
     </thead>
     <tbody>
-      {#each displayedRows() as row}
+      {#each displayedRows() as row, rowIndex}
         <tr>
+          {#if selectable}
+            <td class="radio-column">
+              <input
+                type="radio"
+                name="row-select"
+                checked={selectedRowIndex === rowIndex}
+                onchange={() => handleRowSelect(rowIndex)}
+              />
+            </td>
+          {/if}
           {#each row as cell}
             <td>{cell}</td>
           {/each}
@@ -181,5 +208,16 @@
     text-align: center;
     margin: 0.5rem 0 0 0;
     padding: 0.5rem;
+  }
+
+  .radio-column {
+    width: 2.5rem;
+    text-align: center;
+    padding: 0.5rem !important;
+  }
+
+  .radio-column input[type="radio"] {
+    cursor: pointer;
+    margin: 0;
   }
 </style>
