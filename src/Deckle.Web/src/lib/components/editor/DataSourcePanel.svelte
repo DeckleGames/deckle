@@ -6,6 +6,7 @@
   import { invalidateAll } from "$app/navigation";
   import type { DataSource } from "$lib/types";
   import { formatRelativeTime } from "$lib/utils/date.utils";
+  import { syncDataSource } from "$lib/utils/dataSource.utils";
 
   interface Props {
     dataSource: DataSource | null;
@@ -71,42 +72,12 @@
   }
 
   async function handleSync() {
-    if (!dataSource || isSyncing || !dataSource.csvExportUrl) return;
+    if (!dataSource || isSyncing) return;
 
     try {
       isSyncing = true;
 
-      // Fetch the CSV data from the public URL
-      const response = await fetch(dataSource.csvExportUrl);
-      if (!response.ok) {
-        throw new Error("Failed to fetch CSV data");
-      }
-
-      const csvText = await response.text();
-
-      // Parse CSV to extract headers and count rows
-      const lines = csvText.split("\n");
-
-      // Extract headers (first line)
-      const headers = lines[0]
-        .split(",")
-        .map((h) => h.trim().replace(/^"|"$/g, "")) // Remove quotes if present
-        .filter((h) => h.length > 0);
-
-      // Count non-empty data rows (skip header)
-      const dataRows = lines.slice(1).filter((line) => {
-        // A row is non-empty if it has at least one non-empty cell
-        const cells = line.split(",").map((c) => c.trim());
-        return cells.some((cell) => cell.length > 0);
-      });
-
-      const rowCount = dataRows.length;
-
-      // Send metadata to the backend
-      await dataSourcesApi.sync(dataSource.id, {
-        headers,
-        rowCount,
-      });
+      await syncDataSource(dataSource);
 
       // Refresh the page data
       await invalidateAll();
