@@ -6,6 +6,7 @@
   import PreviewPanel from "./PreviewPanel.svelte";
   import StructureTreePanel from "./StructureTreePanel.svelte";
   import { templateStore } from "$lib/stores/templateElements";
+  import { initDataSourceRow } from "$lib/stores/dataSourceRow";
   import type { CardComponent, DiceComponent } from "$lib/types";
   import { beforeNavigate } from "$app/navigation";
 
@@ -15,6 +16,9 @@
   const partLabel = data.part.charAt(0).toUpperCase() + data.part.slice(1);
 
   const sidebarWidth = 20;
+
+  // Initialize the data source row store for merge field functionality
+  initDataSourceRow();
 
   // Panel size control
   let dataSourcePanelSplit = $state(80); // Start at 80% for the main editor area

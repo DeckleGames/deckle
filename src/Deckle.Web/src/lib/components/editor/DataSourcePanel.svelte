@@ -7,6 +7,7 @@
   import type { DataSource } from "$lib/types";
   import { formatRelativeTime } from "$lib/utils/date.utils";
   import { syncDataSource } from "$lib/utils/dataSource.utils";
+  import { getDataSourceRow } from "$lib/stores/dataSourceRow";
 
   interface Props {
     dataSource: DataSource | null;
@@ -18,6 +19,9 @@
   }
 
   let { dataSource, dataSources, projectId, componentId, onMinimize, onMaximize }: Props = $props();
+
+  // Get the store reference during component initialization
+  const dataSourceRowStore = getDataSourceRow();
 
   let showLinkDataSourceModal = $state(false);
   let isSyncing = $state(false);
@@ -31,6 +35,7 @@
       loadData();
     } else {
       spreadsheetData = null;
+      dataSourceRowStore.set(null); // Clear merge field data when no data source
     }
   });
 
@@ -43,9 +48,26 @@
       spreadsheetData = result.data;
       // Reset to first row when new data is loaded
       selectedRowIndex = 0;
+
+      // Set the initial row data in the store for merge field functionality
+      if (spreadsheetData && spreadsheetData.length > 1) {
+        const headers = spreadsheetData[0];
+        const firstRow = spreadsheetData[1]; // First data row (index 1, since 0 is headers)
+
+        const rowObject = headers.reduce((obj, header, index) => {
+          obj[header] = firstRow[index] || '';
+          return obj;
+        }, {} as Record<string, string>);
+
+        dataSourceRowStore.set(rowObject);
+      } else {
+        // Clear the store if no data
+        dataSourceRowStore.set(null);
+      }
     } catch (err) {
       console.error("Error loading data source data:", err);
       spreadsheetData = null;
+      dataSourceRowStore.set(null);
     } finally {
       loadingData = false;
     }
@@ -68,6 +90,9 @@
         }, {} as Record<string, string>);
 
         console.log('Selected row:', JSON.stringify(rowObject, null, 2));
+
+        // Update the store for merge field functionality
+        dataSourceRowStore.set(rowObject);
       }
     }
   }

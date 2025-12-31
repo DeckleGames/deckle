@@ -1,8 +1,13 @@
 <script lang="ts">
   import { marked } from "marked";
   import { parseInlineClasses, hasInlineClasses } from "$lib/utils/textParser";
+  import { getDataSourceRow } from "$lib/stores/dataSourceRow";
+  import { replaceMergeFields } from "$lib/utils/mergeFields";
 
   let { content = "" }: { content: string } = $props();
+
+  // Get the data source row store for merge field functionality
+  const dataSourceRow = getDataSourceRow();
 
   // Configure marked for safe rendering
   marked.setOptions({
@@ -10,13 +15,18 @@
     gfm: true, // GitHub Flavored Markdown
   });
 
-  // Pre-process content to handle inline classes before markdown parsing
+  // Pre-process content: merge fields → inline classes → markdown parsing
   const preprocessedContent = $derived(() => {
-    if (hasInlineClasses(content)) {
+    // Step 1: Replace merge fields FIRST
+    let processedContent = replaceMergeFields(content, $dataSourceRow);
+
+    // Step 2: Apply inline classes
+    if (hasInlineClasses(processedContent)) {
       // Don't escape HTML in the parsed content since marked will handle escaping
-      return parseInlineClasses(content, false);
+      return parseInlineClasses(processedContent, false);
     }
-    return content;
+
+    return processedContent;
   });
 
   const htmlContent = $derived(marked.parse(preprocessedContent()) as string);

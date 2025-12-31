@@ -6,17 +6,30 @@
   import RotationHandle from './_components/RotationHandle.svelte';
   import MarkdownRenderer from './_components/MarkdownRenderer.svelte';
   import { templateStore } from '$lib/stores/templateElements';
+  import { getDataSourceRow } from '$lib/stores/dataSourceRow';
   import { parseInlineClasses, hasInlineClasses } from '$lib/utils/textParser';
+  import { replaceMergeFields } from '$lib/utils/mergeFields';
 
   let { element }: { element: TemplateElement } = $props();
 
-  // For text elements, check if we need to parse inline classes
+  // Get the data source row store for merge field functionality
+  const dataSourceRow = getDataSourceRow();
+
+  // For text elements, apply merge fields first, then check if we need to parse inline classes
   const textContent = $derived(() => {
     if (element.type === 'text') {
       const textEl = element as TextElement;
-      if (!textEl.markdown && hasInlineClasses(textEl.content)) {
-        return parseInlineClasses(textEl.content, true);
+
+      // Step 1: Replace merge fields FIRST (before inline classes)
+      let processedContent = replaceMergeFields(textEl.content, $dataSourceRow);
+
+      // Step 2: Apply inline classes if not using markdown
+      if (!textEl.markdown && hasInlineClasses(processedContent)) {
+        return parseInlineClasses(processedContent, true);
       }
+
+      // Return processed content (with merge fields replaced)
+      return processedContent;
     }
     return null;
   });
@@ -329,7 +342,7 @@
     {:else if textContent()}
       {@html textContent()}
     {:else}
-      {(element as TextElement).content}
+      {replaceMergeFields((element as TextElement).content, $dataSourceRow)}
     {/if}
     {#if isSelected && !element.locked}
       <ResizeHandles element={element} />
