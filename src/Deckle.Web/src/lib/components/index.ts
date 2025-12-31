@@ -5,6 +5,7 @@ export { default as Breadcrumb } from './Breadcrumb.svelte';
 export { default as Card } from './Card.svelte';
 export { default as ConfirmDialog } from './ConfirmDialog.svelte';
 export { default as DataTable } from './DataTable.svelte';
+export { default as DeleteConfirmationDialog } from './DeleteConfirmationDialog.svelte';
 export { default as Dialog } from './Dialog.svelte';
 export { default as EditableText } from './EditableText.svelte';
 export { default as EmptyState } from './EmptyState.svelte';

@@ -2,7 +2,7 @@
   import type { PageData } from "./$types";
   import { projectsApi, ApiError } from "$lib/api";
   import { goto, invalidateAll } from "$app/navigation";
-  import { Button, Dialog, Card, Badge } from "$lib/components";
+  import { Button, DeleteConfirmationDialog, Card, Badge } from "$lib/components";
   import { setBreadcrumbs } from "$lib/stores/breadcrumb";
   import { buildSettingsBreadcrumbs } from "$lib/utils/breadcrumbs";
 
@@ -22,9 +22,7 @@
 
   // Delete project
   let showDeleteDialog = $state(false);
-  let deleteConfirmationName = $state("");
   let isDeletingProject = $state(false);
-  let deleteErrorMessage = $state("");
 
   const isOwner = $derived(data.project.role === "Owner");
   const canEditProject = $derived(
@@ -73,38 +71,17 @@
     }
   }
 
-  function openDeleteDialog() {
-    showDeleteDialog = true;
-    deleteConfirmationName = "";
-    deleteErrorMessage = "";
-  }
-
-  function closeDeleteDialog() {
-    showDeleteDialog = false;
-    deleteConfirmationName = "";
-    deleteErrorMessage = "";
-  }
-
-  async function confirmDeleteProject() {
-    if (deleteConfirmationName !== data.project.name) {
-      deleteErrorMessage = "Project name does not match";
-      return;
-    }
-
+  async function handleDeleteProject() {
     isDeletingProject = true;
-    deleteErrorMessage = "";
 
     try {
       await projectsApi.delete(data.project.id);
       goto("/projects");
     } catch (err) {
       console.error("Error deleting project:", err);
-      if (err instanceof ApiError) {
-        deleteErrorMessage = err.message;
-      } else {
-        deleteErrorMessage = "Failed to delete project. Please try again.";
-      }
       isDeletingProject = false;
+      // Re-throw to let the dialog handle the error display if needed
+      throw err;
     }
   }
 
@@ -252,7 +229,7 @@
               certain.
             </p>
           </div>
-          <Button variant="danger" onclick={openDeleteDialog}>
+          <Button variant="danger" onclick={() => showDeleteDialog = true}>
             Delete Project
           </Button>
         </div>
@@ -261,51 +238,13 @@
   {/if}
 </div>
 
-<Dialog
+<DeleteConfirmationDialog
   bind:show={showDeleteDialog}
-  title="Delete Project"
-  maxWidth="500px"
-  onclose={closeDeleteDialog}
->
-  <div class="delete-dialog-content">
-    <p class="warning-text">
-      This action cannot be undone. This will permanently delete the project
-      <strong>{data.project.name}</strong> and all of its data.
-    </p>
-
-    <p>Please type <strong>{data.project.name}</strong> to confirm:</p>
-
-    <input
-      type="text"
-      bind:value={deleteConfirmationName}
-      placeholder="Enter project name"
-      disabled={isDeletingProject}
-      class="confirmation-input"
-    />
-
-    {#if deleteErrorMessage}
-      <p class="error-message">{deleteErrorMessage}</p>
-    {/if}
-  </div>
-
-  {#snippet actions()}
-    <Button
-      variant="secondary"
-      onclick={closeDeleteDialog}
-      disabled={isDeletingProject}
-    >
-      Cancel
-    </Button>
-    <Button
-      variant="danger"
-      onclick={confirmDeleteProject}
-      disabled={isDeletingProject ||
-        deleteConfirmationName !== data.project.name}
-    >
-      {isDeletingProject ? "Deleting..." : "Delete Project"}
-    </Button>
-  {/snippet}
-</Dialog>
+  itemName={data.project.name}
+  itemType="Project"
+  onConfirm={handleDeleteProject}
+  isDeleting={isDeletingProject}
+/>
 
 <style>
   .tab-content {
@@ -473,43 +412,6 @@
     align-items: center;
     justify-content: space-between;
     gap: 1.5rem;
-  }
-
-  .delete-dialog-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .warning-text {
-    color: var(--color-text);
-    line-height: 1.6;
-  }
-
-  .confirmation-input {
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 0.875rem;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    background: var(--color-background);
-    color: var(--color-text);
-    font-family: inherit;
-  }
-
-  .confirmation-input:focus {
-    outline: none;
-    border-color: var(--color-danger, #d32f2f);
-  }
-
-  .error-message {
-    color: #d32f2f;
-    font-size: 0.875rem;
-    margin: 0;
-    padding: 0.75rem;
-    background-color: #ffebee;
-    border-radius: 8px;
-    border: 1px solid #ef9a9a;
   }
 
   @media (max-width: 768px) {
