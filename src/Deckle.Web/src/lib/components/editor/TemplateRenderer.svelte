@@ -58,8 +58,15 @@
   }
 
   // Helper to convert spacing to CSS string
-  function spacingToCss(spacing: { top?: number; right?: number; bottom?: number; left?: number } | undefined): string {
+  function spacingToCss(spacing: { all?: number; top?: number; right?: number; bottom?: number; left?: number } | undefined): string {
     if (!spacing) return '0';
+
+    // If 'all' is defined, use it for all sides
+    if (spacing.all !== undefined) {
+      return `${spacing.all}px`;
+    }
+
+    // Otherwise use individual sides
     const { top = 0, right = 0, bottom = 0, left = 0 } = spacing;
     return `${top}px ${right}px ${bottom}px ${left}px`;
   }

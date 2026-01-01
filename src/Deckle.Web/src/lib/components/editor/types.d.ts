@@ -28,6 +28,7 @@ export type ImageFit = 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
 // ============================================================================
 
 export interface Spacing {
+  all?: number; // For "all sides" mode
   top?: number;
   right?: number;
   bottom?: number;

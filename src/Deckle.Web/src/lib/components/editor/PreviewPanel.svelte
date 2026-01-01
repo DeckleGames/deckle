@@ -103,6 +103,7 @@
       {isSaving ? "Saving..." : saveSuccess ? "Saved!" : "Save"}
     </button>
     <UndoRedoControls />
+    <div class="toolbar-divider"></div>
     <button
       onclick={() => (showBleedSafeArea = !showBleedSafeArea)}
       class="bleed-safe-area-toggle"
@@ -112,6 +113,7 @@
     >
       {showBleedSafeArea ? "Hide" : "Show"} Bleed/Safe Area
     </button>
+    <div class="toolbar-divider"></div>
     <div class="grid-controls">
       <button
         onclick={() => (gridEnabled = !gridEnabled)}
@@ -135,6 +137,7 @@
         />
       </label>
     </div>
+    <div class="toolbar-divider"></div>
     <ZoomControls {panzoomInstance} {panzoomElement} />
   {/snippet}
   <ComponentViewer
@@ -148,6 +151,13 @@
 </Panel>
 
 <style>
+  .toolbar-divider {
+    width: 1px;
+    height: 20px;
+    background-color: #e5e7eb;
+    margin: 0 0.25rem;
+  }
+
   .bleed-safe-area-toggle {
     padding: 0.25rem 0.75rem;
     font-size: 0.75rem;
