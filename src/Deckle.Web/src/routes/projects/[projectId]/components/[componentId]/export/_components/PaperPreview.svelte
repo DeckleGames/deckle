@@ -130,36 +130,42 @@
     let rowHeight = 0;
 
     for (const rowData of instances) {
-      // Check if card fits in current row
-      if (currentX + cardWidthPx > printableAreaWidthPx) {
-        // Move to next row
-        currentX = 0;
-        currentY += rowHeight;
-        rowHeight = 0;
-      }
+      // Check for the special "Num" field to determine number of copies
+      const numCopies = rowData.Num ? Math.max(1, parseInt(rowData.Num, 10) || 1) : 1;
 
-      // Check if card fits on current page
-      if (currentY + cardHeightPx > printableAreaHeightPx) {
-        // Start new page
-        if (currentPage.cards.length > 0) {
-          pages.push(currentPage);
+      // Create the specified number of copies for this row
+      for (let copyIndex = 0; copyIndex < numCopies; copyIndex++) {
+        // Check if card fits in current row
+        if (currentX + cardWidthPx > printableAreaWidthPx) {
+          // Move to next row
+          currentX = 0;
+          currentY += rowHeight;
+          rowHeight = 0;
         }
-        currentPage = { cards: [] };
-        currentX = 0;
-        currentY = 0;
-        rowHeight = 0;
+
+        // Check if card fits on current page
+        if (currentY + cardHeightPx > printableAreaHeightPx) {
+          // Start new page
+          if (currentPage.cards.length > 0) {
+            pages.push(currentPage);
+          }
+          currentPage = { cards: [] };
+          currentX = 0;
+          currentY = 0;
+          rowHeight = 0;
+        }
+
+        // Add card to current page
+        currentPage.cards.push({
+          x: currentX,
+          y: currentY,
+          mergeData: Object.keys(rowData).length > 0 ? rowData : null,
+        });
+
+        // Update position for next card
+        currentX += cardWidthPx;
+        rowHeight = Math.max(rowHeight, cardHeightPx);
       }
-
-      // Add card to current page
-      currentPage.cards.push({
-        x: currentX,
-        y: currentY,
-        mergeData: Object.keys(rowData).length > 0 ? rowData : null,
-      });
-
-      // Update position for next card
-      currentX += cardWidthPx;
-      rowHeight = Math.max(rowHeight, cardHeightPx);
     }
 
     // Add the last page if it has cards
