@@ -16,10 +16,19 @@
   import { replaceMergeFields } from "$lib/utils/mergeFields";
   import { mmToPx } from "$lib/utils/size.utils";
 
-  let { element, dpi }: { element: TemplateElement; dpi: number } = $props();
+  let {
+    element,
+    dpi,
+    mergeData = null,
+  }: {
+    element: TemplateElement;
+    dpi: number;
+    mergeData?: Record<string, string> | null;
+  } = $props();
 
-  // Get the data source row store for merge field functionality
-  const dataSourceRow = getDataSourceRow();
+  // Get the data source row store for merge field functionality (fallback to context if prop not provided)
+  const dataSourceRowStore = getDataSourceRow();
+  const dataSourceRow = $derived(mergeData ?? $dataSourceRowStore);
 
   // For text elements, apply merge fields first, then check if we need to parse inline classes
   const textContent = $derived(() => {
@@ -359,7 +368,7 @@
 {#if element.type === "container"}
   <div style={buildStyle(element)} data-element-id={element.id}>
     {#each (element as ContainerElement).children as child (child.id)}
-      <StaticTemplateRenderer element={child} {dpi} />
+      <StaticTemplateRenderer element={child} {dpi} {mergeData} />
     {/each}
   </div>
 {:else if element.type === "text"}

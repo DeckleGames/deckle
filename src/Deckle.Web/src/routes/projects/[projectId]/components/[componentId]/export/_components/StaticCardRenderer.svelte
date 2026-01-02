@@ -17,7 +17,8 @@
     mergeData?: Record<string, string> | null;
   } = $props();
 
-  // Initialize data source row context for merge fields
+  // Initialize data source row context for merge fields (for backwards compatibility)
+  // The merge data is now passed as props to StaticTemplateRenderer
   initDataSourceRow(mergeData);
 
   // Calculate border radius for rectangle shapes
@@ -49,7 +50,7 @@
     2 * dimensions.bleedPx}px; border-radius: {borderRadius}px"
 >
   {#each design.children as child (child.id)}
-    <StaticTemplateRenderer element={child} dpi={dimensions.dpi} />
+    <StaticTemplateRenderer element={child} dpi={dimensions.dpi} {mergeData} />
   {/each}
 </div>
 
