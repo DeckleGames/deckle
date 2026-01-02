@@ -14,6 +14,7 @@ export interface PageSetup {
 	orientation: Orientation;
 	marginInches: number;
 	unit: MeasurementUnit;
+	cropMarks: boolean;
 }
 
 export const PAPER_DIMENSIONS: Record<PaperSize, PaperDimensions> = {
@@ -25,5 +26,6 @@ export const DEFAULT_PAGE_SETUP: PageSetup = {
 	paperSize: 'A4',
 	orientation: 'portrait',
 	marginInches: 0.25,
-	unit: 'inches'
+	unit: 'inches',
+	cropMarks: true
 };

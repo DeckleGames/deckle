@@ -79,6 +79,20 @@
       </button>
     </div>
   </FormField>
+
+  <FormField label="Crop Marks" name="cropMarks">
+    <div class="checkbox-wrapper">
+      <input
+        type="checkbox"
+        id="cropMarks"
+        bind:checked={pageSetup.cropMarks}
+        class="checkbox-input"
+      />
+      <label for="cropMarks" class="checkbox-label">
+        Show crop marks for cutting
+      </label>
+    </div>
+  </FormField>
 </div>
 
 <style>
@@ -140,5 +154,24 @@
 
   .unit-toggle:active {
     background: #f3f4f6;
+  }
+
+  .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .checkbox-input {
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+  }
+
+  .checkbox-label {
+    font-size: 0.813rem;
+    color: #4b5563;
+    cursor: pointer;
+    user-select: none;
   }
 </style>

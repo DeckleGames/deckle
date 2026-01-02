@@ -91,6 +91,11 @@
     component.dimensions.heightPx + 2 * component.dimensions.bleedPx
   );
 
+  // Crop mark dimensions
+  const cropMarkLength = 20; // Length of crop mark in pixels
+  const cropMarkThickness = 1; // Thickness in pixels
+  const cropMarkOffset = 5; // Gap between crop mark and cut line
+
   // Calculate printable area dimensions
   const printableAreaWidthPx = $derived(
     paperDimensionsPx().width - 2 * marginPx
@@ -261,6 +266,99 @@
                       shape={component.shape}
                       mergeData={card.mergeData}
                     />
+                    {#if pageSetup.cropMarks}
+                      <svg
+                        class="crop-marks"
+                        style="
+                          position: absolute;
+                          left: 0;
+                          top: 0;
+                          width: {cardWidthPx}px;
+                          height: {cardHeightPx}px;
+                          pointer-events: none;
+                        "
+                      >
+                        <!-- Top-left corner -->
+                        <!-- Horizontal line -->
+                        <line
+                          x1={component.dimensions.bleedPx - cropMarkOffset - cropMarkLength}
+                          y1={component.dimensions.bleedPx}
+                          x2={component.dimensions.bleedPx - cropMarkOffset}
+                          y2={component.dimensions.bleedPx}
+                          stroke="black"
+                          stroke-width={cropMarkThickness}
+                        />
+                        <!-- Vertical line -->
+                        <line
+                          x1={component.dimensions.bleedPx}
+                          y1={component.dimensions.bleedPx - cropMarkOffset - cropMarkLength}
+                          x2={component.dimensions.bleedPx}
+                          y2={component.dimensions.bleedPx - cropMarkOffset}
+                          stroke="black"
+                          stroke-width={cropMarkThickness}
+                        />
+
+                        <!-- Top-right corner -->
+                        <!-- Horizontal line -->
+                        <line
+                          x1={cardWidthPx - component.dimensions.bleedPx + cropMarkOffset}
+                          y1={component.dimensions.bleedPx}
+                          x2={cardWidthPx - component.dimensions.bleedPx + cropMarkOffset + cropMarkLength}
+                          y2={component.dimensions.bleedPx}
+                          stroke="black"
+                          stroke-width={cropMarkThickness}
+                        />
+                        <!-- Vertical line -->
+                        <line
+                          x1={cardWidthPx - component.dimensions.bleedPx}
+                          y1={component.dimensions.bleedPx - cropMarkOffset - cropMarkLength}
+                          x2={cardWidthPx - component.dimensions.bleedPx}
+                          y2={component.dimensions.bleedPx - cropMarkOffset}
+                          stroke="black"
+                          stroke-width={cropMarkThickness}
+                        />
+
+                        <!-- Bottom-left corner -->
+                        <!-- Horizontal line -->
+                        <line
+                          x1={component.dimensions.bleedPx - cropMarkOffset - cropMarkLength}
+                          y1={cardHeightPx - component.dimensions.bleedPx}
+                          x2={component.dimensions.bleedPx - cropMarkOffset}
+                          y2={cardHeightPx - component.dimensions.bleedPx}
+                          stroke="black"
+                          stroke-width={cropMarkThickness}
+                        />
+                        <!-- Vertical line -->
+                        <line
+                          x1={component.dimensions.bleedPx}
+                          y1={cardHeightPx - component.dimensions.bleedPx + cropMarkOffset}
+                          x2={component.dimensions.bleedPx}
+                          y2={cardHeightPx - component.dimensions.bleedPx + cropMarkOffset + cropMarkLength}
+                          stroke="black"
+                          stroke-width={cropMarkThickness}
+                        />
+
+                        <!-- Bottom-right corner -->
+                        <!-- Horizontal line -->
+                        <line
+                          x1={cardWidthPx - component.dimensions.bleedPx + cropMarkOffset}
+                          y1={cardHeightPx - component.dimensions.bleedPx}
+                          x2={cardWidthPx - component.dimensions.bleedPx + cropMarkOffset + cropMarkLength}
+                          y2={cardHeightPx - component.dimensions.bleedPx}
+                          stroke="black"
+                          stroke-width={cropMarkThickness}
+                        />
+                        <!-- Vertical line -->
+                        <line
+                          x1={cardWidthPx - component.dimensions.bleedPx}
+                          y1={cardHeightPx - component.dimensions.bleedPx + cropMarkOffset}
+                          x2={cardWidthPx - component.dimensions.bleedPx}
+                          y2={cardHeightPx - component.dimensions.bleedPx + cropMarkOffset + cropMarkLength}
+                          stroke="black"
+                          stroke-width={cropMarkThickness}
+                        />
+                      </svg>
+                    {/if}
                   </div>
                 {/if}
               {/each}
