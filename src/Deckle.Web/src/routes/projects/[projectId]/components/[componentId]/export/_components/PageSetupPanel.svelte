@@ -1,11 +1,8 @@
 <script lang="ts">
-  import { FormField, Select } from "$lib/components/forms";
-  import type {
-    PageSetup,
-    PaperSize,
-    Orientation,
-    MeasurementUnit,
-  } from "$lib/types";
+  import FieldWrapper from "$lib/components/editor/_components/FieldWrapper.svelte";
+  import SelectField from "$lib/components/editor/_components/SelectField.svelte";
+  import NumberField from "$lib/components/editor/_components/NumberField.svelte";
+  import type { PageSetup } from "$lib/types";
   import { toPng } from "html-to-image";
   import { BlobWriter, ZipWriter } from "@zip.js/zip.js";
   import { jsPDF } from "jspdf";
@@ -84,7 +81,10 @@
 
           // Add to ZIP with numbered filename
           const pageNumber = String(i + 1).padStart(3, "0");
-          await zipWriter.add(`${componentName}-page-${pageNumber}.png`, blob.stream());
+          await zipWriter.add(
+            `${componentName}-page-${pageNumber}.png`,
+            blob.stream()
+          );
         }
 
         // Close the ZIP and download
@@ -186,8 +186,6 @@
 </script>
 
 <div class="page-setup-panel">
-  <h3>Page Setup</h3>
-
   <div class="export-buttons">
     <button
       class="export-button"
@@ -205,21 +203,30 @@
     </button>
   </div>
 
-  <FormField label="Paper Size" name="paperSize">
-    <Select bind:value={pageSetup.paperSize}>
-      <option value="A4">A4</option>
-      <option value="USLetter">US Letter</option>
-    </Select>
-  </FormField>
+  <SelectField
+    label="Paper Size"
+    id="paperSize"
+    value={pageSetup.paperSize}
+    options={[
+      { value: "A4", label: "A4" },
+      { value: "USLetter", label: "US Letter" },
+    ]}
+    onchange={(value) => (pageSetup.paperSize = value as "A4" | "USLetter")}
+  />
 
-  <FormField label="Orientation" name="orientation">
-    <Select bind:value={pageSetup.orientation}>
-      <option value="portrait">Portrait</option>
-      <option value="landscape">Landscape</option>
-    </Select>
-  </FormField>
+  <SelectField
+    label="Orientation"
+    id="orientation"
+    value={pageSetup.orientation}
+    options={[
+      { value: "portrait", label: "Portrait" },
+      { value: "landscape", label: "Landscape" },
+    ]}
+    onchange={(value) =>
+      (pageSetup.orientation = value as "portrait" | "landscape")}
+  />
 
-  <FormField label="Margin" name="margin">
+  <FieldWrapper label="Margin" htmlFor="margin">
     <div class="margin-input-wrapper">
       <input
         type="number"
@@ -227,7 +234,6 @@
         value={marginValue.toFixed(2)}
         step={pageSetup.unit === "inches" ? "0.25" : "0.5"}
         min="0"
-        class="margin-input"
         oninput={handleMarginChange}
       />
       <button
@@ -239,9 +245,9 @@
         {pageSetup.unit}
       </button>
     </div>
-  </FormField>
+  </FieldWrapper>
 
-  <FormField label="Crop Marks" name="cropMarks">
+  <FieldWrapper label="Crop Marks" htmlFor="cropMarks">
     <div class="checkbox-wrapper">
       <input
         type="checkbox"
@@ -253,9 +259,9 @@
         Show crop marks for cutting
       </label>
     </div>
-  </FormField>
+  </FieldWrapper>
 
-  <FormField label="Export Backs" name="exportBacks">
+  <FieldWrapper label="Export Backs" htmlFor="exportBacks">
     <div class="checkbox-wrapper">
       <input
         type="checkbox"
@@ -267,27 +273,20 @@
         Export back designs on separate pages
       </label>
     </div>
-  </FormField>
+  </FieldWrapper>
 </div>
 
 <style>
   .page-setup-panel {
-    padding: 1.5rem;
+    padding: 1rem;
     height: 100%;
     overflow-y: auto;
-  }
-
-  h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 0 0 1rem 0;
-    color: var(--color-sage);
   }
 
   .export-buttons {
     display: flex;
     gap: 0.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
   }
 
   .export-button {
@@ -322,23 +321,9 @@
     align-items: stretch;
   }
 
-  .margin-input {
+  .margin-input-wrapper input[type="number"] {
     flex: 1;
     min-width: 0;
-    padding: 0.375rem 0.5rem;
-    font-size: 0.813rem;
-    line-height: 1.25rem;
-    height: 2.125rem;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-    background: white;
-    box-sizing: border-box;
-    font-family: inherit;
-  }
-
-  .margin-input:focus {
-    outline: none;
-    border-color: #0066cc;
   }
 
   .unit-toggle {
@@ -352,6 +337,7 @@
     cursor: pointer;
     transition: all 0.2s;
     min-width: 3.5rem;
+    height: 2.125rem;
   }
 
   .unit-toggle:hover {
@@ -376,8 +362,8 @@
   }
 
   .checkbox-label {
-    font-size: 0.813rem;
-    color: #4b5563;
+    font-size: 0.75rem;
+    color: #666;
     cursor: pointer;
     user-select: none;
   }
