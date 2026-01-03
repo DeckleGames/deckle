@@ -8,6 +8,7 @@
   } from "$lib/types";
   import { toPng } from "html-to-image";
   import { BlobWriter, ZipWriter } from "@zip.js/zip.js";
+  import { jsPDF } from "jspdf";
 
   let {
     pageSetup = $bindable(),
@@ -106,6 +107,56 @@
     }
   }
 
+  // Export pages as PDF
+  async function exportAsPdf() {
+    if (pageElements.length === 0) {
+      alert("No pages to export");
+      return;
+    }
+
+    isExporting = true;
+
+    try {
+      // Determine PDF orientation and dimensions based on paper size
+      const pdfOrientation = pageSetup.orientation === "portrait" ? "p" : "l";
+      const pdfFormat = pageSetup.paperSize === "A4" ? "a4" : "letter";
+
+      // Create PDF with same dimensions as the paper
+      const pdf = new jsPDF({
+        orientation: pdfOrientation,
+        unit: "px",
+        format: [paperDimensions.width, paperDimensions.height],
+      });
+
+      // Convert each page to PNG and add to PDF
+      for (let i = 0; i < pageElements.length; i++) {
+        if (i > 0) {
+          pdf.addPage([paperDimensions.width, paperDimensions.height]);
+        }
+
+        const dataUrl = await capturePageAtFullSize(pageElements[i]);
+
+        // Add image to PDF (full page)
+        pdf.addImage(
+          dataUrl,
+          "PNG",
+          0,
+          0,
+          paperDimensions.width,
+          paperDimensions.height
+        );
+      }
+
+      // Download the PDF
+      pdf.save(`${componentName}.pdf`);
+    } catch (error) {
+      console.error("Failed to export as PDF:", error);
+      alert("Failed to export PDF. Please try again.");
+    } finally {
+      isExporting = false;
+    }
+  }
+
   // Capture a page at full size (without zoom transform)
   async function capturePageAtFullSize(element: HTMLElement): Promise<string> {
     // Save the original transform
@@ -137,13 +188,22 @@
 <div class="page-setup-panel">
   <h3>Page Setup</h3>
 
-  <button
-    class="export-png-button"
-    onclick={exportAsPng}
-    disabled={isExporting || pageElements.length === 0}
-  >
-    {isExporting ? "Exporting..." : "Export as PNG"}
-  </button>
+  <div class="export-buttons">
+    <button
+      class="export-button"
+      onclick={exportAsPng}
+      disabled={isExporting || pageElements.length === 0}
+    >
+      {isExporting ? "Exporting..." : "Export as PNG"}
+    </button>
+    <button
+      class="export-button"
+      onclick={exportAsPdf}
+      disabled={isExporting || pageElements.length === 0}
+    >
+      {isExporting ? "Exporting..." : "Export as PDF"}
+    </button>
+  </div>
 
   <FormField label="Paper Size" name="paperSize">
     <Select bind:value={pageSetup.paperSize}>
@@ -224,8 +284,14 @@
     color: var(--color-sage);
   }
 
-  .export-png-button {
-    width: 100%;
+  .export-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .export-button {
+    flex: 1;
     padding: 0.625rem 1rem;
     font-size: 0.875rem;
     font-weight: 500;
@@ -235,18 +301,17 @@
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s;
-    margin-bottom: 1.5rem;
   }
 
-  .export-png-button:hover:not(:disabled) {
+  .export-button:hover:not(:disabled) {
     background: #2d4a3e;
   }
 
-  .export-png-button:active:not(:disabled) {
+  .export-button:active:not(:disabled) {
     background: #243a32;
   }
 
-  .export-png-button:disabled {
+  .export-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
