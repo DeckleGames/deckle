@@ -5,7 +5,7 @@ This document provides instructions for AI agents working on the Deckle project.
 ## Running the Project
 
 ### Prerequisites
-- .NET 9.0 SDK or later
+- .NET 10 SDK or later
 - Visual Studio 2022 or Visual Studio Code with C# Dev Kit
 
 ### Running the Application
