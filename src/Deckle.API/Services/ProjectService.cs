@@ -144,13 +144,102 @@ public class ProjectService
                 Name = up.User.Name,
                 PictureUrl = up.User.PictureUrl,
                 Role = up.Role.ToString(),
-                JoinedAt = up.JoinedAt
+                JoinedAt = up.JoinedAt,
+                IsPending = up.User.GoogleId == null
             })
             .OrderBy(u => u.Role)
             .ThenBy(u => u.Email)
             .ToListAsync();
 
         return users;
+    }
+
+    public async Task<(ProjectUserDto? user, string? inviterName)?> InviteUserToProjectAsync(
+        Guid userId,
+        Guid projectId,
+        string email,
+        string roleString)
+    {
+        // 1. Verify user has Owner or Admin role on this project
+        var userProject = await _dbContext.UserProjects
+            .Where(up => up.UserId == userId && up.ProjectId == projectId)
+            .Include(up => up.Project)
+            .Include(up => up.User)
+            .FirstOrDefaultAsync();
+
+        if (userProject == null ||
+            (userProject.Role != ProjectRole.Owner && userProject.Role != ProjectRole.Admin))
+        {
+            return null; // Unauthorized
+        }
+
+        // 2. Validate role (can't invite Owner)
+        if (!Enum.TryParse<ProjectRole>(roleString, out var role))
+        {
+            throw new ArgumentException("Invalid role");
+        }
+
+        if (role == ProjectRole.Owner)
+        {
+            throw new ArgumentException("Cannot invite users as Owner");
+        }
+
+        // 3. Normalize email
+        email = email.Trim().ToLowerInvariant();
+
+        // 4. Check if user is already a member (check by email, not UserId)
+        var existingMember = await _dbContext.UserProjects
+            .Include(up => up.User)
+            .FirstOrDefaultAsync(up =>
+                up.ProjectId == projectId &&
+                up.User.Email.ToLower() == email);
+
+        if (existingMember != null)
+        {
+            throw new InvalidOperationException("User is already a member of this project");
+        }
+
+        // 5. Check if User record exists with this email
+        var invitedUser = await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == email);
+
+        if (invitedUser == null)
+        {
+            // Create placeholder User record
+            invitedUser = new User
+            {
+                Id = Guid.NewGuid(),
+                GoogleId = null, // Placeholder - will be filled on first login
+                Email = email,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            _dbContext.Users.Add(invitedUser);
+        }
+
+        // 6. Create UserProject entry
+        var newUserProject = new UserProject
+        {
+            UserId = invitedUser.Id,
+            ProjectId = projectId,
+            Role = role,
+            JoinedAt = DateTime.UtcNow
+        };
+
+        _dbContext.UserProjects.Add(newUserProject);
+        await _dbContext.SaveChangesAsync();
+
+        // 7. Return invite details
+        return (new ProjectUserDto
+        {
+            UserId = invitedUser.Id,
+            Email = invitedUser.Email,
+            Name = invitedUser.Name,
+            PictureUrl = invitedUser.PictureUrl,
+            Role = role.ToString(),
+            JoinedAt = newUserProject.JoinedAt,
+            IsPending = invitedUser.GoogleId == null
+        }, userProject.User.Name ?? userProject.User.Email);
     }
 
     public async Task<bool> DeleteProjectAsync(Guid userId, Guid projectId)

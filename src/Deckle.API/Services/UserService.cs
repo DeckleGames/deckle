@@ -17,29 +17,51 @@ public class UserService
 
     public async Task<User> CreateOrUpdateUserAsync(GoogleUserInfo userInfo)
     {
+        // First, try to find user by GoogleId
         var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.GoogleId == userInfo.GoogleId);
 
         if (user == null)
         {
-            user = new User
-            {
-                Id = Guid.NewGuid(),
-                GoogleId = userInfo.GoogleId,
-                Email = userInfo.Email,
-                Name = userInfo.Name,
-                GivenName = userInfo.GivenName,
-                FamilyName = userInfo.FamilyName,
-                PictureUrl = userInfo.Picture,
-                Locale = userInfo.Locale,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                LastLoginAt = DateTime.UtcNow
-            };
+            // If not found by GoogleId, check if user exists by email with null GoogleId (invited user)
+            user = await _dbContext.Users.FirstOrDefaultAsync(u =>
+                u.Email.ToLower() == userInfo.Email.ToLower() && u.GoogleId == null);
 
-            _dbContext.Users.Add(user);
+            if (user != null)
+            {
+                // User was invited but hasn't signed in yet - merge the account
+                user.GoogleId = userInfo.GoogleId;
+                user.Name = userInfo.Name;
+                user.GivenName = userInfo.GivenName;
+                user.FamilyName = userInfo.FamilyName;
+                user.PictureUrl = userInfo.Picture;
+                user.Locale = userInfo.Locale;
+                user.UpdatedAt = DateTime.UtcNow;
+                user.LastLoginAt = DateTime.UtcNow;
+            }
+            else
+            {
+                // User doesn't exist at all - create new user
+                user = new User
+                {
+                    Id = Guid.NewGuid(),
+                    GoogleId = userInfo.GoogleId,
+                    Email = userInfo.Email,
+                    Name = userInfo.Name,
+                    GivenName = userInfo.GivenName,
+                    FamilyName = userInfo.FamilyName,
+                    PictureUrl = userInfo.Picture,
+                    Locale = userInfo.Locale,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    LastLoginAt = DateTime.UtcNow
+                };
+
+                _dbContext.Users.Add(user);
+            }
         }
         else
         {
+            // User exists with this GoogleId - update profile
             user.Email = userInfo.Email;
             user.Name = userInfo.Name;
             user.GivenName = userInfo.GivenName;

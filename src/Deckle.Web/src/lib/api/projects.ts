@@ -31,6 +31,12 @@ export const projectsApi = {
   getUsers: (id: string, fetchFn?: typeof fetch) => api.get<ProjectUser[]>(`/projects/${id}/users`, undefined, fetchFn),
 
   /**
+   * Invite a user to a project
+   */
+  inviteUser: (id: string, data: { email: string; role: string }, fetchFn?: typeof fetch) =>
+    api.post<ProjectUser>(`/projects/${id}/users/invite`, data, undefined, fetchFn),
+
+  /**
    * Delete a project
    */
   delete: (id: string, fetchFn?: typeof fetch) => api.delete(`/projects/${id}`, undefined, fetchFn),

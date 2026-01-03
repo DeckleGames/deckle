@@ -1,14 +1,23 @@
 <script lang="ts">
-  import { Card, Badge } from "$lib/components";
+  import { Card, Badge, Button } from "$lib/components";
 
   interface User {
     name?: string;
     email: string;
     pictureUrl?: string;
     role: string;
+    isPending: boolean;
   }
 
-  let { users }: { users: User[] } = $props();
+  let {
+    users,
+    canInvite = false,
+    onInviteClick
+  }: {
+    users: User[];
+    canInvite?: boolean;
+    onInviteClick?: () => void;
+  } = $props();
 
   function getRoleBadgeVariant(
     role: string
@@ -18,7 +27,7 @@
         return "danger";
       case "Admin":
         return "warning";
-      case "Member":
+      case "Collaborator":
         return "success";
       default:
         return "default";
@@ -27,6 +36,14 @@
 </script>
 
 <Card>
+  {#if canInvite}
+    <div class="card-header">
+      <Button onclick={onInviteClick} size="sm">
+        Add Collaborator
+      </Button>
+    </div>
+  {/if}
+
   <div class="users-list">
     {#each users as user}
       <div class="user-item">
@@ -49,13 +66,26 @@
             {/if}
           </div>
         </div>
-        <Badge variant={getRoleBadgeVariant(user.role)}>{user.role}</Badge>
+        <div class="badges">
+          <Badge variant={getRoleBadgeVariant(user.role)}>{user.role}</Badge>
+          {#if user.isPending}
+            <Badge variant="default">Pending</Badge>
+          {/if}
+        </div>
       </div>
     {/each}
   </div>
 </Card>
 
 <style>
+  .card-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
   .users-list {
     display: flex;
     flex-direction: column;
@@ -70,6 +100,12 @@
     border: 1px solid var(--color-border);
     border-radius: 8px;
     background: var(--color-background-secondary);
+  }
+
+  .badges {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
   }
 
   .user-info {

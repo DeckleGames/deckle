@@ -13,12 +13,17 @@ This document provides instructions for AI agents working on the Deckle project.
 From the solution root directory:
 
 ```bash
-dotnet restore
-dotnet build
-dotnet run --project Deckle.AppHost
+aspire run
 ```
 
 The AppHost will start the Aspire application and launch the dashboard in your browser.
+
+Note: First run may require:
+
+```bash
+dotnet restore
+dotnet build
+```
 
 ### Building the Solution
 

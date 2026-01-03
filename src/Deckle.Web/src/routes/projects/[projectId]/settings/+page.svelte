@@ -8,6 +8,7 @@
   import ProjectDetailsCard from "./_components/ProjectDetailsCard.svelte";
   import UserListCard from "./_components/UserListCard.svelte";
   import DangerZoneCard from "./_components/DangerZoneCard.svelte";
+  import InviteUserDialog from "./_components/InviteUserDialog.svelte";
 
   let { data }: { data: PageData } = $props();
 
@@ -20,8 +21,14 @@
   let showDeleteDialog = $state(false);
   let isDeletingProject = $state(false);
 
+  // Invite user
+  let showInviteDialog = $state(false);
+
   const isOwner = $derived(data.project.role === "Owner");
   const canEditProject = $derived(
+    data.project.role === "Owner" || data.project.role === "Admin"
+  );
+  const canInviteUsers = $derived(
     data.project.role === "Owner" || data.project.role === "Admin"
   );
 
@@ -69,7 +76,11 @@
 
   <div class="settings-section">
     <h2>Project Users</h2>
-    <UserListCard users={data.users} />
+    <UserListCard
+      users={data.users}
+      canInvite={canInviteUsers}
+      onInviteClick={() => (showInviteDialog = true)}
+    />
   </div>
 
   {#if isOwner}
@@ -86,6 +97,11 @@
   itemType="Project"
   onConfirm={handleDeleteProject}
   isDeleting={isDeletingProject}
+/>
+
+<InviteUserDialog
+  bind:show={showInviteDialog}
+  projectId={data.project.id}
 />
 
 <style>

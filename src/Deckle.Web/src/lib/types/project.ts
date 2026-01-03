@@ -26,4 +26,5 @@ export interface ProjectUser {
   pictureUrl?: string;
   role: string;
   joinedAt: string;
+  isPending: boolean;
 }
