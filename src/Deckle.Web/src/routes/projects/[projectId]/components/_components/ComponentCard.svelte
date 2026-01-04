@@ -4,6 +4,8 @@
     DICE_COLORS,
     DICE_TYPES,
     DICE_STYLES,
+    PLAYER_MAT_SIZES,
+    PLAYER_MAT_ORIENTATIONS,
   } from "$lib/constants";
   import { Card, Button } from "$lib/components";
   import type { GameComponent } from "$lib/types";
@@ -109,6 +111,61 @@
     <p class="component-type">
       Card • {CARD_SIZES.find((s) => s.value === component.size)?.label ||
         component.size}
+    </p>
+    <div class="design-links" style:margin-top="0.5rem">
+      <a
+        href="/projects/{component.projectId}/components/{component.id}/front"
+        class="design-link"
+      >
+        {canEdit ? "Edit" : "View"} Front
+      </a>
+      <span class="design-link-separator">•</span>
+      <a
+        href="/projects/{component.projectId}/components/{component.id}/back"
+        class="design-link"
+      >
+        {canEdit ? "Edit" : "View"} Back
+      </a>
+      <span class="design-link-separator">•</span>
+      <a
+        href="/projects/{component.projectId}/components/{component.id}/export"
+        class="design-link"
+      >
+        Export
+      </a>
+    </div>
+    <div class="design-links">
+      <span class="design-link">
+        Data Source:
+        {#if component.dataSource}
+          <a
+            href="/projects/{component.projectId}/data-sources/{component
+              .dataSource.id}"
+            class="design-link">{component.dataSource.name}</a
+          >
+        {:else}
+          None
+        {/if}
+        {#if onLinkDataSource}
+          <Button
+            variant="text"
+            size="sm"
+            onclick={() => onLinkDataSource(component)}
+          >
+            ({component.dataSource ? "Change" : "Link"})
+          </Button>
+        {/if}
+      </span>
+    </div>
+  {:else if component.type === "PlayerMat"}
+    <p class="component-type">
+      Player Mat •
+      {#if component.presetSize}
+        {PLAYER_MAT_SIZES.find((s) => s.value === component.presetSize)?.label || component.presetSize}
+        ({PLAYER_MAT_ORIENTATIONS.find((o) => o.value === component.orientation)?.label || component.orientation})
+      {:else}
+        Custom ({component.customWidthMm}mm × {component.customHeightMm}mm)
+      {/if}
     </p>
     <div class="design-links" style:margin-top="0.5rem">
       <a

@@ -67,6 +67,33 @@ public static class ComponentEndpoints
         })
         .WithName("CreateDice");
 
+        group.MapPost("playermats", async (Guid projectId, HttpContext httpContext, ComponentService componentService, CreatePlayerMatRequest request) =>
+        {
+            var userId = httpContext.GetUserId();
+
+            try
+            {
+                var playerMat = await componentService.CreatePlayerMatAsync(
+                    userId,
+                    projectId,
+                    request.Name,
+                    request.PresetSize,
+                    request.Orientation,
+                    request.CustomWidthMm,
+                    request.CustomHeightMm);
+                return Results.Created($"/projects/{projectId}/components/{playerMat.Id}", playerMat);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Results.Unauthorized();
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+        })
+        .WithName("CreatePlayerMat");
+
         group.MapPut("cards/{id:guid}", async (Guid projectId, Guid id, HttpContext httpContext, ComponentService componentService, UpdateCardRequest request) =>
         {
             var userId = httpContext.GetUserId();
@@ -94,6 +121,35 @@ public static class ComponentEndpoints
             return Results.Ok(dice);
         })
         .WithName("UpdateDice");
+
+        group.MapPut("playermats/{id:guid}", async (Guid projectId, Guid id, HttpContext httpContext, ComponentService componentService, UpdatePlayerMatRequest request) =>
+        {
+            var userId = httpContext.GetUserId();
+
+            try
+            {
+                var playerMat = await componentService.UpdatePlayerMatAsync(
+                    userId,
+                    id,
+                    request.Name,
+                    request.PresetSize,
+                    request.Orientation,
+                    request.CustomWidthMm,
+                    request.CustomHeightMm);
+
+                if (playerMat == null)
+                {
+                    return Results.NotFound();
+                }
+
+                return Results.Ok(playerMat);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+        })
+        .WithName("UpdatePlayerMat");
 
         group.MapDelete("{id:guid}", async (Guid projectId, Guid id, HttpContext httpContext, ComponentService componentService) =>
         {
@@ -153,6 +209,50 @@ public static class ComponentEndpoints
         })
         .WithName("UpdateCardDataSource");
 
+        group.MapPut("playermats/{id:guid}/design/{part}", async (Guid projectId, Guid id, string part, HttpContext httpContext, ComponentService componentService, SavePlayerMatDesignRequest request) =>
+        {
+            var userId = httpContext.GetUserId();
+
+            try
+            {
+                var playerMat = await componentService.SavePlayerMatDesignAsync(userId, id, part, request.Design);
+
+                if (playerMat == null || playerMat.ProjectId != projectId)
+                {
+                    return Results.NotFound();
+                }
+
+                return Results.Ok(playerMat);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+        })
+        .WithName("SavePlayerMatDesign");
+
+        group.MapPut("playermats/{id:guid}/datasource", async (Guid projectId, Guid id, HttpContext httpContext, ComponentService componentService, UpdatePlayerMatDataSourceRequest request) =>
+        {
+            var userId = httpContext.GetUserId();
+
+            try
+            {
+                var playerMat = await componentService.UpdatePlayerMatDataSourceAsync(userId, id, request.DataSourceId);
+
+                if (playerMat == null || playerMat.ProjectId != projectId)
+                {
+                    return Results.NotFound();
+                }
+
+                return Results.Ok(playerMat);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+        })
+        .WithName("UpdatePlayerMatDataSource");
+
         return group;
     }
 }
@@ -160,3 +260,7 @@ public static class ComponentEndpoints
 public record SaveCardDesignRequest(string? Design);
 
 public record UpdateCardDataSourceRequest(Guid? DataSourceId);
+
+public record SavePlayerMatDesignRequest(string? Design);
+
+public record UpdatePlayerMatDataSourceRequest(Guid? DataSourceId);

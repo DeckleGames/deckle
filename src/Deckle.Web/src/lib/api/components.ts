@@ -1,5 +1,5 @@
 import { api } from './client';
-import type { GameComponent, CreateCardDto, CreateDiceDto, UpdateCardDto, UpdateDiceDto } from '$lib/types';
+import type { GameComponent, CreateCardDto, CreateDiceDto, UpdateCardDto, UpdateDiceDto, CreatePlayerMatDto, UpdatePlayerMatDto } from '$lib/types';
 
 /**
  * Components API
@@ -58,4 +58,28 @@ export const componentsApi = {
    */
   updateCardDataSource: (projectId: string, cardId: string, dataSourceId: string | null, fetchFn?: typeof fetch) =>
     api.put<GameComponent>(`/projects/${projectId}/components/cards/${cardId}/datasource`, { dataSourceId }, undefined, fetchFn),
+
+  /**
+   * Create a new player mat component
+   */
+  createPlayerMat: (projectId: string, data: CreatePlayerMatDto, fetchFn?: typeof fetch) =>
+    api.post<GameComponent>(`/projects/${projectId}/components/playermats`, data, undefined, fetchFn),
+
+  /**
+   * Update a player mat component
+   */
+  updatePlayerMat: (projectId: string, componentId: string, data: UpdatePlayerMatDto, fetchFn?: typeof fetch) =>
+    api.put<GameComponent>(`/projects/${projectId}/components/playermats/${componentId}`, data, undefined, fetchFn),
+
+  /**
+   * Save player mat design for a specific part (front/back)
+   */
+  savePlayerMatDesign: (projectId: string, playerMatId: string, part: string, design: string | null, fetchFn?: typeof fetch) =>
+    api.put<GameComponent>(`/projects/${projectId}/components/playermats/${playerMatId}/design/${part}`, { design }, undefined, fetchFn),
+
+  /**
+   * Update player mat data source
+   */
+  updatePlayerMatDataSource: (projectId: string, playerMatId: string, dataSourceId: string | null, fetchFn?: typeof fetch) =>
+    api.put<GameComponent>(`/projects/${projectId}/components/playermats/${playerMatId}/datasource`, { dataSourceId }, undefined, fetchFn),
 };

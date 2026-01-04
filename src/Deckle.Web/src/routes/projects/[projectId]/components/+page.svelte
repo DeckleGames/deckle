@@ -7,6 +7,7 @@
   import ComponentTypeSelector from "./_components/ComponentTypeSelector.svelte";
   import CardConfigForm from "./_components/CardConfigForm.svelte";
   import DiceConfigForm from "./_components/DiceConfigForm.svelte";
+  import PlayerMatConfigForm from "./_components/PlayerMatConfigForm.svelte";
   import LinkDataSourceModal from "./_components/LinkDataSourceModal.svelte";
   import type { GameComponent } from "$lib/types";
   import { setBreadcrumbs } from "$lib/stores/breadcrumb";
@@ -25,7 +26,7 @@
   const canLinkDataSource = $derived(data.project.role === "Owner" || data.project.role === "Admin"); // Only Owners and Admins can link data sources
 
   let showModal = $state(false);
-  let selectedType: "card" | "dice" | null = $state(null);
+  let selectedType: "card" | "dice" | "playermat" | null = $state(null);
   let componentName = $state("");
   let editingComponent: GameComponent | null = $state(null);
 
@@ -37,6 +38,13 @@
   let diceStyle = $state("Numbered");
   let diceColor = $state("EarthGreen");
   let diceNumber = $state("1");
+
+  // Player Mat configuration
+  let playerMatSizeMode: 'preset' | 'custom' = $state('preset');
+  let playerMatPresetSize = $state<string | null>("A4");
+  let playerMatOrientation = $state("Portrait");
+  let playerMatCustomWidth = $state("210");
+  let playerMatCustomHeight = $state("297");
 
   let isSubmitting = $state(false);
   let errorMessage = $state("");
@@ -59,6 +67,11 @@
     diceStyle = "Numbered";
     diceColor = "EarthGreen";
     diceNumber = "1";
+    playerMatSizeMode = 'preset';
+    playerMatPresetSize = "A4";
+    playerMatOrientation = "Portrait";
+    playerMatCustomWidth = "210";
+    playerMatCustomHeight = "297";
     errorMessage = "";
   }
 
@@ -70,7 +83,7 @@
     errorMessage = "";
   }
 
-  function selectType(type: "card" | "dice") {
+  function selectType(type: "card" | "dice" | "playermat") {
     selectedType = type;
     errorMessage = "";
   }
@@ -82,12 +95,23 @@
     if (component.type === "Card") {
       selectedType = "card";
       cardSize = component.size;
-    } else {
+    } else if (component.type === "Dice") {
       selectedType = "dice";
       diceType = component.diceType;
       diceStyle = component.diceStyle;
       diceColor = component.diceBaseColor;
       diceNumber = String(component.diceNumber);
+    } else if (component.type === "PlayerMat") {
+      selectedType = "playermat";
+      if (component.presetSize) {
+        playerMatSizeMode = 'preset';
+        playerMatPresetSize = component.presetSize;
+        playerMatOrientation = component.orientation;
+      } else {
+        playerMatSizeMode = 'custom';
+        playerMatCustomWidth = String(component.customWidthMm || 210);
+        playerMatCustomHeight = String(component.customHeightMm || 297);
+      }
     }
 
     showModal = true;
@@ -130,18 +154,26 @@
   }
 
   async function handleConfirmLinkDataSource(dataSourceId: string | null) {
-    if (!componentToLink || componentToLink.type !== "Card") return;
+    if (!componentToLink) return;
 
     try {
-      await componentsApi.updateCardDataSource(
-        data.project.id,
-        componentToLink.id,
-        dataSourceId
-      );
+      if (componentToLink.type === "Card") {
+        await componentsApi.updateCardDataSource(
+          data.project.id,
+          componentToLink.id,
+          dataSourceId
+        );
+      } else if (componentToLink.type === "PlayerMat") {
+        await componentsApi.updatePlayerMatDataSource(
+          data.project.id,
+          componentToLink.id,
+          dataSourceId
+        );
+      }
       await invalidateAll();
       closeLinkDataSourceModal();
     } catch (err) {
-      console.error("Error updating card data source:", err);
+      console.error("Error updating data source:", err);
       // Could add error handling UI here
     }
   }
@@ -168,13 +200,21 @@
             name: componentName,
             size: cardSize,
           });
-        } else {
+        } else if (selectedType === "dice") {
           await componentsApi.updateDice(data.project.id, editingComponent.id, {
             name: componentName,
             type: diceType,
             style: diceStyle,
             baseColor: diceColor,
             number: Number(diceNumber),
+          });
+        } else if (selectedType === "playermat") {
+          await componentsApi.updatePlayerMat(data.project.id, editingComponent.id, {
+            name: componentName,
+            presetSize: playerMatSizeMode === 'preset' ? playerMatPresetSize : null,
+            orientation: playerMatOrientation,
+            customWidthMm: playerMatSizeMode === 'custom' ? parseFloat(playerMatCustomWidth) : null,
+            customHeightMm: playerMatSizeMode === 'custom' ? parseFloat(playerMatCustomHeight) : null,
           });
         }
       } else {
@@ -184,13 +224,21 @@
             name: componentName,
             size: cardSize,
           });
-        } else {
+        } else if (selectedType === "dice") {
           await componentsApi.createDice(data.project.id, {
             name: componentName,
             type: diceType,
             style: diceStyle,
             baseColor: diceColor,
             number: Number(diceNumber),
+          });
+        } else if (selectedType === "playermat") {
+          await componentsApi.createPlayerMat(data.project.id, {
+            name: componentName,
+            presetSize: playerMatSizeMode === 'preset' ? playerMatPresetSize : null,
+            orientation: playerMatOrientation,
+            customWidthMm: playerMatSizeMode === 'custom' ? parseFloat(playerMatCustomWidth) : null,
+            customHeightMm: playerMatSizeMode === 'custom' ? parseFloat(playerMatCustomHeight) : null,
           });
         }
       }
@@ -271,6 +319,15 @@
         bind:componentName
         bind:diceNumber
       />
+    {:else if selectedType === "playermat"}
+      <PlayerMatConfigForm
+        bind:componentName
+        bind:sizeMode={playerMatSizeMode}
+        bind:presetSize={playerMatPresetSize}
+        bind:orientation={playerMatOrientation}
+        bind:customWidthMm={playerMatCustomWidth}
+        bind:customHeightMm={playerMatCustomHeight}
+      />
     {/if}
 
     {#if errorMessage}
@@ -308,7 +365,7 @@
 <LinkDataSourceModal
   bind:show={showLinkDataSourceModal}
   dataSources={data.dataSources || []}
-  currentDataSourceId={componentToLink?.type === "Card" ? componentToLink.dataSource?.id : null}
+  currentDataSourceId={(componentToLink?.type === "Card" || componentToLink?.type === "PlayerMat") ? componentToLink.dataSource?.id : null}
   onConfirm={handleConfirmLinkDataSource}
   onClose={closeLinkDataSourceModal}
 />
