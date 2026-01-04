@@ -1,9 +1,12 @@
 <script lang="ts">
-  import type { PageSetup, CardComponent, PlayerMatComponent } from "$lib/types";
+  import type {
+    PageSetup,
+    CardComponent,
+    PlayerMatComponent,
+  } from "$lib/types";
   import type { ContainerElement } from "$lib/components/editor/types";
   import { PAPER_DIMENSIONS } from "$lib/types";
-  import StaticCardRenderer from "./StaticCardRenderer.svelte";
-  import StaticPlayerMatRenderer from "./StaticPlayerMatRenderer.svelte";
+  import StaticComponentRenderer from "./StaticComponentRenderer.svelte";
 
   let {
     pageSetup,
@@ -32,7 +35,7 @@
       destroy() {
         pageRefsMap.delete(index);
         pageRefsMap = new Map(pageRefsMap);
-      }
+      },
     };
   }
 
@@ -184,9 +187,7 @@
 
     // Determine how many instances to create
     const instances: Record<string, string>[] =
-      dataSourceRows.length > 0
-        ? dataSourceRows
-        : [{}]; // Single instance with no merge data if no data source
+      dataSourceRows.length > 0 ? dataSourceRows : [{}]; // Single instance with no merge data if no data source
 
     const pages: Page[] = [];
     let currentPage: Page = { cards: [] };
@@ -197,7 +198,9 @@
 
     for (const rowData of instances) {
       // Check for the special "Num" field to determine number of copies
-      const numCopies = rowData.Num ? Math.max(1, parseInt(rowData.Num, 10) || 1) : 1;
+      const numCopies = rowData.Num
+        ? Math.max(1, parseInt(rowData.Num, 10) || 1)
+        : 1;
 
       // Create the specified number of copies for this row
       for (let copyIndex = 0; copyIndex < numCopies; copyIndex++) {
@@ -382,21 +385,12 @@
                       top: {card.y}px;
                     "
                   >
-                    {#if component.type === 'Card'}
-                      <StaticCardRenderer
-                        {design}
-                        dimensions={component.dimensions}
-                        shape={component.shape}
-                        mergeData={card.mergeData}
-                      />
-                    {:else if component.type === 'PlayerMat'}
-                      <StaticPlayerMatRenderer
-                        {design}
-                        dimensions={component.dimensions}
-                        shape={component.shape}
-                        mergeData={card.mergeData}
-                      />
-                    {/if}
+                    <StaticComponentRenderer
+                      {design}
+                      dimensions={component.dimensions}
+                      shape={component.shape}
+                      mergeData={card.mergeData}
+                    />
                   </div>
                 {/if}
               {/each}
@@ -418,12 +412,24 @@
                   {#each page.cards as card}
                     {@const cardBleedLeft = card.x + cropMarkSpace}
                     {@const cardBleedTop = card.y + cropMarkSpace}
-                    {@const cardBleedRight = card.x + cardWidthPx + cropMarkSpace}
-                    {@const cardBleedBottom = card.y + cardHeightPx + cropMarkSpace}
-                    {@const cardCutLeft = card.x + component.dimensions.bleedPx + cropMarkSpace}
-                    {@const cardCutTop = card.y + component.dimensions.bleedPx + cropMarkSpace}
-                    {@const cardCutRight = card.x + cardWidthPx - component.dimensions.bleedPx + cropMarkSpace}
-                    {@const cardCutBottom = card.y + cardHeightPx - component.dimensions.bleedPx + cropMarkSpace}
+                    {@const cardBleedRight =
+                      card.x + cardWidthPx + cropMarkSpace}
+                    {@const cardBleedBottom =
+                      card.y + cardHeightPx + cropMarkSpace}
+                    {@const cardCutLeft =
+                      card.x + component.dimensions.bleedPx + cropMarkSpace}
+                    {@const cardCutTop =
+                      card.y + component.dimensions.bleedPx + cropMarkSpace}
+                    {@const cardCutRight =
+                      card.x +
+                      cardWidthPx -
+                      component.dimensions.bleedPx +
+                      cropMarkSpace}
+                    {@const cardCutBottom =
+                      card.y +
+                      cardHeightPx -
+                      component.dimensions.bleedPx +
+                      cropMarkSpace}
 
                     <!-- Check if this card is on the left edge -->
                     {#if card.x === bounds.minX}
