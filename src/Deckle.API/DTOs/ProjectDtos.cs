@@ -14,6 +14,10 @@ public record CreateProjectRequest(string Name, string? Description);
 
 public record UpdateProjectRequest(string Name, string? Description);
 
+public record InviteUserRequest(string Email, string Role);
+
+public record UpdateUserRoleRequest(string Role);
+
 public record ProjectUserDto
 {
     public required Guid UserId { get; init; }
@@ -22,4 +26,5 @@ public record ProjectUserDto
     public string? PictureUrl { get; init; }
     public required string Role { get; init; }
     public required DateTime JoinedAt { get; init; }
+    public required bool IsPending { get; init; }
 }

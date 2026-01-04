@@ -2,6 +2,7 @@ using Deckle.API.DTOs;
 using Deckle.API.Endpoints;
 using Deckle.API.Services;
 using Deckle.Domain.Data;
+using Deckle.Email;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
@@ -178,7 +179,11 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 // Register HttpClient for GoogleSheetsService
 builder.Services.AddHttpClient();
 
+// Register email services
+builder.Services.AddEmailServices(builder.Configuration);
+
 // Register application services
+builder.Services.AddScoped<ProjectAuthorizationService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<GoogleSheetsService>();

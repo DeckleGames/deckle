@@ -27,12 +27,12 @@ public class AppDbContext : DbContext
             entity.HasKey(u => u.Id);
 
             entity.HasIndex(u => u.GoogleId)
-                .IsUnique();
+                .IsUnique()
+                .HasFilter("\"GoogleId\" IS NOT NULL");
 
             entity.HasIndex(u => u.Email);
 
             entity.Property(u => u.GoogleId)
-                .IsRequired()
                 .HasMaxLength(255);
 
             entity.Property(u => u.Email)

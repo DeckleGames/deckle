@@ -1,6 +1,8 @@
 using Deckle.API.DTOs;
+using Deckle.API.EmailTemplates;
 using Deckle.API.Filters;
 using Deckle.API.Services;
+using Deckle.Email.Abstractions;
 
 namespace Deckle.API.Endpoints;
 
@@ -64,6 +66,139 @@ public static class ProjectEndpoints
             return Results.Ok(users);
         })
         .WithName("GetProjectUsers");
+
+        group.MapPost("{id:guid}/users/invite", async (
+            Guid id,
+            HttpContext httpContext,
+            ProjectService projectService,
+            IEmailSender emailSender,
+            IConfiguration configuration,
+            InviteUserRequest request) =>
+        {
+            var userId = httpContext.GetUserId();
+
+            try
+            {
+                var result = await projectService.InviteUserToProjectAsync(
+                    userId,
+                    id,
+                    request.Email,
+                    request.Role);
+
+                if (result == null)
+                {
+                    return Results.NotFound();
+                }
+
+                var (invitedUser, inviterName) = result.Value;
+
+                if (invitedUser == null)
+                {
+                    return Results.NotFound();
+                }
+
+                // Get project details for email
+                var project = await projectService.GetProjectByIdAsync(userId, id);
+                if (project == null)
+                {
+                    return Results.NotFound();
+                }
+
+                // Construct invitation URL
+                var frontendUrl = configuration["FrontendUrl"] ?? "http://localhost:5173";
+                var invitationUrl = $"{frontendUrl}/projects/{id}";
+
+                // Send email
+                var emailTemplate = new NewUserInviteEmail
+                {
+                    RecipientEmail = invitedUser.Email,
+                    InviterName = inviterName ?? "Someone",
+                    ProjectName = project.Name,
+                    InvitationUrl = invitationUrl
+                };
+
+                await emailSender.SendAsync(emailTemplate);
+
+                return Results.Ok(invitedUser);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+        })
+        .WithName("InviteUserToProject");
+
+        group.MapPut("{id:guid}/users/{userId:guid}/role", async (
+            Guid id,
+            Guid userId,
+            HttpContext httpContext,
+            ProjectService projectService,
+            UpdateUserRoleRequest request) =>
+        {
+            var requestingUserId = httpContext.GetUserId();
+
+            try
+            {
+                var updatedUser = await projectService.UpdateUserRoleAsync(
+                    requestingUserId,
+                    id,
+                    userId,
+                    request.Role);
+
+                if (updatedUser == null)
+                {
+                    return Results.NotFound();
+                }
+
+                return Results.Ok(updatedUser);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+        })
+        .WithName("UpdateUserRole");
+
+        group.MapDelete("{id:guid}/users/{userId:guid}", async (
+            Guid id,
+            Guid userId,
+            HttpContext httpContext,
+            ProjectService projectService) =>
+        {
+            var requestingUserId = httpContext.GetUserId();
+
+            try
+            {
+                var success = await projectService.RemoveUserFromProjectAsync(
+                    requestingUserId,
+                    id,
+                    userId);
+
+                if (!success)
+                {
+                    return Results.NotFound();
+                }
+
+                return Results.NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+        })
+        .WithName("RemoveUserFromProject");
 
         group.MapDelete("{id:guid}", async (Guid id, HttpContext httpContext, ProjectService projectService) =>
         {

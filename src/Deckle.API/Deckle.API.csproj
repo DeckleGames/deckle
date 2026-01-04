@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Deckle.Domain\Deckle.Domain.csproj" />
+    <ProjectReference Include="..\Deckle.Email\Deckle.Email.csproj" />
     <ProjectReference Include="..\Deckle.ServiceDefaults\Deckle.ServiceDefaults.csproj" />
   </ItemGroup>
 

@@ -1,14 +1,39 @@
 <script lang="ts">
-  import { Card, Badge } from "$lib/components";
+  import { Card, Badge, Button } from "$lib/components";
+  import { Select } from "$lib/components/forms";
 
   interface User {
+    userId: string;
     name?: string;
     email: string;
     pictureUrl?: string;
-    role: string;
+    role: "Owner" | "Admin" | "Collaborator" | "Viewer";
+    isPending: boolean;
   }
 
-  let { users }: { users: User[] } = $props();
+  let {
+    users,
+    canInvite = false,
+    canEditRoles = false,
+    currentUserId,
+    onInviteClick,
+    onRoleChange,
+    onRemoveUser,
+  }: {
+    users: User[];
+    canInvite?: boolean;
+    canEditRoles?: boolean;
+    currentUserId?: string;
+    onInviteClick?: () => void;
+    onRoleChange?: (userId: string, newRole: string) => Promise<void>;
+    onRemoveUser?: (
+      userId: string,
+      userName: string,
+      role: string
+    ) => Promise<void>;
+  } = $props();
+
+  const availableRoles = ["Admin", "Collaborator", "Viewer"];
 
   function getRoleBadgeVariant(
     role: string
@@ -18,15 +43,49 @@
         return "danger";
       case "Admin":
         return "warning";
-      case "Member":
+      case "Collaborator":
         return "success";
       default:
         return "default";
     }
   }
+
+  async function handleRoleChange(user: User, newRole: string) {
+    if (onRoleChange && newRole !== user.role) {
+      await onRoleChange(user.userId, newRole);
+    }
+  }
+
+  // Determine if revoke button should be shown for a user
+  function canRevokeUser(user: User): boolean {
+    if (!onRemoveUser) return false;
+
+    if (user.role === "Owner") return;
+
+    const isSelf = user.userId === currentUserId;
+
+    if (isSelf) {
+      // Users can remove themselves (backend will validate owner rules)
+      return true;
+    }
+
+    // Can remove others if we have permission and they're not Owner
+    return canEditRoles && user.role !== "Owner";
+  }
+
+  function getRevokeButtonText(user: User): string {
+    const isSelf = user.userId === currentUserId;
+    return isSelf ? "Leave Project" : "Remove";
+  }
 </script>
 
 <Card>
+  {#if canInvite}
+    <div class="card-header">
+      <Button onclick={onInviteClick} size="sm">Add Collaborator</Button>
+    </div>
+  {/if}
+
   <div class="users-list">
     {#each users as user}
       <div class="user-item">
@@ -49,13 +108,48 @@
             {/if}
           </div>
         </div>
-        <Badge variant={getRoleBadgeVariant(user.role)}>{user.role}</Badge>
+        <div class="badges">
+          {#if canEditRoles && user.role !== "Owner"}
+            <Select
+              value={user.role}
+              onchange={(e) => handleRoleChange(user, e.currentTarget.value)}
+            >
+              {#each availableRoles as role}
+                <option value={role}>{role}</option>
+              {/each}
+            </Select>
+          {:else}
+            <Badge variant={getRoleBadgeVariant(user.role)}>{user.role}</Badge>
+          {/if}
+          {#if user.isPending}
+            <Badge variant="default">Pending</Badge>
+          {/if}
+          {#if canRevokeUser(user)}
+            <Button
+              variant="danger"
+              outline
+              size="sm"
+              onclick={() =>
+                onRemoveUser?.(user.userId, user.name || user.email, user.role)}
+            >
+              {getRevokeButtonText(user)}
+            </Button>
+          {/if}
+        </div>
       </div>
     {/each}
   </div>
 </Card>
 
 <style>
+  .card-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
   .users-list {
     display: flex;
     flex-direction: column;
@@ -70,6 +164,12 @@
     border: 1px solid var(--color-border);
     border-radius: 8px;
     background: var(--color-background-secondary);
+  }
+
+  .badges {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
   }
 
   .user-info {

@@ -28,12 +28,17 @@ Deckle helps board game designers and hobbyists create professional-looking game
 3. Run the application:
 
 ```bash
-dotnet restore
-dotnet build
-dotnet run --project Deckle.AppHost
+aspire run
 ```
 
-The Aspire dashboard will open in your browser, and you can access the Deckle web interface from there.
+The AppHost will start the Aspire application and launch the dashboard in your browser.
+
+Note: First run may require:
+
+```bash
+dotnet restore
+dotnet build
+```
 
 ## Technology Stack
 
