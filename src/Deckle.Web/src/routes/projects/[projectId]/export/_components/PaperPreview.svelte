@@ -142,6 +142,11 @@
   // Calculate zoom percentage for display
   const zoomPercentage = $derived(Math.round(userZoomMultiplier * 100));
 
+  // Calculate total number of component instances across all pages
+  const totalInstances = $derived.by(() => {
+    return allPages.reduce((sum, { page }) => sum + page.instances.length, 0);
+  });
+
   // Calculate scaled dimensions for layout
   const scaledDimensions = $derived.by(() => ({
     width: paperDimensionsPx.width * zoom,
@@ -207,7 +212,21 @@
     instances: ComponentInstance[];
   }
 
-  const pages = $derived.by((): Page[] => {
+  /**
+   * Pack component instances onto pages using greedy row-based algorithm
+   * @param componentsTopack - Components to pack together
+   * @param componentIndexOffset - Offset to add to component indices (for separate packing)
+   * @param printableWidthPx - Printable area width in pixels
+   * @param printableHeightPx - Printable area height in pixels
+   * @param rotationStateMap - Map of rotation states for component instances
+   */
+  function packComponentInstances(
+    componentsTopack: ComponentWithData[],
+    componentIndexOffset: number,
+    printableWidthPx: number,
+    printableHeightPx: number,
+    rotationStateMap: Map<string, boolean>
+  ): Page[] {
     const pages: Page[] = [];
     let currentPage: Page = { instances: [] };
 
@@ -216,8 +235,9 @@
     let rowHeight = 0;
 
     // Process each component
-    components.forEach((componentWithData, componentIndex) => {
+    componentsTopack.forEach((componentWithData, localIndex) => {
       const component = componentWithData.component;
+      const componentIndex = componentIndexOffset + localIndex;
 
       // Skip non-exportable components
       if (!isExportable(component)) {
@@ -259,14 +279,14 @@
         for (let copyIndex = 0; copyIndex < numCopies; copyIndex++) {
           // Generate instance key and check rotation state
           const instanceKey = getInstanceKey(componentIndex, Object.keys(rowData).length > 0 ? rowData : null, copyIndex);
-          const isRotated = rotationState.get(instanceKey) || false;
+          const isRotated = rotationStateMap.get(instanceKey) || false;
 
           // Swap dimensions if rotated
           const layoutWidthPx = isRotated ? instanceHeightPx : instanceWidthPx;
           const layoutHeightPx = isRotated ? instanceWidthPx : instanceHeightPx;
 
           // Check if instance fits in current row
-          if (currentX + layoutWidthPx > printableAreaWidthPx) {
+          if (currentX + layoutWidthPx > printableWidthPx) {
             // Move to next row
             currentX = 0;
             currentY += rowHeight;
@@ -274,7 +294,7 @@
           }
 
           // Check if instance fits on current page
-          if (currentY + layoutHeightPx > printableAreaHeightPx) {
+          if (currentY + layoutHeightPx > printableHeightPx) {
             // Start new page
             if (currentPage.instances.length > 0) {
               pages.push(currentPage);
@@ -311,6 +331,38 @@
     }
 
     return pages;
+  }
+
+  const pages = $derived.by((): Page[] => {
+    if (pageSetup.separateComponentPages) {
+      // Separate packing: each component gets its own page sequence
+      const allPages: Page[] = [];
+
+      components.forEach((component, originalIndex) => {
+        // Pack this single component
+        const componentPages = packComponentInstances(
+          [component],
+          originalIndex, // Preserve original index for rotation keys
+          printableAreaWidthPx,
+          printableAreaHeightPx,
+          rotationState
+        );
+
+        // Append to overall page list
+        allPages.push(...componentPages);
+      });
+
+      return allPages;
+    } else {
+      // Combined packing: all components share pages (current behavior)
+      return packComponentInstances(
+        components,
+        0,
+        printableAreaWidthPx,
+        printableAreaHeightPx,
+        rotationState
+      );
+    }
   });
 
   // Generate back pages with horizontally mirrored positions
@@ -321,8 +373,9 @@
 
     return pages.map((frontPage) => {
       const backPageInstances: ComponentInstance[] = frontPage.instances.map((instance) => {
-        // Mirror the x position
-        const mirroredX = printableAreaWidthPx - (instance.x + instance.widthPx);
+        // Mirror the x position, accounting for rotation
+        const layoutWidth = instance.isRotated ? instance.heightPx : instance.widthPx;
+        const mirroredX = printableAreaWidthPx - (instance.x + layoutWidth);
         return {
           ...instance,
           x: mirroredX,
@@ -470,7 +523,7 @@
                       <div
                         class="component-renderer-wrapper"
                         style="
-                          transform: rotate({rotation}deg) translateY({rotation !== 0 ? '-100%' : '0'});
+                          transform: rotate({rotation}deg) {rotation === 90 ? 'translateY(-100%)' : rotation === -90 ? 'translateX(-100%)' : ''};
                           transform-origin: top left;
                           width: {instance.widthPx}px;
                           height: {instance.heightPx}px;
@@ -601,6 +654,11 @@
         </div>
       {/each}
     {/if}
+  </div>
+
+  <!-- Info display -->
+  <div class="info-display">
+    {totalInstances} {totalInstances === 1 ? 'Component' : 'Components'}; {allPages.length} {allPages.length === 1 ? 'Page' : 'Pages'}
   </div>
 
   <!-- Zoom control -->
@@ -753,5 +811,24 @@
   .zoom-reset {
     min-width: 3.5rem;
     font-size: 0.875rem;
+  }
+
+  .info-display {
+    position: sticky;
+    bottom: 1rem;
+    left: 1rem;
+    margin-left: 1rem;
+    margin-bottom: 1rem;
+    width: fit-content;
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(8px);
+    z-index: 10;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #334155;
   }
 </style>

@@ -10,14 +10,19 @@
     pageElements = [],
     paperDimensions,
     componentName = "component",
+    componentCount = 1,
   }: {
     pageSetup: PageSetup;
     pageElements?: HTMLElement[];
     paperDimensions: { width: number; height: number };
     componentName?: string;
+    componentCount?: number;
   } = $props();
 
   let isExporting = $state(false);
+
+  // Show separate pages option only when multiple components selected
+  const shouldShowSeparatePages = $derived(componentCount > 1);
 
   // Helper to convert between units
   const inchesToCm = (inches: number) => inches * 2.54;
@@ -281,6 +286,22 @@
       </label>
     </div>
   </FieldWrapper>
+
+  {#if shouldShowSeparatePages}
+    <FieldWrapper label="Separate Pages" htmlFor="separateComponentPages">
+      <div class="checkbox-wrapper">
+        <input
+          type="checkbox"
+          id="separateComponentPages"
+          bind:checked={pageSetup.separateComponentPages}
+          class="checkbox-input"
+        />
+        <label for="separateComponentPages" class="checkbox-label">
+          Put each component on separate pages
+        </label>
+      </div>
+    </FieldWrapper>
+  {/if}
 </div>
 
 <style>

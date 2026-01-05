@@ -120,6 +120,7 @@
             {pageElements}
             {paperDimensions}
             componentName={exportFilename}
+            componentCount={data.components.length}
           />
         </div>
       {/if}
