@@ -204,6 +204,11 @@ public class AppDbContext : DbContext
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
                     v => JsonSerializer.Deserialize<ComponentShape>(v, (JsonSerializerOptions?)null)!
                 );
+
+            entity.HasOne(c => c.DataSource)
+                .WithMany()
+                .HasForeignKey("DataSourceId")
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Dice>(entity =>
@@ -249,6 +254,11 @@ public class AppDbContext : DbContext
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
                     v => JsonSerializer.Deserialize<ComponentShape>(v, (JsonSerializerOptions?)null)!
                 );
+
+            entity.HasOne(pm => pm.DataSource)
+                .WithMany()
+                .HasForeignKey("DataSourceId")
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

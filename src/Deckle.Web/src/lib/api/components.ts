@@ -48,16 +48,16 @@ export const componentsApi = {
     api.delete(`/projects/${projectId}/components/${componentId}`, undefined, fetchFn),
 
   /**
-   * Save card design for a specific part (front/back)
+   * Save design for a component (Card or PlayerMat) for a specific part (front/back)
    */
-  saveCardDesign: (projectId: string, cardId: string, part: string, design: string | null, fetchFn?: typeof fetch) =>
-    api.put<GameComponent>(`/projects/${projectId}/components/cards/${cardId}/design/${part}`, { design }, undefined, fetchFn),
+  saveDesign: (projectId: string, componentId: string, part: string, design: string | null, fetchFn?: typeof fetch) =>
+    api.put<GameComponent>(`/projects/${projectId}/components/${componentId}/design/${part}`, { design }, undefined, fetchFn),
 
   /**
-   * Update card data source
+   * Update data source for a component (Card or PlayerMat)
    */
-  updateCardDataSource: (projectId: string, cardId: string, dataSourceId: string | null, fetchFn?: typeof fetch) =>
-    api.put<GameComponent>(`/projects/${projectId}/components/cards/${cardId}/datasource`, { dataSourceId }, undefined, fetchFn),
+  updateDataSource: (projectId: string, componentId: string, dataSourceId: string | null, fetchFn?: typeof fetch) =>
+    api.put<GameComponent>(`/projects/${projectId}/components/${componentId}/datasource`, { dataSourceId }, undefined, fetchFn),
 
   /**
    * Create a new player mat component
@@ -70,16 +70,4 @@ export const componentsApi = {
    */
   updatePlayerMat: (projectId: string, componentId: string, data: UpdatePlayerMatDto, fetchFn?: typeof fetch) =>
     api.put<GameComponent>(`/projects/${projectId}/components/playermats/${componentId}`, data, undefined, fetchFn),
-
-  /**
-   * Save player mat design for a specific part (front/back)
-   */
-  savePlayerMatDesign: (projectId: string, playerMatId: string, part: string, design: string | null, fetchFn?: typeof fetch) =>
-    api.put<GameComponent>(`/projects/${projectId}/components/playermats/${playerMatId}/design/${part}`, { design }, undefined, fetchFn),
-
-  /**
-   * Update player mat data source
-   */
-  updatePlayerMatDataSource: (projectId: string, playerMatId: string, dataSourceId: string | null, fetchFn?: typeof fetch) =>
-    api.put<GameComponent>(`/projects/${projectId}/components/playermats/${playerMatId}/datasource`, { dataSourceId }, undefined, fetchFn),
 };

@@ -1,6 +1,7 @@
 import { componentsApi, dataSourcesApi } from '$lib/api';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { hasDataSource } from '$lib/utils/componentTypes';
 
 export const load: PageServerLoad = async ({ params, url, fetch, parent }) => {
 	try {
@@ -49,7 +50,8 @@ export const load: PageServerLoad = async ({ params, url, fetch, parent }) => {
 				let dataSource = null;
 				let dataSourceRows: Record<string, string>[] = [];
 
-				if (component.type === 'Card' && component.dataSource) {
+				// Check if component can have a data source (Card or PlayerMat)
+				if (hasDataSource(component) && component.dataSource) {
 					try {
 						dataSource = await dataSourcesApi.getById(component.dataSource.id, fetch);
 

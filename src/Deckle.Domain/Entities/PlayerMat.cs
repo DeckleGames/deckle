@@ -1,6 +1,6 @@
 namespace Deckle.Domain.Entities;
 
-public class PlayerMat : Component, IEditableComponent, IDataSourceComponent
+public class PlayerMat : EditableComponent, IDataSourceComponent
 {
     // If PresetSize is set, use it with Orientation
     // Otherwise, use CustomWidthMm and CustomHeightMm
@@ -12,15 +12,17 @@ public class PlayerMat : Component, IEditableComponent, IDataSourceComponent
 
     public decimal? CustomHeightMm { get; set; }
 
-    public string? FrontDesign { get; set; }
+    public override string? FrontDesign { get; set; }
 
-    public string? BackDesign { get; set; }
+    public override string? BackDesign { get; set; }
 
-    public ComponentShape Shape { get; set; } = new RectangleShape(0);
+    public override ComponentShape Shape { get; set; } = new RectangleShape(3);
 
     public DataSource? DataSource { get; set; }
 
-    public Dimensions GetDimensions()
+    protected override string ComponentTypeName => "player mat";
+
+    public override Dimensions GetDimensions()
     {
         if (PresetSize.HasValue)
         {

@@ -165,102 +165,56 @@ public static class ComponentEndpoints
         })
         .WithName("DeleteComponent");
 
-        group.MapPut("cards/{id:guid}/design/{part}", async (Guid projectId, Guid id, string part, HttpContext httpContext, ComponentService componentService, SaveCardDesignRequest request) =>
+        group.MapPut("{id:guid}/design/{part}", async (Guid projectId, Guid id, string part, HttpContext httpContext, ComponentService componentService, SaveDesignRequest request) =>
         {
             var userId = httpContext.GetUserId();
 
             try
             {
-                var card = await componentService.SaveCardDesignAsync(userId, id, part, request.Design);
+                var component = await componentService.SaveDesignAsync(userId, id, part, request.Design);
 
-                if (card == null || card.ProjectId != projectId)
+                if (component == null || component.ProjectId != projectId)
                 {
                     return Results.NotFound();
                 }
 
-                return Results.Ok(card);
+                return Results.Ok(component);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+        })
+        .WithName("SaveComponentDesign")
+        .WithDescription("Save design for any editable component (Card, PlayerMat, etc.)");
+
+        group.MapPut("{id:guid}/datasource", async (Guid projectId, Guid id, HttpContext httpContext, ComponentService componentService, UpdateComponentDataSourceRequest request) =>
+        {
+            var userId = httpContext.GetUserId();
+
+            try
+            {
+                var component = await componentService.UpdateDataSourceAsync(userId, id, request.DataSourceId);
+
+                if (component == null || component.ProjectId != projectId)
+                {
+                    return Results.NotFound();
+                }
+
+                return Results.Ok(component);
             }
             catch (ArgumentException ex)
             {
                 return Results.BadRequest(ex.Message);
             }
         })
-        .WithName("SaveCardDesign");
-
-        group.MapPut("cards/{id:guid}/datasource", async (Guid projectId, Guid id, HttpContext httpContext, ComponentService componentService, UpdateCardDataSourceRequest request) =>
-        {
-            var userId = httpContext.GetUserId();
-
-            try
-            {
-                var card = await componentService.UpdateCardDataSourceAsync(userId, id, request.DataSourceId);
-
-                if (card == null || card.ProjectId != projectId)
-                {
-                    return Results.NotFound();
-                }
-
-                return Results.Ok(card);
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
-        })
-        .WithName("UpdateCardDataSource");
-
-        group.MapPut("playermats/{id:guid}/design/{part}", async (Guid projectId, Guid id, string part, HttpContext httpContext, ComponentService componentService, SavePlayerMatDesignRequest request) =>
-        {
-            var userId = httpContext.GetUserId();
-
-            try
-            {
-                var playerMat = await componentService.SavePlayerMatDesignAsync(userId, id, part, request.Design);
-
-                if (playerMat == null || playerMat.ProjectId != projectId)
-                {
-                    return Results.NotFound();
-                }
-
-                return Results.Ok(playerMat);
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
-        })
-        .WithName("SavePlayerMatDesign");
-
-        group.MapPut("playermats/{id:guid}/datasource", async (Guid projectId, Guid id, HttpContext httpContext, ComponentService componentService, UpdatePlayerMatDataSourceRequest request) =>
-        {
-            var userId = httpContext.GetUserId();
-
-            try
-            {
-                var playerMat = await componentService.UpdatePlayerMatDataSourceAsync(userId, id, request.DataSourceId);
-
-                if (playerMat == null || playerMat.ProjectId != projectId)
-                {
-                    return Results.NotFound();
-                }
-
-                return Results.Ok(playerMat);
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
-        })
-        .WithName("UpdatePlayerMatDataSource");
+        .WithName("UpdateComponentDataSource")
+        .WithDescription("Update data source for any component that supports data sources (Card, PlayerMat, etc.)");
 
         return group;
     }
 }
 
-public record SaveCardDesignRequest(string? Design);
+public record SaveDesignRequest(string? Design);
 
-public record UpdateCardDataSourceRequest(Guid? DataSourceId);
-
-public record SavePlayerMatDesignRequest(string? Design);
-
-public record UpdatePlayerMatDataSourceRequest(Guid? DataSourceId);
+public record UpdateComponentDataSourceRequest(Guid? DataSourceId);

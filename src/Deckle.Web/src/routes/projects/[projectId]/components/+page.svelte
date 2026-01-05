@@ -103,32 +103,63 @@
     errorMessage = "";
   }
 
-  function handleEdit(component: GameComponent) {
-    editingComponent = component;
+  /**
+   * Populate form fields from a card component
+   */
+  function populateCardForm(card: Extract<GameComponent, { type: 'Card' }>) {
+    selectedType = "card";
+    cardSize = card.size;
+  }
+
+  /**
+   * Populate form fields from a dice component
+   */
+  function populateDiceForm(dice: Extract<GameComponent, { type: 'Dice' }>) {
+    selectedType = "dice";
+    diceType = dice.diceType;
+    diceStyle = dice.style;
+    diceColor = dice.baseColor;
+    diceNumber = String(dice.number);
+  }
+
+  /**
+   * Populate form fields from a player mat component
+   */
+  function populatePlayerMatForm(mat: Extract<GameComponent, { type: 'PlayerMat' }>) {
+    selectedType = "playermat";
+    if (mat.presetSize) {
+      playerMatSizeMode = 'preset';
+      playerMatPresetSize = mat.presetSize;
+      playerMatOrientation = mat.orientation;
+    } else {
+      playerMatSizeMode = 'custom';
+      playerMatCustomWidth = String(mat.customWidthMm || 210);
+      playerMatCustomHeight = String(mat.customHeightMm || 297);
+    }
+  }
+
+  /**
+   * Populate form fields from any component type
+   */
+  function populateFormFromComponent(component: GameComponent) {
     componentName = component.name;
 
-    if (component.type === "Card") {
-      selectedType = "card";
-      cardSize = component.size;
-    } else if (component.type === "Dice") {
-      selectedType = "dice";
-      diceType = component.diceType;
-      diceStyle = component.style;
-      diceColor = component.baseColor;
-      diceNumber = String(component.number);
-    } else if (component.type === "PlayerMat") {
-      selectedType = "playermat";
-      if (component.presetSize) {
-        playerMatSizeMode = 'preset';
-        playerMatPresetSize = component.presetSize;
-        playerMatOrientation = component.orientation;
-      } else {
-        playerMatSizeMode = 'custom';
-        playerMatCustomWidth = String(component.customWidthMm || 210);
-        playerMatCustomHeight = String(component.customHeightMm || 297);
-      }
+    switch (component.type) {
+      case 'Card':
+        populateCardForm(component);
+        break;
+      case 'Dice':
+        populateDiceForm(component);
+        break;
+      case 'PlayerMat':
+        populatePlayerMatForm(component);
+        break;
     }
+  }
 
+  function handleEdit(component: GameComponent) {
+    editingComponent = component;
+    populateFormFromComponent(component);
     showModal = true;
     errorMessage = "";
   }
@@ -172,24 +203,117 @@
     if (!componentToLink) return;
 
     try {
-      if (componentToLink.type === "Card") {
-        await componentsApi.updateCardDataSource(
-          data.project.id,
-          componentToLink.id,
-          dataSourceId
-        );
-      } else if (componentToLink.type === "PlayerMat") {
-        await componentsApi.updatePlayerMatDataSource(
-          data.project.id,
-          componentToLink.id,
-          dataSourceId
-        );
-      }
+      await componentsApi.updateDataSource(
+        data.project.id,
+        componentToLink.id,
+        dataSourceId
+      );
       await invalidateAll();
       closeLinkDataSourceModal();
     } catch (err) {
       console.error("Error updating data source:", err);
       // Could add error handling UI here
+    }
+  }
+
+  /**
+   * Create a new card component
+   */
+  async function createCard() {
+    await componentsApi.createCard(data.project.id, {
+      name: componentName,
+      size: cardSize,
+    });
+  }
+
+  /**
+   * Update an existing card component
+   */
+  async function updateCard(componentId: string) {
+    await componentsApi.updateCard(data.project.id, componentId, {
+      name: componentName,
+      size: cardSize,
+    });
+  }
+
+  /**
+   * Create a new dice component
+   */
+  async function createDice() {
+    await componentsApi.createDice(data.project.id, {
+      name: componentName,
+      type: diceType,
+      style: diceStyle,
+      baseColor: diceColor,
+      number: Number(diceNumber),
+    });
+  }
+
+  /**
+   * Update an existing dice component
+   */
+  async function updateDice(componentId: string) {
+    await componentsApi.updateDice(data.project.id, componentId, {
+      name: componentName,
+      type: diceType,
+      style: diceStyle,
+      baseColor: diceColor,
+      number: Number(diceNumber),
+    });
+  }
+
+  /**
+   * Create a new player mat component
+   */
+  async function createPlayerMat() {
+    await componentsApi.createPlayerMat(data.project.id, {
+      name: componentName,
+      presetSize: playerMatSizeMode === 'preset' ? playerMatPresetSize : null,
+      orientation: playerMatOrientation,
+      customWidthMm: playerMatSizeMode === 'custom' ? parseFloat(playerMatCustomWidth) : null,
+      customHeightMm: playerMatSizeMode === 'custom' ? parseFloat(playerMatCustomHeight) : null,
+    });
+  }
+
+  /**
+   * Update an existing player mat component
+   */
+  async function updatePlayerMat(componentId: string) {
+    await componentsApi.updatePlayerMat(data.project.id, componentId, {
+      name: componentName,
+      presetSize: playerMatSizeMode === 'preset' ? playerMatPresetSize : null,
+      orientation: playerMatOrientation,
+      customWidthMm: playerMatSizeMode === 'custom' ? parseFloat(playerMatCustomWidth) : null,
+      customHeightMm: playerMatSizeMode === 'custom' ? parseFloat(playerMatCustomHeight) : null,
+    });
+  }
+
+  /**
+   * Save component based on selected type
+   */
+  async function saveComponent() {
+    switch (selectedType) {
+      case 'card':
+        if (editingComponent) {
+          await updateCard(editingComponent.id);
+        } else {
+          await createCard();
+        }
+        break;
+      case 'dice':
+        if (editingComponent) {
+          await updateDice(editingComponent.id);
+        } else {
+          await createDice();
+        }
+        break;
+      case 'playermat':
+        if (editingComponent) {
+          await updatePlayerMat(editingComponent.id);
+        } else {
+          await createPlayerMat();
+        }
+        break;
     }
   }
 
@@ -208,56 +332,7 @@
     errorMessage = "";
 
     try {
-      if (editingComponent) {
-        // Update existing component
-        if (selectedType === "card") {
-          await componentsApi.updateCard(data.project.id, editingComponent.id, {
-            name: componentName,
-            size: cardSize,
-          });
-        } else if (selectedType === "dice") {
-          await componentsApi.updateDice(data.project.id, editingComponent.id, {
-            name: componentName,
-            type: diceType,
-            style: diceStyle,
-            baseColor: diceColor,
-            number: Number(diceNumber),
-          });
-        } else if (selectedType === "playermat") {
-          await componentsApi.updatePlayerMat(data.project.id, editingComponent.id, {
-            name: componentName,
-            presetSize: playerMatSizeMode === 'preset' ? playerMatPresetSize : null,
-            orientation: playerMatOrientation,
-            customWidthMm: playerMatSizeMode === 'custom' ? parseFloat(playerMatCustomWidth) : null,
-            customHeightMm: playerMatSizeMode === 'custom' ? parseFloat(playerMatCustomHeight) : null,
-          });
-        }
-      } else {
-        // Create new component
-        if (selectedType === "card") {
-          await componentsApi.createCard(data.project.id, {
-            name: componentName,
-            size: cardSize,
-          });
-        } else if (selectedType === "dice") {
-          await componentsApi.createDice(data.project.id, {
-            name: componentName,
-            type: diceType,
-            style: diceStyle,
-            baseColor: diceColor,
-            number: Number(diceNumber),
-          });
-        } else if (selectedType === "playermat") {
-          await componentsApi.createPlayerMat(data.project.id, {
-            name: componentName,
-            presetSize: playerMatSizeMode === 'preset' ? playerMatPresetSize : null,
-            orientation: playerMatOrientation,
-            customWidthMm: playerMatSizeMode === 'custom' ? parseFloat(playerMatCustomWidth) : null,
-            customHeightMm: playerMatSizeMode === 'custom' ? parseFloat(playerMatCustomHeight) : null,
-          });
-        }
-      }
-
+      await saveComponent();
       await invalidateAll();
       closeModal();
     } catch (err) {

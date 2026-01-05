@@ -2,6 +2,7 @@ using Deckle.API.DTOs;
 using Deckle.Domain.Data;
 using Deckle.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Deckle.API.Services;
 
@@ -24,11 +25,17 @@ public class ComponentService
         }
 
         var components = await _context.Components
-            .Include(c => (c as Card)!.DataSource)
-            .Include(c => (c as PlayerMat)!.DataSource)
             .Where(c => c.ProjectId == projectId)
             .OrderBy(c => c.CreatedAt)
             .ToListAsync();
+
+        // Explicitly load DataSource for components that support it
+        foreach (var component in components.OfType<IDataSourceComponent>())
+        {
+            await _context.Entry(component)
+                .Reference(c => c.DataSource)
+                .LoadAsync();
+        }
 
         return components.Select(c => c.ToComponentDto()).ToList();
     }
@@ -36,8 +43,6 @@ public class ComponentService
     public async Task<ComponentDto?> GetComponentByIdAsync(Guid userId, Guid componentId)
     {
         var component = await _context.Components
-            .Include(c => (c as Card)!.DataSource)
-            .Include(c => (c as PlayerMat)!.DataSource)
             .Where(c => c.Id == componentId &&
                         c.Project.Users.Any(u => u.Id == userId))
             .FirstOrDefaultAsync();
@@ -47,13 +52,19 @@ public class ComponentService
             return null;
         }
 
+        // Explicitly load DataSource if the component supports it
+        if (component is IDataSourceComponent)
+        {
+            await _context.Entry(component)
+                .Reference(nameof(IDataSourceComponent.DataSource))
+                .LoadAsync();
+        }
+
         return component.ToComponentDto();
     }
 
     public async Task<CardDto> CreateCardAsync(Guid userId, Guid projectId, string name, CardSize size)
     {
-        await _authService.EnsureCanModifyResourcesAsync(userId, projectId);
-
         var card = new Card
         {
             Id = Guid.NewGuid(),
@@ -64,16 +75,12 @@ public class ComponentService
             UpdatedAt = DateTime.UtcNow
         };
 
-        _context.Cards.Add(card);
-        await _context.SaveChangesAsync();
-
+        await CreateAndSaveComponentAsync(userId, projectId, card);
         return new CardDto(card);
     }
 
     public async Task<DiceDto> CreateDiceAsync(Guid userId, Guid projectId, string name, DiceType type, DiceStyle style, DiceColor baseColor, int number)
     {
-        await _authService.EnsureCanModifyResourcesAsync(userId, projectId);
-
         var dice = new Dice
         {
             Id = Guid.NewGuid(),
@@ -87,26 +94,18 @@ public class ComponentService
             UpdatedAt = DateTime.UtcNow
         };
 
-        _context.Dices.Add(dice);
-        await _context.SaveChangesAsync();
-
+        await CreateAndSaveComponentAsync(userId, projectId, dice);
         return new DiceDto(dice);
     }
 
     public async Task<CardDto?> UpdateCardAsync(Guid userId, Guid componentId, string name, CardSize size)
     {
-        var card = await _context.Cards
-            .Where(c => c.Id == componentId && c.Project.Users.Any(u => u.Id == userId))
-            .FirstOrDefaultAsync();
+        var card = await FindAndAuthorizeComponentAsync<Card>(
+            userId,
+            componentId,
+            ProjectAuthorizationService.CanModifyResources);
 
         if (card == null)
-        {
-            return null;
-        }
-
-        // Check user's role - Viewers cannot update components
-        var role = await _authService.GetUserProjectRoleAsync(userId, card.ProjectId);
-        if (role == null || !ProjectAuthorizationService.CanModifyResources(role.Value))
         {
             return null;
         }
@@ -122,18 +121,12 @@ public class ComponentService
 
     public async Task<DiceDto?> UpdateDiceAsync(Guid userId, Guid componentId, string name, DiceType type, DiceStyle style, DiceColor baseColor, int number)
     {
-        var dice = await _context.Dices
-            .Where(d => d.Id == componentId && d.Project.Users.Any(u => u.Id == userId))
-            .FirstOrDefaultAsync();
+        var dice = await FindAndAuthorizeComponentAsync<Dice>(
+            userId,
+            componentId,
+            ProjectAuthorizationService.CanModifyResources);
 
         if (dice == null)
-        {
-            return null;
-        }
-
-        // Check user's role - Viewers cannot update components
-        var role = await _authService.GetUserProjectRoleAsync(userId, dice.ProjectId);
-        if (role == null || !ProjectAuthorizationService.CanModifyResources(role.Value))
         {
             return null;
         }
@@ -176,84 +169,36 @@ public class ComponentService
 
     public async Task<CardDto?> SaveCardDesignAsync(Guid userId, Guid componentId, string part, string? design)
     {
-        var card = await _context.Cards
-            .Where(c => c.Id == componentId && c.Project.Users.Any(u => u.Id == userId))
-            .FirstOrDefaultAsync();
-
-        if (card == null)
-        {
-            return null;
-        }
-
-        // Check user's role - Viewers cannot save designs
-        var role = await _authService.GetUserProjectRoleAsync(userId, card.ProjectId);
-        if (role == null || !ProjectAuthorizationService.CanModifyResources(role.Value))
-        {
-            return null;
-        }
-
-        if (part.ToLower() == "front")
-        {
-            card.FrontDesign = design;
-        }
-        else if (part.ToLower() == "back")
-        {
-            card.BackDesign = design;
-        }
-        else
-        {
-            throw new ArgumentException($"Invalid part '{part}' for card. Must be 'front' or 'back'.");
-        }
-
-        card.UpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
-
-        return new CardDto(card);
+        return await SaveDesignAsync<Card, CardDto>(
+            userId,
+            componentId,
+            part,
+            design,
+            card => new CardDto(card));
     }
 
-    public async Task<CardDto?> UpdateCardDataSourceAsync(Guid userId, Guid componentId, Guid? dataSourceId)
+    public async Task<ComponentDto?> UpdateDataSourceAsync(Guid userId, Guid componentId, Guid? dataSourceId)
     {
-        var card = await _context.Cards
-            .Include(c => c.DataSource)
+        var component = await _context.Components
             .Where(c => c.Id == componentId && c.Project.Users.Any(u => u.Id == userId))
             .FirstOrDefaultAsync();
 
-        if (card == null)
+        if (component is not IDataSourceComponent dataSourceComponent)
         {
             return null;
         }
 
-        // Check user's role - Only Owners and Admins can update data source links
-        var role = await _authService.GetUserProjectRoleAsync(userId, card.ProjectId);
-        if (role == null || !ProjectAuthorizationService.CanManageDataSources(role.Value))
+        // Load the current DataSource if it exists
+        await _context.Entry(component)
+            .Reference(nameof(IDataSourceComponent.DataSource))
+            .LoadAsync();
+
+        if (!await TryUpdateComponentDataSourceAsync(userId, dataSourceComponent, dataSourceId))
         {
             return null;
         }
 
-        // If dataSourceId is provided, verify it exists and belongs to the same project
-        if (dataSourceId.HasValue)
-        {
-            var dataSourceExists = await _context.DataSources
-                .AnyAsync(ds => ds.Id == dataSourceId.Value && ds.ProjectId == card.ProjectId);
-
-            if (!dataSourceExists)
-            {
-                throw new ArgumentException("Data source not found or does not belong to this project");
-            }
-
-            // Load the data source to ensure it's available in the response
-            card.DataSource = await _context.DataSources.FindAsync(dataSourceId.Value);
-        }
-        else
-        {
-            // Remove the data source
-            card.DataSource = null;
-        }
-
-        card.UpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
-
-        return new CardDto(card);
+        return component.ToComponentDto();
     }
 
     public async Task<PlayerMatDto> CreatePlayerMatAsync(
@@ -265,8 +210,6 @@ public class ComponentService
         decimal? customWidthMm,
         decimal? customHeightMm)
     {
-        await _authService.EnsureCanModifyResourcesAsync(userId, projectId);
-
         // Validate that either presetSize is set OR both custom dimensions are set
         if (!presetSize.HasValue && (!customWidthMm.HasValue || !customHeightMm.HasValue))
         {
@@ -299,9 +242,7 @@ public class ComponentService
             UpdatedAt = DateTime.UtcNow
         };
 
-        _context.PlayerMats.Add(playerMat);
-        await _context.SaveChangesAsync();
-
+        await CreateAndSaveComponentAsync(userId, projectId, playerMat);
         return new PlayerMatDto(playerMat);
     }
 
@@ -314,18 +255,12 @@ public class ComponentService
         decimal? customWidthMm,
         decimal? customHeightMm)
     {
-        var playerMat = await _context.PlayerMats
-            .Where(pm => pm.Id == componentId && pm.Project.Users.Any(u => u.Id == userId))
-            .FirstOrDefaultAsync();
+        var playerMat = await FindAndAuthorizeComponentAsync<PlayerMat>(
+            userId,
+            componentId,
+            ProjectAuthorizationService.CanModifyResources);
 
         if (playerMat == null)
-        {
-            return null;
-        }
-
-        // Check user's role - Viewers cannot update components
-        var role = await _authService.GetUserProjectRoleAsync(userId, playerMat.ProjectId);
-        if (role == null || !ProjectAuthorizationService.CanModifyResources(role.Value))
         {
             return null;
         }
@@ -363,65 +298,90 @@ public class ComponentService
 
     public async Task<PlayerMatDto?> SavePlayerMatDesignAsync(Guid userId, Guid componentId, string part, string? design)
     {
-        var playerMat = await _context.PlayerMats
-            .Where(pm => pm.Id == componentId && pm.Project.Users.Any(u => u.Id == userId))
+        return await SaveDesignAsync<PlayerMat, PlayerMatDto>(
+            userId,
+            componentId,
+            part,
+            design,
+            playerMat => new PlayerMatDto(playerMat));
+    }
+
+    public async Task<ComponentDto?> SaveDesignAsync(Guid userId, Guid componentId, string part, string? design)
+    {
+        // Find the component and check if it implements IEditableComponent
+        var component = await _context.Components
+            .Where(c => c.Id == componentId && c.Project.Users.Any(u => u.Id == userId))
             .FirstOrDefaultAsync();
 
-        if (playerMat == null)
+        if (component is not IEditableComponent editableComponent)
         {
             return null;
         }
 
-        // Check user's role - Viewers cannot save designs
-        var role = await _authService.GetUserProjectRoleAsync(userId, playerMat.ProjectId);
+        // Check user's role - Only users with modify permissions can save designs
+        var role = await _authService.GetUserProjectRoleAsync(userId, component.ProjectId);
         if (role == null || !ProjectAuthorizationService.CanModifyResources(role.Value))
         {
             return null;
         }
 
-        if (part.ToLower() == "front")
-        {
-            playerMat.FrontDesign = design;
-        }
-        else if (part.ToLower() == "back")
-        {
-            playerMat.BackDesign = design;
-        }
-        else
-        {
-            throw new ArgumentException($"Invalid part '{part}' for player mat. Must be 'front' or 'back'.");
-        }
+        editableComponent.SetDesign(part, design);
+        component.UpdatedAt = DateTime.UtcNow;
 
-        playerMat.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
-        return new PlayerMatDto(playerMat);
-    }
-
-    public async Task<PlayerMatDto?> UpdatePlayerMatDataSourceAsync(Guid userId, Guid componentId, Guid? dataSourceId)
-    {
-        var playerMat = await _context.PlayerMats
-            .Include(pm => pm.DataSource)
-            .Where(pm => pm.Id == componentId && pm.Project.Users.Any(u => u.Id == userId))
-            .FirstOrDefaultAsync();
-
-        if (playerMat == null)
+        // Load DataSource if the component supports it
+        if (component is IDataSourceComponent)
         {
-            return null;
+            await _context.Entry(component)
+                .Reference(nameof(IDataSourceComponent.DataSource))
+                .LoadAsync();
         }
 
+        return component.ToComponentDto();
+    }
+
+    private async Task<TDto?> SaveDesignAsync<TComponent, TDto>(
+        Guid userId,
+        Guid componentId,
+        string part,
+        string? design,
+        Func<TComponent, TDto> toDtoFunc)
+        where TComponent : Component, IEditableComponent
+    {
+        var component = await FindAndAuthorizeComponentAsync<TComponent>(
+            userId,
+            componentId,
+            ProjectAuthorizationService.CanModifyResources);
+
+        if (component == null)
+        {
+            return default;
+        }
+
+        component.SetDesign(part, design);
+
+        await _context.SaveChangesAsync();
+
+        return toDtoFunc(component);
+    }
+
+    private async Task<bool> TryUpdateComponentDataSourceAsync(Guid userId, [NotNullWhen(true)]IDataSourceComponent? component, Guid? dataSourceId)
+    {
+        if (component == null) return false;
+
         // Check user's role - Only Owners and Admins can update data source links
-        var role = await _authService.GetUserProjectRoleAsync(userId, playerMat.ProjectId);
+        var role = await _authService.GetUserProjectRoleAsync(userId, component.ProjectId);
         if (role == null || !ProjectAuthorizationService.CanManageDataSources(role.Value))
         {
-            return null;
+            return false;
         }
 
         // If dataSourceId is provided, verify it exists and belongs to the same project
         if (dataSourceId.HasValue)
         {
             var dataSourceExists = await _context.DataSources
-                .AnyAsync(ds => ds.Id == dataSourceId.Value && ds.ProjectId == playerMat.ProjectId);
+                .AnyAsync(ds => ds.Id == dataSourceId.Value && ds.ProjectId == component.ProjectId);
 
             if (!dataSourceExists)
             {
@@ -429,17 +389,62 @@ public class ComponentService
             }
 
             // Load the data source to ensure it's available in the response
-            playerMat.DataSource = await _context.DataSources.FindAsync(dataSourceId.Value);
+            component.DataSource = await _context.DataSources.FindAsync(dataSourceId.Value);
         }
         else
         {
             // Remove the data source
-            playerMat.DataSource = null;
+            component.DataSource = null;
         }
 
-        playerMat.UpdatedAt = DateTime.UtcNow;
+        component.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
-        return new PlayerMatDto(playerMat);
+        return true;
+    }
+
+    private async Task<T> CreateAndSaveComponentAsync<T>(
+        Guid userId,
+        Guid projectId,
+        T component) where T : Component
+    {
+        await _authService.EnsureCanModifyResourcesAsync(userId, projectId);
+
+        _context.Set<T>().Add(component);
+        await _context.SaveChangesAsync();
+
+        return component;
+    }
+
+    private async Task<T?> FindAndAuthorizeComponentAsync<T>(
+        Guid userId,
+        Guid componentId,
+        Func<ProjectRole, bool> authorizationCheck,
+        Func<IQueryable<T>, IQueryable<T>>? includeFunc = null)
+        where T : Component
+    {
+        var query = _context.Set<T>()
+            .Where(c => c.Id == componentId && c.Project.Users.Any(u => u.Id == userId));
+
+        if (includeFunc != null)
+        {
+            query = includeFunc(query);
+        }
+
+        var component = await query.FirstOrDefaultAsync();
+
+        if (component == null)
+        {
+            return null;
+        }
+
+        // Check user's role with the provided authorization check
+        var role = await _authService.GetUserProjectRoleAsync(userId, component.ProjectId);
+        if (role == null || !authorizationCheck(role.Value))
+        {
+            return null;
+        }
+
+        return component;
     }
 }

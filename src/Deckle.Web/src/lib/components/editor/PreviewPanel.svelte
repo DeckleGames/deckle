@@ -86,22 +86,13 @@
         design = JSON.stringify(store.root);
       })();
 
-      // Save the design via API based on component type
-      if (component.type === "Card") {
-        await componentsApi.saveCardDesign(
-          projectId,
-          component.id,
-          part.toLowerCase(),
-          design
-        );
-      } else if (component.type === "PlayerMat") {
-        await componentsApi.savePlayerMatDesign(
-          projectId,
-          component.id,
-          part.toLowerCase(),
-          design
-        );
-      }
+      // Save the design via API (works for both Card and PlayerMat)
+      await componentsApi.saveDesign(
+        projectId,
+        component.id,
+        part.toLowerCase(),
+        design
+      );
 
       // Mark changes as saved
       templateStore.markAsSaved();
