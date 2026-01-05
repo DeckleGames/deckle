@@ -143,6 +143,27 @@
     paperDimensionsPx.height - 2 * marginPx
   );
 
+  // Rotation state - tracks which component instances are rotated
+  // Key format: "componentIndex-dataHash"
+  let rotationState = $state<Map<string, boolean>>(new Map());
+
+  // Generate a unique key for each instance
+  function getInstanceKey(componentIndex: number, mergeData: Record<string, string> | null, copyIndex: number): string {
+    if (!mergeData || Object.keys(mergeData).length === 0) {
+      return `${componentIndex}-${copyIndex}`;
+    }
+    // Create a stable hash from mergeData
+    const dataStr = JSON.stringify(mergeData);
+    return `${componentIndex}-${dataStr}-${copyIndex}`;
+  }
+
+  // Toggle rotation for a component instance
+  function toggleRotation(instanceKey: string) {
+    const currentRotation = rotationState.get(instanceKey) || false;
+    rotationState.set(instanceKey, !currentRotation);
+    rotationState = new Map(rotationState); // Trigger reactivity
+  }
+
   // Layout component instances on pages
   interface ComponentInstance {
     componentIndex: number;
@@ -152,6 +173,8 @@
     widthPx: number;
     heightPx: number;
     bleedPx: number;
+    instanceKey: string;
+    isRotated: boolean;
   }
 
   interface Page {
@@ -208,8 +231,16 @@
           : 1;
 
         for (let copyIndex = 0; copyIndex < numCopies; copyIndex++) {
+          // Generate instance key and check rotation state
+          const instanceKey = getInstanceKey(componentIndex, Object.keys(rowData).length > 0 ? rowData : null, copyIndex);
+          const isRotated = rotationState.get(instanceKey) || false;
+
+          // Swap dimensions if rotated
+          const layoutWidthPx = isRotated ? instanceHeightPx : instanceWidthPx;
+          const layoutHeightPx = isRotated ? instanceWidthPx : instanceHeightPx;
+
           // Check if instance fits in current row
-          if (currentX + instanceWidthPx > printableAreaWidthPx) {
+          if (currentX + layoutWidthPx > printableAreaWidthPx) {
             // Move to next row
             currentX = 0;
             currentY += rowHeight;
@@ -217,7 +248,7 @@
           }
 
           // Check if instance fits on current page
-          if (currentY + instanceHeightPx > printableAreaHeightPx) {
+          if (currentY + layoutHeightPx > printableAreaHeightPx) {
             // Start new page
             if (currentPage.instances.length > 0) {
               pages.push(currentPage);
@@ -237,11 +268,13 @@
             widthPx: instanceWidthPx,
             heightPx: instanceHeightPx,
             bleedPx: component.dimensions.bleedPx,
+            instanceKey,
+            isRotated,
           });
 
-          // Update position for next instance
-          currentX += instanceWidthPx;
-          rowHeight = Math.max(rowHeight, instanceHeightPx);
+          // Update position for next instance (use layout dimensions)
+          currentX += layoutWidthPx;
+          rowHeight = Math.max(rowHeight, layoutHeightPx);
         }
       }
     });
@@ -301,10 +334,14 @@
       let maxY = -Infinity;
 
       for (const instance of page.instances) {
+        // Use layout dimensions for rotated components
+        const layoutWidthPx = instance.isRotated ? instance.heightPx : instance.widthPx;
+        const layoutHeightPx = instance.isRotated ? instance.widthPx : instance.heightPx;
+
         minX = Math.min(minX, instance.x);
         minY = Math.min(minY, instance.y);
-        maxX = Math.max(maxX, instance.x + instance.widthPx);
-        maxY = Math.max(maxY, instance.y + instance.heightPx);
+        maxX = Math.max(maxX, instance.x + layoutWidthPx);
+        maxY = Math.max(maxY, instance.y + layoutHeightPx);
       }
 
       return { minX, minY, maxX, maxY };
@@ -381,20 +418,45 @@
                   {@const designJson = isBack ? component.backDesign : component.frontDesign}
                   {#if designJson}
                     {@const design = JSON.parse(designJson) as ContainerElement}
+                    {@const rotation = instance.isRotated ? (isBack ? -90 : 90) : 0}
+                    {@const layoutWidthPx = instance.isRotated ? instance.heightPx : instance.widthPx}
+                    {@const layoutHeightPx = instance.isRotated ? instance.widthPx : instance.heightPx}
                     <div
                       class="component-instance"
+                      role="button"
+                      tabindex="0"
+                      onclick={() => toggleRotation(instance.instanceKey)}
+                      onkeydown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleRotation(instance.instanceKey);
+                        }
+                      }}
                       style="
                         position: absolute;
                         left: {instance.x}px;
                         top: {instance.y}px;
+                        width: {layoutWidthPx}px;
+                        height: {layoutHeightPx}px;
+                        cursor: pointer;
                       "
                     >
-                      <StaticComponentRenderer
-                        {design}
-                        dimensions={component.dimensions}
-                        shape={component.shape}
-                        mergeData={instance.mergeData}
-                      />
+                      <div
+                        class="component-renderer-wrapper"
+                        style="
+                          transform: rotate({rotation}deg) translateY({rotation !== 0 ? '-100%' : '0'});
+                          transform-origin: top left;
+                          width: {instance.widthPx}px;
+                          height: {instance.heightPx}px;
+                        "
+                      >
+                        <StaticComponentRenderer
+                          {design}
+                          dimensions={component.dimensions}
+                          shape={component.shape}
+                          mergeData={instance.mergeData}
+                        />
+                      </div>
                     </div>
                   {/if}
                 {/if}
@@ -415,14 +477,16 @@
                   "
                 >
                   {#each page.instances as instance}
+                    {@const layoutWidthPx = instance.isRotated ? instance.heightPx : instance.widthPx}
+                    {@const layoutHeightPx = instance.isRotated ? instance.widthPx : instance.heightPx}
                     {@const instanceBleedLeft = instance.x + cropMarkSpace}
                     {@const instanceBleedTop = instance.y + cropMarkSpace}
-                    {@const instanceBleedRight = instance.x + instance.widthPx + cropMarkSpace}
-                    {@const instanceBleedBottom = instance.y + instance.heightPx + cropMarkSpace}
+                    {@const instanceBleedRight = instance.x + layoutWidthPx + cropMarkSpace}
+                    {@const instanceBleedBottom = instance.y + layoutHeightPx + cropMarkSpace}
                     {@const instanceCutLeft = instance.x + instance.bleedPx + cropMarkSpace}
                     {@const instanceCutTop = instance.y + instance.bleedPx + cropMarkSpace}
-                    {@const instanceCutRight = instance.x + instance.widthPx - instance.bleedPx + cropMarkSpace}
-                    {@const instanceCutBottom = instance.y + instance.heightPx - instance.bleedPx + cropMarkSpace}
+                    {@const instanceCutRight = instance.x + layoutWidthPx - instance.bleedPx + cropMarkSpace}
+                    {@const instanceCutBottom = instance.y + layoutHeightPx - instance.bleedPx + cropMarkSpace}
 
                     <!-- Left edge crop marks -->
                     {#if instance.x === bounds.minX}
@@ -445,7 +509,7 @@
                     {/if}
 
                     <!-- Right edge crop marks -->
-                    {#if instance.x + instance.widthPx === bounds.maxX}
+                    {#if instance.x + layoutWidthPx === bounds.maxX}
                       <line
                         x1={instanceBleedRight + cropMarkOffset}
                         y1={instanceCutTop}
@@ -485,7 +549,7 @@
                     {/if}
 
                     <!-- Bottom edge crop marks -->
-                    {#if instance.y + instance.heightPx === bounds.maxY}
+                    {#if instance.y + layoutHeightPx === bounds.maxY}
                       <line
                         x1={instanceCutLeft}
                         y1={instanceBleedBottom + cropMarkOffset}
@@ -569,5 +633,19 @@
 
   .component-instance {
     pointer-events: auto;
+    transition: opacity 0.15s ease;
+  }
+
+  .component-instance:hover {
+    opacity: 0.85;
+  }
+
+  .component-instance:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+
+  .component-renderer-wrapper {
+    transition: transform 0.3s ease;
   }
 </style>
