@@ -703,7 +703,7 @@
   }
 
   .zoom-control {
-    position: absolute;
+    position: fixed;
     bottom: 1rem;
     right: 1rem;
     display: flex;
