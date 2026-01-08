@@ -8,7 +8,19 @@
     <UserSecretsId>8f851dae-38eb-4666-8f6d-e7ef577f8fa5</UserSecretsId>
   </PropertyGroup>
 
+  <!-- GitVersion configuration -->
+  <PropertyGroup>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <GenerateAssemblyVersionAttribute>true</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>true</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>true</GenerateAssemblyInformationalVersionAttribute>
+  </PropertyGroup>
+
   <ItemGroup>
+    <PackageReference Include="GitVersion.MsBuild" Version="6.2.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Aspire.Hosting.Docker" Version="13.1.0-preview.1.25616.3" />
     <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.1.0" />

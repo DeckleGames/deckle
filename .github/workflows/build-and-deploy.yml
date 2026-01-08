@@ -15,13 +15,36 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write  # For creating Git tags
       packages: write
       security-events: write  # For Trivy SARIF upload
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for GitVersion to work properly
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3.1.2
+        with:
+          versionSpec: '6.x'
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v3.1.2
+        with:
+          useConfigFile: true
+          configFilePath: GitVersion.yml
+
+      - name: Display GitVersion outputs
+        run: |
+          echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
+          echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
+          echo "InformationalVersion: ${{ steps.gitversion.outputs.informationalVersion }}"
+          echo "Major: ${{ steps.gitversion.outputs.major }}"
+          echo "Minor: ${{ steps.gitversion.outputs.minor }}"
+          echo "Patch: ${{ steps.gitversion.outputs.patch }}"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -123,11 +146,16 @@ jobs:
             # Build GHCR image path
             ghcr_image="${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${service_name}"
 
-            # Tag with improved versioning strategy
-            docker tag "$image" "${ghcr_image}:latest"
+            # Tag with semantic versioning strategy
+            docker tag "$image" "${ghcr_image}:${{ steps.gitversion.outputs.semVer }}"
+            docker tag "$image" "${ghcr_image}:${{ steps.gitversion.outputs.major }}.${{ steps.gitversion.outputs.minor }}"
+            docker tag "$image" "${ghcr_image}:${{ steps.gitversion.outputs.major }}"
             docker tag "$image" "${ghcr_image}:${{ steps.meta.outputs.sha_short }}"
-            docker tag "$image" "${ghcr_image}:${{ steps.meta.outputs.date }}"
-            docker tag "$image" "${ghcr_image}:${{ steps.meta.outputs.branch }}-${{ steps.meta.outputs.sha_short }}"
+
+            # Only tag as 'latest' for master/main branch stable releases
+            if [[ "${{ steps.meta.outputs.branch }}" == "master" || "${{ steps.meta.outputs.branch }}" == "main" ]]; then
+              docker tag "$image" "${ghcr_image}:latest"
+            fi
 
             # Run Trivy scan on the local image before pushing
             echo "Scanning image for vulnerabilities..."
@@ -142,10 +170,15 @@ jobs:
 
             # Push all tags
             echo "Pushing tags to registry..."
-            docker push "${ghcr_image}:latest"
+            docker push "${ghcr_image}:${{ steps.gitversion.outputs.semVer }}"
+            docker push "${ghcr_image}:${{ steps.gitversion.outputs.major }}.${{ steps.gitversion.outputs.minor }}"
+            docker push "${ghcr_image}:${{ steps.gitversion.outputs.major }}"
             docker push "${ghcr_image}:${{ steps.meta.outputs.sha_short }}"
-            docker push "${ghcr_image}:${{ steps.meta.outputs.date }}"
-            docker push "${ghcr_image}:${{ steps.meta.outputs.branch }}-${{ steps.meta.outputs.sha_short }}"
+
+            # Push latest tag only for master/main
+            if [[ "${{ steps.meta.outputs.branch }}" == "master" || "${{ steps.meta.outputs.branch }}" == "main" ]]; then
+              docker push "${ghcr_image}:latest"
+            fi
 
             echo "Successfully pushed: $service_name"
           done
@@ -163,3 +196,13 @@ jobs:
           name: docker-compose-artifacts
           path: docker-compose-artifacts/
           retention-days: 30
+
+      - name: Create Git Tag
+        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ steps.gitversion.outputs.semVer }}" -m "Release v${{ steps.gitversion.outputs.semVer }}"
+          git push origin "v${{ steps.gitversion.outputs.semVer }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
