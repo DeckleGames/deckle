@@ -9,7 +9,7 @@ services:
     networks:
       - "aspire"
     restart: "always"
-  db-server:
+  postgres:
     image: "docker.io/library/postgres:17.6"
     environment:
       POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"

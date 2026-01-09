@@ -131,6 +131,13 @@ jobs:
               continue
             fi
 
+            # Skip third-party images (postgres, aspire-dashboard, etc.)
+            # Only process our application images that contain 'deckle'
+            if ! echo "$image" | grep -q "deckle"; then
+              echo "Skipping third-party image: $image"
+              continue
+            fi
+
             # Extract service name from image (remove path and tag)
             service_name=$(echo "$image" | sed 's/.*\///; s/:.*$//')
 
