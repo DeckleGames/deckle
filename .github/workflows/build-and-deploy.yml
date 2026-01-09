@@ -118,6 +118,12 @@ jobs:
           echo "date=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
           echo "sha_short=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
           echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+          
+      - name: Lowercase Registry and Image Name
+        run: |
+          # Convert to lowercase using 'tr' and write to environment
+          echo "REGISTRY_LOWER=$(echo ${{ env.REGISTRY }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "IMAGE_PREFIX_LOWER=$(echo ${{ env.IMAGE_PREFIX }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Build and push Docker images
         if: github.event_name != 'pull_request'
@@ -144,7 +150,7 @@ jobs:
             echo "Processing image: $image (service: $service_name)"
 
             # Build GHCR image path
-            ghcr_image="${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${service_name}"
+            ghcr_image="${{ env.REGISTRY_LOWER }}/${{ env.IMAGE_PREFIX_LOWER }}/${service_name}"
 
             # Tag with semantic versioning strategy
             docker tag "$image" "${ghcr_image}:${{ steps.gitversion.outputs.semVer }}"
