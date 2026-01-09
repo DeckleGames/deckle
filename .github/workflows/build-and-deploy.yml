@@ -131,8 +131,8 @@ jobs:
               continue
             fi
 
-            # Extract service name from image
-            service_name=$(echo "$image" | sed 's/.*\///')
+            # Extract service name from image (remove path and tag)
+            service_name=$(echo "$image" | sed 's/.*\///; s/:.*$//')
 
             echo "Processing image: $image (service: $service_name)"
 
