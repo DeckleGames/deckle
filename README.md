@@ -40,6 +40,55 @@ dotnet restore
 dotnet build
 ```
 
+## Versioning
+
+Deckle uses [GitVersion](https://gitversion.net/) for automatic semantic versioning. We follow **GitHubFlow**: master is always releasable, features branch off and PR back.
+
+### How It Works
+
+Every merge to master automatically gets a version number following [Semantic Versioning](https://semver.org/):
+
+- **MAJOR** (breaking changes): Add `+semver: major` to commit message
+- **MINOR** (new features): Add `+semver: minor` to commit message
+- **PATCH** (bug fixes): Default, or add `+semver: patch`
+
+### Workflow
+
+```bash
+# 1. Create a feature branch
+git checkout -b feature/new-component
+
+# 2. Make changes and commit
+git commit -m "Add player mat component +semver: minor"
+
+# 3. Push and create PR
+git push origin feature/new-component
+
+# 4. Merge PR to master
+# GitHub Actions automatically:
+#   - Calculates version (e.g., 1.3.0)
+#   - Tags Docker images
+#   - Creates Git tag (v1.3.0)
+```
+
+### Docker Image Tags
+
+Every master build creates images tagged with:
+
+- **{SemVer}** (1.2.3) - Full version
+- **{Major}.{Minor}** (1.2) - Minor version
+- **{Major}** (1) - Major version
+- **{sha}** (abc1234) - Git commit
+- **latest** - Always points to newest master build
+
+### Version Endpoint
+
+Check the version of a running instance:
+
+```bash
+curl http://localhost:5000/api/version
+```
+
 ## Technology Stack
 
 - **Backend**: .NET 10 with Aspire orchestration

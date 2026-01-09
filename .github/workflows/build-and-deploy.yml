@@ -15,21 +15,40 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write  # For creating Git tags
       packages: write
-      security-events: write  # For Trivy SARIF upload
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for GitVersion to work properly
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4
+        with:
+          versionSpec: '6.x'
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v4
+        with:
+          useConfigFile: true
+          configFilePath: GitVersion.yml
+
+      - name: Display GitVersion outputs
+        run: |
+          echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
+          echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
+          echo "InformationalVersion: ${{ steps.gitversion.outputs.informationalVersion }}"
+          echo "Major: ${{ steps.gitversion.outputs.major }}"
+          echo "Minor: ${{ steps.gitversion.outputs.minor }}"
+          echo "Patch: ${{ steps.gitversion.outputs.patch }}"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-
-      - name: Install .NET Aspire workload
-        run: dotnet workload install aspire
 
       - name: Cache NuGet packages
         uses: actions/cache@v4
@@ -64,24 +83,21 @@ jobs:
           path: '**/TestResults/**/coverage.cobertura.xml'
           retention-days: 30
 
-      - name: Run Trivy vulnerability scanner (filesystem)
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-fs-results.sarif'
-          severity: 'CRITICAL,HIGH'
+      - name: Build API container
+        run: |
+          cd src
+          docker build -f Deckle.API/Dockerfile -t deckle-api:local .
 
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: 'trivy-fs-results.sarif'
-          category: 'trivy-filesystem'
+      - name: Build Web container
+        run: |
+          cd src/Deckle.Web
+          docker build -t deckle-web:local .
 
-      - name: Publish with Aspire
-        run: aspire publish -o docker-compose-artifacts
+      - name: Prepare docker-compose artifacts
+        run: |
+          # Copy template and replace environment variables with actual image names
+          cp docker-compose-artifacts/docker-compose.yaml docker-compose-artifacts/docker-compose.yaml.template
+          sed 's/\${API_IMAGE}/deckle-api:local/g; s/\${WEB_IMAGE}/deckle-web:local/g' docker-compose-artifacts/docker-compose.yaml.template > docker-compose-artifacts/docker-compose.yaml
 
       - name: Log in to GitHub Container Registry
         if: github.event_name != 'pull_request'
@@ -123,39 +139,31 @@ jobs:
             # Build GHCR image path
             ghcr_image="${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${service_name}"
 
-            # Tag with improved versioning strategy
-            docker tag "$image" "${ghcr_image}:latest"
+            # Tag with semantic versioning strategy
+            docker tag "$image" "${ghcr_image}:${{ steps.gitversion.outputs.semVer }}"
+            docker tag "$image" "${ghcr_image}:${{ steps.gitversion.outputs.major }}.${{ steps.gitversion.outputs.minor }}"
+            docker tag "$image" "${ghcr_image}:${{ steps.gitversion.outputs.major }}"
             docker tag "$image" "${ghcr_image}:${{ steps.meta.outputs.sha_short }}"
-            docker tag "$image" "${ghcr_image}:${{ steps.meta.outputs.date }}"
-            docker tag "$image" "${ghcr_image}:${{ steps.meta.outputs.branch }}-${{ steps.meta.outputs.sha_short }}"
 
-            # Run Trivy scan on the local image before pushing
-            echo "Scanning image for vulnerabilities..."
-            docker run --rm \
-              -v /var/run/docker.sock:/var/run/docker.sock \
-              -v "$(pwd):/output" \
-              aquasec/trivy:latest image \
-              --format sarif \
-              --output "/output/trivy-${service_name}-results.sarif" \
-              --severity CRITICAL,HIGH \
-              "$image" || echo "Warning: Trivy scan failed for ${service_name}"
+            # Only tag as 'latest' for master/main branch stable releases
+            if [[ "${{ steps.meta.outputs.branch }}" == "master" || "${{ steps.meta.outputs.branch }}" == "main" ]]; then
+              docker tag "$image" "${ghcr_image}:latest"
+            fi
 
             # Push all tags
             echo "Pushing tags to registry..."
-            docker push "${ghcr_image}:latest"
+            docker push "${ghcr_image}:${{ steps.gitversion.outputs.semVer }}"
+            docker push "${ghcr_image}:${{ steps.gitversion.outputs.major }}.${{ steps.gitversion.outputs.minor }}"
+            docker push "${ghcr_image}:${{ steps.gitversion.outputs.major }}"
             docker push "${ghcr_image}:${{ steps.meta.outputs.sha_short }}"
-            docker push "${ghcr_image}:${{ steps.meta.outputs.date }}"
-            docker push "${ghcr_image}:${{ steps.meta.outputs.branch }}-${{ steps.meta.outputs.sha_short }}"
+
+            # Push latest tag only for master/main
+            if [[ "${{ steps.meta.outputs.branch }}" == "master" || "${{ steps.meta.outputs.branch }}" == "main" ]]; then
+              docker push "${ghcr_image}:latest"
+            fi
 
             echo "Successfully pushed: $service_name"
           done
-
-      - name: Upload Trivy image scan results
-        uses: github/codeql-action/upload-sarif@v3
-        if: always() && github.event_name != 'pull_request'
-        with:
-          sarif_file: 'docker-compose-artifacts/trivy-*-results.sarif'
-          category: 'trivy-images'
 
       - name: Upload docker-compose artifacts
         uses: actions/upload-artifact@v4
@@ -163,3 +171,13 @@ jobs:
           name: docker-compose-artifacts
           path: docker-compose-artifacts/
           retention-days: 30
+
+      - name: Create Git Tag
+        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ steps.gitversion.outputs.semVer }}" -m "Release v${{ steps.gitversion.outputs.semVer }}"
+          git push origin "v${{ steps.gitversion.outputs.semVer }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

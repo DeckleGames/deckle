@@ -218,6 +218,7 @@ app.UseAuthorization();
 app.MapDefaultEndpoints();
 
 // Map endpoint groups
+app.MapVersionEndpoints();
 app.MapAuthEndpoints();
 app.MapProjectEndpoints();
 app.MapDataSourceEndpoints();

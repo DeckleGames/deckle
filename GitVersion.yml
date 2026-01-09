@@ -1,0 +1,40 @@
+# GitVersion configuration for Deckle
+# Using GitHubFlow: master is always releasable, features branch off and PR back
+
+# Tag prefix for releases (e.g., v1.2.3)
+tag-prefix: '[vV]'
+
+# Version increment strategies based on commit messages
+major-version-bump-message: '\+semver:\s?(breaking|major)'
+minor-version-bump-message: '\+semver:\s?(feature|minor)'
+patch-version-bump-message: '\+semver:\s?(fix|patch)'
+no-bump-message: '\+semver:\s?(none|skip)'
+
+# Enable commit message incrementing
+commit-message-incrementing: Enabled
+
+# Update build number
+update-build-number: true
+
+# Branch configuration
+branches:
+  # Master/Main - always releasable
+  master:
+    regex: ^master$|^main$
+    mode: ContinuousDelivery
+    label: ''
+    increment: Patch
+
+  # Feature branches - work in progress
+  feature:
+    regex: ^features?[/-]
+    mode: ContinuousDeployment
+    label: alpha
+    increment: Minor
+
+  # Pull request branches
+  pull-request:
+    regex: ^(pull|pull\-requests|pr)[/-]
+    mode: ContinuousDeployment
+    label: pr
+    increment: Inherit
