@@ -14,6 +14,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
+// Diagnostic: Log connection string configuration
+var connectionString = builder.Configuration.GetConnectionString("deckledb");
+Console.WriteLine($"[DIAGNOSTIC] Connection string 'deckledb': {(string.IsNullOrEmpty(connectionString) ? "EMPTY OR NULL" : $"Length={connectionString.Length}, Starts with={connectionString.Substring(0, Math.Min(20, connectionString.Length))}...")}");
+Console.WriteLine($"[DIAGNOSTIC] Environment: {builder.Environment.EnvironmentName}");
+Console.WriteLine($"[DIAGNOSTIC] All connection strings in config:");
+var connStrings = builder.Configuration.GetSection("ConnectionStrings");
+foreach (var child in connStrings.GetChildren())
+{
+    Console.WriteLine($"  - {child.Key}: {(string.IsNullOrEmpty(child.Value) ? "EMPTY" : "SET")}");
+}
+
 builder.AddNpgsqlDbContext<AppDbContext>("deckledb");
 
 // Add authentication services

@@ -194,3 +194,14 @@ jobs:
           git push origin "v${{ steps.gitversion.outputs.semVer }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger Railway Deployment
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          echo "Triggering Railway API deployment..."
+          curl -f -X POST "${{ secrets.RAILWAY_API_WEBHOOK_URL }}" || echo "Warning: API webhook failed"
+
+          echo "Triggering Railway Web deployment..."
+          curl -f -X POST "${{ secrets.RAILWAY_WEB_WEBHOOK_URL }}" || echo "Warning: Web webhook failed"
+
+          echo "Railway deployments triggered successfully"
