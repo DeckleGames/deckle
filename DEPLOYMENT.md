@@ -24,6 +24,22 @@ Railway Project
 └── Web Service (pulls ghcr.io/.../deckle-web)
 ```
 
+## Important: Aspire vs Railway Configuration
+
+Deckle is built with .NET Aspire for local development, but deployed to Railway for production. There are some key differences:
+
+**Development (Aspire):**
+- Uses `builder.AddNpgsqlDbContext<AppDbContext>("deckledb")` - Aspire-specific method
+- Relies on Aspire's service discovery and orchestration
+- Connection strings managed by Aspire AppHost
+
+**Production (Railway):**
+- Uses standard `builder.Services.AddDbContext<AppDbContext>()` with `options.UseNpgsql()`
+- Standard Entity Framework Core configuration
+- Connection strings from environment variables
+
+**The API automatically detects the environment and uses the appropriate configuration method.** No manual changes needed - just ensure the `ConnectionStrings__deckledb` environment variable is set in Railway.
+
 ## Step 1: Create Railway Project
 
 ### Option A: Using Railway CLI

@@ -14,18 +14,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-// Diagnostic: Log connection string configuration
+// Configure database context
+// In non-Aspire environments (like Railway), use standard EF Core configuration
+// Aspire's AddNpgsqlDbContext expects service discovery which isn't available outside Aspire orchestration
 var connectionString = builder.Configuration.GetConnectionString("deckledb");
-Console.WriteLine($"[DIAGNOSTIC] Connection string 'deckledb': {(string.IsNullOrEmpty(connectionString) ? "EMPTY OR NULL" : $"Length={connectionString.Length}, Starts with={connectionString.Substring(0, Math.Min(20, connectionString.Length))}...")}");
-Console.WriteLine($"[DIAGNOSTIC] Environment: {builder.Environment.EnvironmentName}");
-Console.WriteLine($"[DIAGNOSTIC] All connection strings in config:");
-var connStrings = builder.Configuration.GetSection("ConnectionStrings");
-foreach (var child in connStrings.GetChildren())
+if (string.IsNullOrEmpty(connectionString))
 {
-    Console.WriteLine($"  - {child.Key}: {(string.IsNullOrEmpty(child.Value) ? "EMPTY" : "SET")}");
+    throw new InvalidOperationException("Database connection string 'deckledb' is not configured. Please set ConnectionStrings__deckledb environment variable.");
 }
 
-builder.AddNpgsqlDbContext<AppDbContext>("deckledb");
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseNpgsql(connectionString);
+});
 
 // Add authentication services
 builder.Services.AddAuthentication(options =>
