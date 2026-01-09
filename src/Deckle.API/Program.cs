@@ -26,17 +26,36 @@ builder.Services.AddAuthentication(options =>
 {
     options.Cookie.Name = "Deckle.Auth";
     options.Cookie.HttpOnly = true;
+
     if (builder.Environment.IsDevelopment())
     {
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.Domain = null; // Don't set domain to allow cross-port cookies on localhost
     }
     else
     {
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.SameSite = SameSiteMode.None;
+
+        // In production, set cookie domain to allow sharing between API and Web subdomains
+        // Railway domains use pattern: {service}.up.railway.app
+        // To share cookies, we need a shared parent domain
+        // If using custom domain (api.yourdomain.com and app.yourdomain.com), set to .yourdomain.com
+        var cookieDomain = builder.Configuration["CookieDomain"];
+        if (!string.IsNullOrWhiteSpace(cookieDomain))
+        {
+            options.Cookie.Domain = cookieDomain;
+            builder.Configuration.GetSection("Logging").GetChildren().FirstOrDefault()?.GetSection("LogLevel").GetChildren().FirstOrDefault();
+            Console.WriteLine($"Cookie domain set to: {cookieDomain}");
+        }
+        else
+        {
+            options.Cookie.Domain = null;
+            Console.WriteLine("WARNING: CookieDomain not configured. Cookies will not be shared between API and Web domains on Railway.");
+        }
     }
-    options.Cookie.Domain = null; // Don't set domain to allow cross-port cookies on localhost
+
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
     options.Events.OnRedirectToLogin = context =>
@@ -140,12 +159,12 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-var frontendUrl = builder.Configuration["FrontendUrl"] ?? "http://localhost:5173";
-
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
+        var frontendUrl = builder.Configuration["FrontendUrl"];
+
         policy.SetIsOriginAllowed(origin =>
             {
                 if (string.IsNullOrEmpty(origin))
@@ -157,8 +176,23 @@ builder.Services.AddCors(options =>
                 if (builder.Environment.IsDevelopment() && uri.Host == "localhost")
                     return true;
 
-                // Allow the configured frontend URL
-                return origin == frontendUrl ||
+                // In production, FrontendUrl must be configured
+                if (string.IsNullOrWhiteSpace(frontendUrl))
+                {
+                    if (!builder.Environment.IsDevelopment())
+                    {
+                        Console.WriteLine("WARNING: FrontendUrl not configured in production. CORS will block all requests.");
+                        return false;
+                    }
+                    // Development fallback
+                    return origin == "http://localhost:5173" || origin == "https://localhost:5173";
+                }
+
+                // Allow the configured frontend URL (with and without trailing slash)
+                var normalizedFrontendUrl = frontendUrl.TrimEnd('/');
+                var normalizedOrigin = origin.TrimEnd('/');
+
+                return normalizedOrigin == normalizedFrontendUrl ||
                        origin == "http://localhost:5173" ||
                        origin == "https://localhost:5173";
             })

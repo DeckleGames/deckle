@@ -2,6 +2,8 @@
 
 This guide provides step-by-step instructions for deploying Deckle to Railway using pre-built Docker images from GitHub Container Registry (GHCR).
 
+**Note:** For a complete custom domain setup example with deckle.games, see [RAILWAY_CONFIG.md](RAILWAY_CONFIG.md).
+
 ## Prerequisites
 
 - Railway account (sign up at https://railway.app)
@@ -105,7 +107,27 @@ Go to API service → Variables and add:
 | `ASPNETCORE_URLS` | `http://+:8080` | Listening URL |
 | `ASPNETCORE_FORWARDEDHEADERS_ENABLED` | `true` | Enable proxy headers |
 | `ConnectionStrings__deckledb` | `Host=${{Postgres.PGHOST}};Port=${{Postgres.PGPORT}};Username=${{Postgres.PGUSER}};Password=${{Postgres.PGPASSWORD}};Database=${{Postgres.PGDATABASE}}` | Database connection (Railway reference) |
-| `FrontendUrl` | `https://${{web.RAILWAY_PUBLIC_DOMAIN}}` | Frontend URL (Railway reference) |
+| `FrontendUrl` | `https://${{web.RAILWAY_PUBLIC_DOMAIN}}` | **REQUIRED**: Frontend URL (Railway reference) |
+| `CookieDomain` | _(see note below)_ | **OPTIONAL**: Cookie domain for cross-domain auth |
+
+**IMPORTANT - Cookie Domain Configuration:**
+
+Railway default domains (`*.up.railway.app`) cannot share cookies between services because browsers don't allow cookie sharing across different subdomains of a public suffix. This means authentication cookies set by the API won't be accessible to the Web frontend.
+
+**Options:**
+
+1. **Use a Custom Domain (Recommended)**:
+   - Set up custom subdomains: `api.yourdomain.com` and `app.yourdomain.com`
+   - Example: `api.deckle.games` and `app.deckle.games`
+   - Set `CookieDomain` to `.yourdomain.com` (note the leading dot)
+   - Example: `.deckle.games`
+   - This allows both subdomains to share authentication cookies
+   - See Step 8 for custom domain setup or [RAILWAY_CONFIG.md](RAILWAY_CONFIG.md) for complete example
+
+2. **Use Railway Default Domains (Limited)**:
+   - Leave `CookieDomain` empty or unset
+   - Authentication will work, but cookies won't persist across page refreshes due to cross-domain limitations
+   - Not recommended for production use
 
 #### Authentication - Google OAuth
 
@@ -312,37 +334,85 @@ Look for Entity Framework migration logs. The database schema is applied automat
 4. Create a test project
 5. Verify it's saved (check PostgreSQL)
 
-## Step 8: Custom Domain (Optional)
+## Step 8: Custom Domain (Required for Production)
 
-### 8.1 Add Custom Domain to Web Service
+**Important:** Custom domains are required for proper authentication in production. Railway default domains cannot share cookies between services.
 
-1. Web service → Settings → Networking → Domains
-2. Click "Add Domain"
-3. Enter your domain: `app.yourdomain.com`
-4. Railway provides DNS instructions
+**Example Setup:** `api.deckle.games` and `app.deckle.games`
+
+### 8.1 Add Custom Domain to Both Services
+
+**API Service:**
+1. Railway → API service → Settings → Networking → Custom Domains
+2. Click "Add Custom Domain"
+3. Enter your API domain: `api.yourdomain.com` (e.g., `api.deckle.games`)
+4. Railway will provide a CNAME target (e.g., `deckle-api-production-xyz123.up.railway.app`)
+5. Copy this target - you'll add it to DNS
+
+**Web Service:**
+1. Railway → Web service → Settings → Networking → Custom Domains
+2. Click "Add Custom Domain"
+3. Enter your web domain: `app.yourdomain.com` (e.g., `app.deckle.games`)
+4. Railway will provide a CNAME target
+5. Copy this target - you'll add it to DNS
 
 ### 8.2 Configure DNS
 
-Add CNAME record in your DNS provider:
+Add CNAME records in your DNS provider (Cloudflare, Route53, etc.):
+
 ```
 Type: CNAME
+Name: api
+Value: {api-cname-from-railway}.up.railway.app
+
+Type: CNAME
 Name: app
-Value: {provided-by-railway}.up.railway.app
+Value: {web-cname-from-railway}.up.railway.app
+```
+
+**Example for deckle.games:**
+```
+Type: CNAME
+Name: api
+Value: deckle-api-production-abc123.up.railway.app
+
+Type: CNAME
+Name: app
+Value: deckle-web-production-xyz789.up.railway.app
+```
+
+**Wait for DNS propagation** (5-30 minutes). Verify with:
+```bash
+nslookup api.yourdomain.com
+nslookup app.yourdomain.com
 ```
 
 ### 8.3 Update Environment Variables
 
-After custom domain is active:
+After DNS is propagated and domains are active in Railway:
 
-**API Service:**
-- Update `FrontendUrl` to `https://app.yourdomain.com`
+**API Service Variables:**
 
-**Web Service:**
-- Update `ORIGIN` to `https://app.yourdomain.com`
+| Variable | Value | Example (deckle.games) |
+|----------|-------|------------------------|
+| `FrontendUrl` | `https://app.yourdomain.com` | `https://app.deckle.games` |
+| `CookieDomain` | `.yourdomain.com` (with leading dot) | `.deckle.games` |
 
-**Google OAuth:**
-- Update authorized redirect URI to:
-  `https://{your-api-domain}.railway.app/api/auth/google-callback`
+**Web Service Variables:**
+
+| Variable | Value | Example (deckle.games) |
+|----------|-------|------------------------|
+| `PUBLIC_API_URL` | `https://api.yourdomain.com` | `https://api.deckle.games` |
+| `ORIGIN` | `https://app.yourdomain.com` | `https://app.deckle.games` |
+
+**Google OAuth Configuration:**
+
+1. Go to Google Cloud Console → APIs & Services → Credentials
+2. Edit your OAuth 2.0 Client ID
+3. Update authorized redirect URI to:
+   - `https://api.yourdomain.com/signin-google`
+   - Example: `https://api.deckle.games/signin-google`
+4. Save changes
 
 ### 8.4 SSL Certificate
 
@@ -384,12 +454,38 @@ Railway automatically provisions SSL certificates for custom domains (via Let's 
    - API service → Settings → Deploy
    - Ensure Postgres is listed as a dependency (this ensures Postgres starts before API)
 
+### Authentication Issues / Redirect to "projects/"
+
+**Symptoms:**
+- After signing in with Google, redirected to "projects/" (relative URL with no domain)
+- CORS errors when making API requests from the web app
+- Layout/TopBar not showing after authentication
+
+**Root Cause:** `FrontendUrl` environment variable is not configured in the API service.
+
+**Solution:**
+1. Go to Railway → API service → Variables
+2. Verify `FrontendUrl` is set to: `https://${{web.RAILWAY_PUBLIC_DOMAIN}}`
+3. If missing, add it and redeploy the API service
+4. Check API logs for: `"Auth login initiated. Redirecting to: https://..."`
+5. If you see warnings about FrontendUrl, the variable is not being resolved correctly
+
+**Additional Cookie/Session Issues:**
+
+If authentication works but doesn't persist (layout doesn't show, re-authentication required):
+
+**Cause:** Railway default domains can't share cookies between services.
+
+**Solution:**
+- Set up custom domain with subdomains (recommended - see Step 8)
+- Configure `CookieDomain` to `.yourdomain.com` in API service variables
+
 ### Google OAuth Fails
 
 **Check:**
 1. `Authentication__Google__ClientId` and `ClientSecret` are correct
 2. Redirect URI added to Google Cloud Console:
-   - `https://{api-domain}/api/auth/google-callback`
+   - `https://{api-domain}/signin-google`
 3. OAuth consent screen configured
 
 ### Web Can't Reach API
