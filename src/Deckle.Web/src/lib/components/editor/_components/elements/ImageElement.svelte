@@ -12,10 +12,17 @@
     element.borderRadius ? `${element.borderRadius}px` : undefined
   );
   const boxShadow = $derived(boxShadowStyle(element.shadow));
+
+  // Generate placeholder URL when imageId is empty
+  const displaySrc = $derived(
+    element.imageId && element.imageId.trim() !== ""
+      ? element.imageId
+      : `https://placehold.co/${Math.round(element.width || 400)}x${Math.round(element.height || 300)}/e5e7eb/9ca3af.png?text=Image`
+  );
 </script>
 
 <img
-  src={element.imageId}
+  src={displaySrc}
   alt={element.label}
   style:width="100%"
   style:height="100%"

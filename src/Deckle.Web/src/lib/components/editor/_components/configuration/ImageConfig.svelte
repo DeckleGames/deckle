@@ -2,25 +2,48 @@
   import type { ImageElement } from "../../types";
   import { templateStore } from "$lib/stores/templateElements";
   import BaseElementConfig from "./BaseElementConfig.svelte";
-  import TextField from "../config-controls/TextField.svelte";
   import SelectField from "../config-controls/SelectField.svelte";
   import ObjectPositionGrid from "../config-controls/ObjectPositionGrid.svelte";
+  import PlaceholderModal from "./PlaceholderModal.svelte";
 
   let { element }: { element: ImageElement } = $props();
+
+  let showPlaceholderModal = $state(false);
 
   function updateElement(updates: Partial<ImageElement>) {
     templateStore.updateElement(element.id, updates);
   }
+
+  function handlePlaceholderConfirm(url: string) {
+    updateElement({ imageId: url });
+    showPlaceholderModal = false;
+  }
+
+  function handlePlaceholderClose() {
+    showPlaceholderModal = false;
+  }
 </script>
 
 <BaseElementConfig {element} {updateElement}>
-  <TextField
-    label="Image URL"
-    id="image-url"
-    placeholder="https://example.com/image.jpg"
-    value={element.imageId}
-    oninput={(e) => updateElement({ imageId: e.currentTarget.value })}
-  />
+  <div class="image-url-field">
+    <div class="field-header">
+      <label for="image-url">Image URL</label>
+      <button
+        type="button"
+        class="placeholder-link"
+        onclick={() => (showPlaceholderModal = true)}
+      >
+        Use Placeholder
+      </button>
+    </div>
+    <input
+      type="text"
+      id="image-url"
+      placeholder="https://example.com/image.jpg"
+      value={element.imageId}
+      oninput={(e) => updateElement({ imageId: e.currentTarget.value })}
+    />
+  </div>
 
   <SelectField
     label="Object Fit"
@@ -47,7 +70,63 @@
   {/if}
 </BaseElementConfig>
 
+<PlaceholderModal
+  bind:show={showPlaceholderModal}
+  onConfirm={handlePlaceholderConfirm}
+  onClose={handlePlaceholderClose}
+/>
+
 <style>
+  .image-url-field {
+    margin-bottom: 1rem;
+  }
+
+  .field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+  }
+
+  .field-header label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #666;
+  }
+
+  .placeholder-link {
+    background: none;
+    border: none;
+    color: #0066cc;
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    font-family: inherit;
+  }
+
+  .placeholder-link:hover {
+    color: #0052a3;
+  }
+
+  .image-url-field input[type="text"] {
+    width: 100%;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.813rem;
+    line-height: 1.25rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background: white;
+    font-family: inherit;
+    box-sizing: border-box;
+    height: 2.125rem;
+  }
+
+  .image-url-field input[type="text"]:focus {
+    outline: none;
+    border-color: #0066cc;
+  }
+
   .object-position-section {
     display: flex;
     flex-direction: column;
