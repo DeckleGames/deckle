@@ -1,16 +1,9 @@
 <script lang="ts">
   import type { ImageElement } from "../../types";
   import { templateStore } from "$lib/stores/templateElements";
-  import ConfigSection from "../config-controls/ConfigSection.svelte";
-  import VisibilityCheckbox from "../config-controls/VisibilityCheckbox.svelte";
-  import LockCheckbox from "../config-controls/LockCheckbox.svelte";
-  import PositionControls from "../config-controls/PositionControls.svelte";
-  import DimensionInput from "../config-controls/DimensionInput.svelte";
-  import BorderConfig from "../config-controls/BorderConfig.svelte";
+  import BaseElementConfig from "./BaseElementConfig.svelte";
   import TextField from "../config-controls/TextField.svelte";
-  import NumberField from "../config-controls/NumberField.svelte";
   import SelectField from "../config-controls/SelectField.svelte";
-  import Fields from "../config-controls/Fields.svelte";
   import ObjectPositionGrid from "../config-controls/ObjectPositionGrid.svelte";
 
   let { element }: { element: ImageElement } = $props();
@@ -20,38 +13,7 @@
   }
 </script>
 
-<ConfigSection>
-  <div class="icon-toggle-group">
-    <VisibilityCheckbox
-      visible={element.visible}
-      onchange={(visible) => updateElement({ visible })}
-    />
-
-    <LockCheckbox
-      locked={element.locked}
-      onchange={(locked) => updateElement({ locked })}
-    />
-  </div>
-
-  {#if element.position === "absolute"}
-    <PositionControls
-      x={element.x}
-      y={element.y}
-      onchange={(updates) => updateElement(updates)}
-    />
-  {/if}
-
-  <NumberField
-    label="Rotation"
-    id="rotation"
-    value={element.rotation ?? 0}
-    min={-360}
-    max={360}
-    step={1}
-    unit="°"
-    onchange={(rotation) => updateElement({ rotation })}
-  />
-
+<BaseElementConfig {element} {updateElement}>
   <TextField
     label="Image URL"
     id="image-url"
@@ -59,34 +21,6 @@
     value={element.imageId}
     oninput={(e) => updateElement({ imageId: e.currentTarget.value })}
   />
-
-  <Fields>
-    <DimensionInput
-      label="Width"
-      id="width"
-      value={element.dimensions?.width?.toString()}
-      onchange={(width) =>
-        updateElement({
-          dimensions: {
-            ...element.dimensions,
-            width,
-          },
-        })}
-    />
-
-    <DimensionInput
-      label="Height"
-      id="height"
-      value={element.dimensions?.height?.toString()}
-      onchange={(height) =>
-        updateElement({
-          dimensions: {
-            ...element.dimensions,
-            height,
-          },
-        })}
-    />
-  </Fields>
 
   <SelectField
     label="Object Fit"
@@ -111,20 +45,9 @@
       />
     </div>
   {/if}
-
-  <BorderConfig
-    border={element.border}
-    onchange={(border) => updateElement({ border })}
-  />
-</ConfigSection>
+</BaseElementConfig>
 
 <style>
-  .icon-toggle-group {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
   .object-position-section {
     display: flex;
     flex-direction: column;

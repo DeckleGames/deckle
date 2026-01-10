@@ -1,18 +1,12 @@
 <script lang="ts">
   import type { ContainerElement } from "../../types";
   import { templateStore } from "$lib/stores/templateElements";
-  import ConfigSection from "../config-controls/ConfigSection.svelte";
+  import BaseElementConfig from "./BaseElementConfig.svelte";
   import FieldWrapper from "../config-controls/FieldWrapper.svelte";
   import SelectField from "../config-controls/SelectField.svelte";
-  import VisibilityCheckbox from "../config-controls/VisibilityCheckbox.svelte";
-  import LockCheckbox from "../config-controls/LockCheckbox.svelte";
-  import PositionControls from "../config-controls/PositionControls.svelte";
-  import DimensionInput from "../config-controls/DimensionInput.svelte";
   import ColorPicker from "../config-controls/ColorPicker.svelte";
   import PaddingControls from "../config-controls/PaddingControls.svelte";
-  import BorderConfig from "../config-controls/BorderConfig.svelte";
   import Fields from "../config-controls/Fields.svelte";
-  import NumberField from "../config-controls/NumberField.svelte";
   import AlignmentGrid from "../config-controls/AlignmentGrid.svelte";
   import GapControl from "../config-controls/GapControl.svelte";
 
@@ -29,38 +23,7 @@
   );
 </script>
 
-<ConfigSection>
-  <div class="icon-toggle-group">
-    <VisibilityCheckbox
-      visible={element.visible}
-      onchange={(visible) => updateElement({ visible })}
-    />
-
-    <LockCheckbox
-      locked={element.locked}
-      onchange={(locked) => updateElement({ locked })}
-    />
-  </div>
-
-  {#if element.position === "absolute"}
-    <PositionControls
-      x={element.x}
-      y={element.y}
-      onchange={(updates) => updateElement(updates)}
-    />
-  {/if}
-
-  <NumberField
-    label="Rotation"
-    id="rotation"
-    value={element.rotation ?? 0}
-    min={-360}
-    max={360}
-    step={1}
-    unit="°"
-    onchange={(rotation) => updateElement({ rotation })}
-  />
-
+<BaseElementConfig {element} {updateElement}>
   <SelectField
     label="Display"
     id="display"
@@ -159,45 +122,4 @@
     padding={element.padding}
     onchange={(padding) => updateElement({ padding })}
   />
-
-  <BorderConfig
-    border={element.border}
-    onchange={(border) => updateElement({ border })}
-  />
-
-  <Fields>
-    <DimensionInput
-      label="Width"
-      id="width"
-      value={element.dimensions?.width?.toString()}
-      onchange={(width) =>
-        updateElement({
-          dimensions: {
-            ...element.dimensions,
-            width,
-          },
-        })}
-    />
-
-    <DimensionInput
-      label="Height"
-      id="height"
-      value={element.dimensions?.height?.toString()}
-      onchange={(height) =>
-        updateElement({
-          dimensions: {
-            ...element.dimensions,
-            height,
-          },
-        })}
-    />
-  </Fields>
-</ConfigSection>
-
-<style>
-  .icon-toggle-group {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-</style>
+</BaseElementConfig>
