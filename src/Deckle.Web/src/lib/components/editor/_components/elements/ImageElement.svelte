@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { ImageElement } from '../../types';
-  import { borderStyle, boxShadowStyle } from '../../utils';
+  import type { ImageElement } from "../../types";
+  import { borderStyle, boxShadowStyle } from "../../utils";
 
   let { element, dpi }: { element: ImageElement; dpi: number } = $props();
 
@@ -8,13 +8,15 @@
   const objectFit = $derived(element.objectFit);
   const objectPosition = $derived(element.objectPosition);
   const border = $derived(borderStyle(element.border, dpi));
-  const borderRadius = $derived(element.borderRadius ? `${element.borderRadius}px` : undefined);
+  const borderRadius = $derived(
+    element.borderRadius ? `${element.borderRadius}px` : undefined
+  );
   const boxShadow = $derived(boxShadowStyle(element.shadow));
 </script>
 
 <img
   src={element.imageId}
-  alt=""
+  alt={element.label}
   style:width="100%"
   style:height="100%"
   style:display="block"

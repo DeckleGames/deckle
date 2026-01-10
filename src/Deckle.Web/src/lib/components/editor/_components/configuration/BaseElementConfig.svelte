@@ -8,6 +8,7 @@
   import DimensionInput from "../config-controls/DimensionInput.svelte";
   import BorderConfig from "../config-controls/BorderConfig.svelte";
   import Fields from "../config-controls/Fields.svelte";
+  import TextField from "../config-controls/TextField.svelte";
 
   let {
     element,
@@ -22,6 +23,18 @@
 
 <ConfigSection>
   <div class="icon-toggle-group">
+    <div style:flex="1">
+      <TextField
+        label="Label"
+        id="label"
+        placeholder={element.label ??
+          element.type.charAt(0).toUpperCase() + element.type.slice(1)}
+        value={element.label}
+        oninput={(e) => updateElement({ label: e.currentTarget.value })}
+        hideLabel={true}
+      />
+    </div>
+
     <VisibilityCheckbox
       visible={element.visible}
       onchange={(visible) => updateElement({ visible })}

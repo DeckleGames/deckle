@@ -1,5 +1,18 @@
-import type { Shadow } from './types';
+import type { BaseElement, Shadow } from './types';
 import { mmToPx } from '$lib/utils/size.utils';
+
+export function getElementLabel(el: BaseElement): string {
+	// Use custom label if available
+	if (el.label) {
+		return el.label;
+	}
+
+	// Otherwise use default label
+	if (el.type === 'text') {
+		return el.content.substring(0, 20) + (el.content.length > 20 ? '...' : '');
+	}
+	return el.type.charAt(0).toUpperCase() + el.type.slice(1);
+}
 
 /**
  * Converts a dimension value to CSS string.
