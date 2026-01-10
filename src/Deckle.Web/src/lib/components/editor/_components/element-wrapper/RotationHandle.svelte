@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import { templateStore } from '$lib/stores/templateElements';
-	import type { BaseElement } from '$lib/components/editor/types';
+	import type { TemplateElement } from '$lib/components/editor/types';
 
-	let { element }: { element: BaseElement } = $props();
+	let { element }: { element: TemplateElement } = $props();
 
 	let isRotating = $state(false);
 	let startAngle = 0;
