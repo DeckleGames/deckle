@@ -101,7 +101,7 @@
 
 <div class="border-config">
   <div class="header">
-    <label class="section-label">Border:</label>
+    <span class="section-label">Border:</span>
     <label class="toggle-label">
       <span>Separate sides</span>
       <input

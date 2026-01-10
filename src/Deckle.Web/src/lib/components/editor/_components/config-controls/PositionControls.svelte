@@ -22,7 +22,7 @@
 </script>
 
 <div class="field">
-  <label class="section-label">Position:</label>
+  <span class="section-label">Position:</span>
   <div class="position-grid">
     <DimensionInput
       label="Left"

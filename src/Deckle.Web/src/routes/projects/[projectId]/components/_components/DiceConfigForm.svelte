@@ -52,28 +52,30 @@
   </FormField>
 
   <div class="color-field">
-    <label class="color-field-label" for="dice-color">Base Color</label>
+    <span class="color-field-label">Base Color</span>
     <div class="color-grid">
       {#each DICE_COLORS as color}
         <div class="color-option-wrapper">
           <button
+            type="button"
             class="color-option"
             class:selected={diceColor === color.value}
             onclick={() => diceColor = color.value}
             style="background-color: {color.hex}; border-color: {color.hex};"
-            title={color.label}
+            aria-label="{color.label}{color.colorblindFriendly ? ' (Colorblind friendly)' : ''}"
+            aria-pressed={diceColor === color.value}
           >
             {#if diceColor === color.value}
-              <span class="checkmark">✓</span>
+              <span class="checkmark" aria-hidden="true">✓</span>
             {/if}
           </button>
           {#if color.colorblindFriendly}
-            <span class="colorblind-badge" title="Colorblind friendly">👁️</span>
+            <span class="colorblind-badge" aria-hidden="true" title="Colorblind friendly">👁️</span>
           {/if}
         </div>
       {/each}
     </div>
-    <p class="color-label">
+    <p class="color-label" aria-live="polite">
       {DICE_COLORS.find(c => c.value === diceColor)?.label}
       {#if DICE_COLORS.find(c => c.value === diceColor)?.colorblindFriendly}
         <span class="colorblind-text">• Colorblind friendly</span>

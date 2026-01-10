@@ -61,7 +61,7 @@
 
   {#if element.objectFit !== "fill"}
     <div class="object-position-section">
-      <label for="object-position" class="section-label">Object Position</label>
+      <span class="section-label">Object Position</span>
       <ObjectPositionGrid
         value={element.objectPosition ?? "center center"}
         onchange={(position) => updateElement({ objectPosition: position })}

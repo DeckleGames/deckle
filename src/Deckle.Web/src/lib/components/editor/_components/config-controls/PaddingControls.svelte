@@ -85,7 +85,7 @@
 
 <div class="field">
   <div class="header">
-    <label class="section-label">Padding:</label>
+    <span class="section-label">Padding:</span>
     <label class="toggle-label">
       <span>Separate sides</span>
       <input
