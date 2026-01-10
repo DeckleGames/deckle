@@ -1,15 +1,13 @@
 <script lang="ts">
   import type { PageData } from "./$types";
   import type { DataSource as DataSourceType, DataSourceSyncStatus } from "$lib/types";
-  import { config } from "$lib/config";
-  import { onMount } from "svelte";
-  import { Card, Dialog, Button, EmptyState } from "$lib/components";
+  import { Card, Dialog, Button, EmptyState, ConfirmDialog } from "$lib/components";
   import { buildDataSourcesBreadcrumbs } from "$lib/utils/breadcrumbs";
   import { setBreadcrumbs } from "$lib/stores/breadcrumb";
-  import { dataSourcesApi } from "$lib/api";
+  import { dataSourcesApi, ApiError } from "$lib/api";
   import { formatRelativeTime } from "$lib/utils/date.utils";
   import { syncDataSource } from "$lib/utils/dataSource.utils";
-  import csvToJson from "convert-csv-to-json";
+  import { invalidateAll } from "$app/navigation";
 
   let { data }: { data: PageData } = $props();
 
@@ -18,8 +16,6 @@
     setBreadcrumbs(buildDataSourcesBreadcrumbs(data.project));
   });
 
-  let dataSources = $state<DataSourceType[]>([]);
-  let loading = $state(true);
   let showAddModal = $state(false);
   let newSourceUrl = $state("");
   let newSourceName = $state("");
@@ -31,31 +27,11 @@
   let syncStatuses = $state<Record<string, DataSourceSyncStatus>>({});
   let syncErrors = $state<Record<string, string>>({});
 
-  onMount(async () => {
-    await loadDataSources();
-  });
+  // Delete confirmation
+  let showDeleteConfirm = $state(false);
+  let dataSourceToDelete: DataSourceType | null = $state(null);
 
-  async function loadDataSources() {
-    try {
-      loading = true;
-      const response = await fetch(
-        `${config.apiUrl}/data-sources/project/${data.project.id}`,
-        {
-          credentials: "include",
-        }
-      );
-
-      if (response.ok) {
-        dataSources = await response.json();
-      }
-    } catch (error) {
-      console.error("Failed to load data sources:", error);
-    } finally {
-      loading = false;
-    }
-  }
-
-  async function addDataSource() {
+  async function addDataSource(): Promise<void> {
     if (!newSourceUrl.trim()) {
       errorMessage = "Please enter a Google Sheets URL";
       return;
@@ -65,71 +41,73 @@
       addingSource = true;
       errorMessage = "";
 
-      const response = await fetch(`${config.apiUrl}/data-sources`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          projectId: data.project.id,
-          name: newSourceName.trim() || "",
-          url: newSourceUrl.trim(),
-          sheetGid: newSourceGid,
-        }),
+      await dataSourcesApi.create({
+        projectId: data.project.id,
+        name: newSourceName.trim() || "",
+        url: newSourceUrl.trim(),
+        sheetGid: newSourceGid,
       });
 
-      if (response.ok) {
-        const newSource = await response.json();
-        dataSources = [...dataSources, newSource];
-        showAddModal = false;
-        newSourceUrl = "";
-        newSourceName = "";
-        newSourceGid = undefined;
+      // Refresh data from server
+      await invalidateAll();
+
+      // Close modal and reset form
+      showAddModal = false;
+      newSourceUrl = "";
+      newSourceName = "";
+      newSourceGid = undefined;
+    } catch (err) {
+      console.error("Failed to add data source:", err);
+      if (err instanceof ApiError) {
+        errorMessage = err.message;
       } else {
-        const error = await response.json();
-        errorMessage = error.error || "Failed to add data source";
+        errorMessage = "Failed to add data source. Please try again.";
       }
-    } catch (error) {
-      console.error("Failed to add data source:", error);
-      errorMessage = "Failed to add data source. Please try again.";
     } finally {
       addingSource = false;
     }
   }
 
-  async function deleteDataSource(id: string) {
-    if (!confirm("Are you sure you want to delete this data source?")) {
-      return;
-    }
+  function initiateDelete(source: DataSourceType): void {
+    dataSourceToDelete = source;
+    showDeleteConfirm = true;
+  }
+
+  async function confirmDelete(): Promise<void> {
+    if (!dataSourceToDelete) return;
 
     try {
-      const response = await fetch(`${config.apiUrl}/data-sources/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        dataSources = dataSources.filter((ds) => ds.id !== id);
+      await dataSourcesApi.delete(dataSourceToDelete.id);
+      await invalidateAll();
+      showDeleteConfirm = false;
+      dataSourceToDelete = null;
+    } catch (err) {
+      console.error("Failed to delete data source:", err);
+      if (err instanceof ApiError) {
+        errorMessage = err.message;
+      } else {
+        errorMessage = "Failed to delete data source. Please try again.";
       }
-    } catch (error) {
-      console.error("Failed to delete data source:", error);
+      showDeleteConfirm = false;
     }
   }
 
-  async function handleSyncDataSource(source: DataSourceType) {
+  function cancelDelete(): void {
+    showDeleteConfirm = false;
+    dataSourceToDelete = null;
+  }
+
+  async function handleSyncDataSource(source: DataSourceType): Promise<void> {
     try {
       // Set syncing status
       syncStatuses[source.id] = "syncing";
       syncErrors[source.id] = "";
 
       // Use the shared sync utility
-      const updatedSource = await syncDataSource(source);
+      await syncDataSource(source);
 
-      // Update the data source in the list
-      dataSources = dataSources.map(ds =>
-        ds.id === source.id ? updatedSource : ds
-      );
+      // Refresh data from server to get updated source
+      await invalidateAll();
 
       // Set idle status
       syncStatuses[source.id] = "idle";
@@ -140,7 +118,7 @@
     }
   }
 
-  function openAddModal() {
+  function openAddModal(): void {
     showAddModal = true;
     errorMessage = "";
     newSourceUrl = "";
@@ -165,9 +143,7 @@
     </Button>
   </div>
 
-  {#if loading}
-    <EmptyState title="Loading..." border={false} />
-  {:else if dataSources.length === 0}
+  {#if data.dataSources.length === 0}
     <EmptyState
       title="No data sources yet"
       subtitle="Connect data sources to populate your game components"
@@ -175,7 +151,7 @@
     />
   {:else}
     <div class="data-sources-list">
-      {#each dataSources as source}
+      {#each data.dataSources as source}
         <Card>
           <div class="card-content">
             <div class="source-info">
@@ -223,7 +199,7 @@
               <Button
                 variant="danger"
                 size="sm"
-                onclick={() => deleteDataSource(source.id)}
+                onclick={() => initiateDelete(source)}
               >
                 Delete
               </Button>
@@ -293,6 +269,16 @@
     </Button>
   {/snippet}
 </Dialog>
+
+<ConfirmDialog
+  bind:show={showDeleteConfirm}
+  title="Delete Data Source"
+  message="Are you sure you want to delete this data source? This action cannot be undone."
+  confirmText="Delete"
+  confirmVariant="danger"
+  onconfirm={confirmDelete}
+  oncancel={cancelDelete}
+/>
 
 <style>
   .tab-content {

@@ -1,19 +1,20 @@
 <script lang="ts">
   import { config } from "$lib/config";
+  import type { CurrentUser } from "$lib/types";
   import LogoMark from "./LogoMark.svelte";
 
-  let { user }: { user: any } = $props();
+  let { user }: { user: CurrentUser } = $props();
   let showDropdown = $state(false);
 
-  function toggleDropdown() {
+  function toggleDropdown(): void {
     showDropdown = !showDropdown;
   }
 
-  function closeDropdown() {
+  function closeDropdown(): void {
     showDropdown = false;
   }
 
-  async function handleSignOut() {
+  async function handleSignOut(): Promise<void> {
     try {
       await fetch(`${config.apiUrl}/auth/logout`, {
         method: "POST",

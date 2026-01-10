@@ -1,23 +1,24 @@
 <script lang="ts">
   import { config } from '$lib/config';
   import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
+  import { authApi, ApiError } from '$lib/api';
 
-  onMount(async () => {
-    try {
-      const response = await fetch(`${config.apiUrl}/auth/me`, {
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        goto('/projects');
-      }
-    } catch (error) {
-      // User is not authenticated, stay on this page
-    }
+  $effect(() => {
+    checkAuth();
   });
 
-  function handleSignIn() {
+  async function checkAuth(): Promise<void> {
+    try {
+      await authApi.me();
+      // User is authenticated, redirect to projects
+      goto('/projects');
+    } catch (error) {
+      // User is not authenticated, stay on this page
+      // No need to log this as it's expected behavior
+    }
+  }
+
+  function handleSignIn(): void {
     window.location.href = `${config.apiUrl}/auth/login`;
   }
 </script>

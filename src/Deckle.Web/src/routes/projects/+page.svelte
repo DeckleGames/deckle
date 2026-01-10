@@ -5,6 +5,7 @@
   import { FormField, Input, TextArea } from "$lib/components/forms";
   import ProjectCard from "./_components/ProjectCard.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import { invalidateAll } from "$app/navigation";
 
   let { data }: { data: PageData } = $props();
 
@@ -16,11 +17,11 @@
   let isCreating = $state(false);
   let createError = $state<ApiError | null>(null);
 
-  function openCreateDialog() {
+  function openCreateDialog(): void {
     showCreateDialog = true;
   }
 
-  async function createProject() {
+  async function createProject(): Promise<void> {
     if (!projectName.trim()) return;
 
     isCreating = true;
@@ -31,7 +32,11 @@
         description: projectDescription,
       });
 
-      window.location.reload();
+      // Refresh data from server
+      await invalidateAll();
+
+      // Close dialog and reset form
+      closeDialog();
     } catch (error) {
       console.error("Failed to create project:", error);
       if (error instanceof ApiError) {
@@ -44,7 +49,7 @@
     }
   }
 
-  function closeDialog() {
+  function closeDialog(): void {
     showCreateDialog = false;
     projectName = "";
     projectDescription = "";

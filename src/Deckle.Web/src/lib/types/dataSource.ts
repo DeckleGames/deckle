@@ -35,3 +35,12 @@ export interface SyncDataSourceMetadataRequest {
   headers: string[];
   rowCount: number;
 }
+
+export interface DataSourceMetadata {
+  id: string;
+  name: string;
+  googleSheetsId?: string;
+  googleSheetsUrl?: string;
+  sheetGid?: number;
+  csvExportUrl?: string;
+}

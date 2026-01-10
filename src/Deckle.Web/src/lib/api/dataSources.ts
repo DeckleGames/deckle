@@ -1,5 +1,5 @@
 import { api } from './client';
-import type { DataSource, CreateDataSourceDto, UpdateDataSourceDto, SyncDataSourceMetadataRequest } from '$lib/types';
+import type { DataSource, CreateDataSourceDto, UpdateDataSourceDto, SyncDataSourceMetadataRequest, DataSourceMetadata } from '$lib/types';
 
 /**
  * Data Sources API
@@ -21,7 +21,7 @@ export const dataSourcesApi = {
    * Get metadata for a data source (e.g., spreadsheet info)
    */
   getMetadata: (id: string, fetchFn?: typeof fetch) =>
-    api.get<any>(`/data-sources/${id}/metadata`, undefined, fetchFn),
+    api.get<DataSourceMetadata>(`/data-sources/${id}/metadata`, undefined, fetchFn),
 
   /**
    * Create a new data source
