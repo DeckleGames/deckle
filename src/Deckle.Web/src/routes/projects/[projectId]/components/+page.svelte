@@ -354,16 +354,18 @@
 </svelte:head>
 
 <TabContent>
-  {#if canEdit || hasExportableComponents}
-    {#snippet actions()}
-      {#if hasExportableComponents}
-        <Button variant="secondary" size="sm" onclick={navigateToExport}>Export</Button>
-      {/if}
-      {#if canEdit}
-        <Button variant="primary" size="sm" onclick={openModal}>+ Add Component</Button>
-      {/if}
-    {/snippet}
-  {/if}
+  {#snippet actions()}
+    {#if canEdit || hasExportableComponents}
+      <div>
+        {#if hasExportableComponents}
+          <Button variant="secondary" size="sm" onclick={navigateToExport}>Export</Button>
+        {/if}
+        {#if canEdit}
+          <Button variant="primary" size="sm" onclick={openModal}>+ Add Component</Button>
+        {/if}
+      </div>
+    {/if}
+  {/snippet}
 
   {#if data.components && data.components.length > 0}
   <div class="components-list">

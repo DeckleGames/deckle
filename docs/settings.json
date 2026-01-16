@@ -1,0 +1,20 @@
+{
+    "siteTitle": "Deckle",
+    "siteDescription": "Deckle documentation",
+    "author": "Jordan Wallwork",
+    "faviconUrl": "/assets/favicon.svg",
+    "#blogTitle": "Blog",
+    "#blogDescription": "Devlog",
+    "productionUrl": "https://app.deckle.games",
+    "customLinks": [
+        {
+            "url": "/feed.xml",
+            "text": "Atom feed"
+        },
+        {
+            "url": "https://github.com/jordanwallwork/deckle",
+            "text": "GitHub"
+        }
+    ],
+    "#editThisPageRootUrl": "https://github.com/jordanwallwork/deckle/docs/blob/main"
+}

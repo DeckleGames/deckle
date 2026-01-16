@@ -1,4 +1,12 @@
-# Deckle Railway Deployment Guide
+---
+title: Railway Deployment Guide
+layout: libdoc_page.liquid
+permalink: development/railway-deployment/index.html
+eleventyNavigation:
+    key: Railway Deployment
+    parent: Development
+date: 2026-01-16
+---
 
 This guide provides step-by-step instructions for deploying Deckle to Railway using pre-built Docker images from GitHub Container Registry (GHCR).
 

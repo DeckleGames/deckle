@@ -1,4 +1,12 @@
-# Railway Configuration for deckle.games
+---
+title: Railway Configuration
+layout: libdoc_page.liquid
+permalink: development/railway-configuration/index.html
+eleventyNavigation:
+    key: Railway Configuration
+    parent: Development
+date: 2026-01-16
+---
 
 ## Custom Domain Setup
 

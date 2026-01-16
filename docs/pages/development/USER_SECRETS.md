@@ -1,4 +1,12 @@
-# User Secrets
+---
+title: Local User Secrets
+layout: libdoc_page.liquid
+permalink: development/user-secrets/index.html
+eleventyNavigation:
+    key: User Secrets
+    parent: Development
+date: 2026-01-16
+---
 
 In order to run the project properly, configure the following user secrets:
 

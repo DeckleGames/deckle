@@ -1,4 +1,12 @@
-# Google OIDC Authentication Setup
+---
+title: Authentication Setup
+layout: libdoc_page.liquid
+permalink: development/authentication-setup/index.html
+eleventyNavigation:
+    key: Authentication Setup
+    parent: Development
+date: 2026-01-16
+---
 
 This document describes the Google OIDC authentication implementation for Deckle.
 
@@ -102,43 +110,6 @@ Returns information about the currently authenticated user.
    - Adds the user's database ID to the claims
 6. An authentication cookie is set
 7. User is redirected to the application
-
-## Database Migrations
-
-The initial migration has been created. When you run the Deckle.API service, it will automatically apply migrations on startup.
-
-To create additional migrations:
-
-```bash
-cd src/Deckle.Domain
-dotnet ef migrations add MigrationName --startup-project ../Deckle.API/Deckle.API.csproj
-```
-
-## Running the Application
-
-Start the Aspire AppHost:
-
-```bash
-cd src/Deckle.AppHost
-dotnet run
-```
-
-This will start:
-- PostgreSQL database
-- pgAdmin (accessible via the Aspire dashboard)
-- Deckle.API service (includes authentication endpoints)
-- Deckle.Web frontend
-
-Access the Aspire dashboard to see all service URLs.
-
-## CORS Configuration
-
-The API service is configured to accept requests from:
-- `http://localhost:5173`
-- `https://localhost:5173`
-- The frontend URL configured via the `FrontendUrl` environment variable
-
-If your frontend runs on a different port, update the CORS configuration in `Deckle.API/Program.cs`.
 
 ## Security Features
 

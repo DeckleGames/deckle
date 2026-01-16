@@ -260,8 +260,6 @@
     background-color: #f8f9fa;
     border: 1px solid #e9ecef;
     border-radius: 8px;
-    padding: 0.75rem 1rem;
-    margin-bottom: 1.5rem;
   }
 
   .quota-info p {
