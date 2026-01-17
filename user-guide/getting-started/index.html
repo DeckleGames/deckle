@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getting Started</title>
+    
+
+    <meta itemprop="name" content="Getting Started">
+    <meta name="description" itemprop="description" content="">
+    <meta name="application-name" content="Getting Started">
+    <meta name="author" content="Jordan Wallwork">
+    <link rel="icon" type="image/png" href="/deckle/assets/favicon.svg">
+    
+    <!-- Microsoft -->
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="msapplication-starturl" content="/user-guide/getting-started/">
+    <meta name="msapplication-tooltip" content="Getting Started">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="/user-guide/getting-started/">
+    <meta property="og:title" content="Getting Started">
+    <meta property="og:description" content="">
+    <meta property="og:image" content="https://raw.githubusercontent.com/ita-design-system/ita-medias/refs/heads/main/ogimage-11ty-libdoc.png">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Getting Started">
+    <meta name="twitter:description" content="">
+    <meta name="twitter:url" content="/user-guide/getting-started/">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/ita-design-system/ita-medias/refs/heads/main/ogimage-11ty-libdoc.png">
+    
+    <!-- iOS -->
+    <meta name="apple-mobile-web-app-title" content="Getting Started">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <!-- Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <meta name="color-scheme" content="light dark">
+
+    <meta name="generator" content="Eleventy v3.1.2">
+
+    <!-- Font fallback -->
+    <style>
+        @font-face {
+            font-family: "fallbackFont";
+            src: local("Arial");
+            size-adjust: 103%;
+        }
+        html, body {
+            font-family: fallbackFont, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, Adwaita Sans, Cantarell, Ubuntu, roboto, noto, helvetica, arial, sans-serif;
+            font-display: swap;
+        }
+        pre, code {
+            font-family: Menlo, Consolas, Monaco, Adwaita Mono, Liberation Mono, Lucida Console, monospace;
+        }
+    </style>
+    <link rel="stylesheet" href="/deckle/core/assets/css/fonts.css">
+    <link rel="stylesheet" href="/deckle/core/assets/css/ds.css">
+    <link rel="stylesheet" href="/deckle/core/assets/css/ds__defaults.css">
+    <link rel="stylesheet" href="/deckle/core/assets/css/ds__colors.css">
+    <link rel="stylesheet" href="/deckle/core/assets/css/ds__dark_mode.css" media="(prefers-color-scheme: dark)" id="libdoc_dark_mode_css">
+    <link rel="stylesheet" href="/deckle/core/assets/css/hljs/night-owl.css">
+    <link rel="stylesheet" href="/deckle/core/assets/fonts/icomoon/style.css">
+    <link rel="stylesheet" href="/deckle/assets/deckle.css">
+    <style>
+        :root {
+            --libdoc-image-background-color-light-mode: transparent;
+            --libdoc-image-background-color-dark-mode: transparent;
+            --libdoc-image-background-color: var(--libdoc-image-background-color-light-mode);
+            --ita-widths-sidebar: 300px;
+            --ita-widths-content: 700px;
+            --ita-widths-main-container-max: calc(2 * var(--ita-widths-content) + var(--ita-widths-sidebar));
+        }
+        
+            main img {
+                border-radius: 9px;
+            }
+        
+    </style>
+    <noscript>
+        <link rel="stylesheet" href="/deckle/core/assets/css/noscript.css">
+    </noscript>
+    <script>
+        const libdocMessages = {
+            
+                copiedToClipboard: `Copied to clipboard`,
+                code: `Code`,
+                colorSchemes: `Color schemes`,
+                colorSchemeAuto: `Automatic`,
+                colorSchemeDescriptionAuto: `Based on you operating system preference`,
+                colorSchemeLight: `Light`,
+                colorSchemeDescriptionLight: `Always apply light mode`,
+                colorSchemeDark: `Dark`,
+                colorSchemeDescriptionDark: `Always apply dark mode`,
+                copied: `Copied`,
+                copy: `Copy`,
+                copyCode: `Copy code`,
+                copyHTML: `Copy HTML`,
+                copyURL: `Copy URL`,
+                enable: `Enable`,
+                goToTopOfPage: `Go to top of page`,
+                editThisPage: `Edit this page`,
+                height: `Height`,
+                homepage: `Homepage`,
+                homepageShort: `Home`,
+                inANewTab: `In a new tab`,
+                lastModified: `Last modified`,
+                menu: `Menu`,
+                noscriptAlert: `It seems that your browser JavaScript is disabled, LibDoc is set to fallback mode with reduced features.`,
+                open: `Open`,
+                openInANewTab: `Open in a new tab`,
+                otherCustomLinks: `Other custom links`,
+                page: `Page`,
+                pages: `Pages`,
+                pagesTagged: `Pages tagged`,
+                preferences: `Preferences`,
+                reload: `Reload`,
+                reloaded: `Reloaded`,
+                result: `result`,
+                sandbox: `Sandbox`,
+                sandboxResizeHelper: `Click and drag to resize code and result`,
+                search: `Search`,
+                searchClear: `Clear input`,
+                searchMinimumCharacters: `3 characters min.`,
+                searchResultsNoResultForQuery: `No result for query`,
+                searchOccurrence: `Occurrence search`,
+                searchOccurrencesCurrent: `Current search occurrence`,
+                searchOccurrencesNext: `Next search occurrence`,
+                searchOccurrencesPrevious: `Previous search occurrence`,
+                searchOccurrencesStop: `Stop search occurrences`,
+                searchPlaceholder: `Press 🆂 to search`,
+                searchSubmit: `Submit search`,
+                tableOfContent: `Table of content`,
+                tableOfContentAbbr: `TOC`,
+                tag: `Tag`,
+                tagsList: `Tags list`,
+                tagsListDescription: `List of every tag available`,
+                toggleFloatingToc: `Toggle floating Table of content`,
+                top: `Top`,
+                userPreferences: `User preferences`,
+                width: `Width`,
+        }
+        const libdocConfig = {
+            blogTitle: `Blog Posts`,
+            blogDescription: `false`,
+            displayTagsListLink: true
+        }
+        const libdocSystem = {
+            searchIndexUrl: `/deckle/core/assets/js/search_index.json`,
+            fuzzyIndexUrl: `/deckle/core/assets/js/fuzzy_index.json`,
+            productionUrl: `eleventy-libdoc.netlify.app`,
+            blogPostsCount: ``
+        }
+    </script>
+</head>
+<body class="d-flex fd-column ai-center | m-0">
+    <div class="d-flex | w-100" fd-column="xs,sm" ai-start="md" ai-center="xs,sm" pl-5="md" style="max-width: var(--ita-widths-main-container-max)">
+        <div id="sidebar" class="d-flex fd-column | pos-sticky top-0 z-3" ai-center="xs,sm" w-100="xs,sm" w-sidebar="md">
+            <nav id="nav_small_devices" class="d-flex | pos-fixed bottom-0 left-0 z-1 | w-100 h-60px" d-none="md">
+                <div class="d-flex jc-space-between | w-100 | bc-neutral-100 btwidth-1 btstyle-dashed bcolor-neutral-500">
+                    <a href="/deckle/" class="d-flex fd-column jc-center ai-center gap-1 | pl-5 pr-2 | td-none ta-center | c-primary-900 b-0 brad-3">
+                        <span class="icon-house fs-6"></span>
+                        <span class="fvs-wght-400 fs-1 tt-uppercase">Home</span>
+                    </a>
+                    
+                        <a href="/deckle/search/" class="d-flex fd-column jc-center ai-center gap-1 | pl-2 pr-2 | td-none ta-center | c-primary-900 b-0 brad-3">
+                            <span class="icon-magnifying-glass fs-6"></span>
+                            <span class="fvs-wght-400 fs-1 tt-uppercase">Search</span>
+                        </a>
+                    
+                    <button type="button" id="sd_floating_toc_toggle_btn" class="d-flex fd-column jc-center ai-center gap-1 | pl-2 pr-2 | ta-center | cur-pointer c-primary-900 bc-neutral-100 b-0 brad-3" disabled="">
+                        <span class="icon-list-dashes fs-6"></span>
+                        <span class="fvs-wght-400 fs-1 tt-uppercase">TOC</span>
+                    </button>
+                    <button type="button" id="sd_gtt_btn" class="d-flex fd-column jc-center ai-center gap-1 | pl-2 pr-2 | ta-center | cur-pointer c-primary-900 bc-neutral-100 b-0 brad-3" onclick="libdocUi.handlers._clickGTT()">
+                        <span class="icon-arrow-line-up fs-6"></span>
+                        <span class="fvs-wght-400 fs-1 tt-uppercase">Top</span>
+                    </button>
+                    <div class="d-flex ai-center">
+                        <input type="checkbox" name="nav_primary" id="nav_primary_checkbox" value="" class="pos-absolute opa-0 pe-none">
+                        <label for="nav_primary_checkbox" class="d-flex fd-column jc-center ai-center gap-1 | h-100 pl-2 pr-5 | ta-center | cur-pointer c-primary-900 bc-neutral-100">
+                            <span class="icon-list fs-6"></span>
+                            <span class="fvs-wght-400 fs-1 tt-uppercase">Menu</span>
+                        </label>
+                    </div>
+                </div>
+            </nav>
+            <nav id="nav_primary_container" class="d-flex d-none--xs d-none--sm fd-column | w-100 | bwidth-1 bstyle-dashed bcolor-neutral-500 | __soft-shadow" mt-5="md" maxw-sidebar="md" maxh-sidebar="md" h-sidebar="xs,sm" brad-3="md">
+                <menu id="nav_primary_header" class="
+                    d-flex fd-column
+                    pos-sticky top-0 z-1
+                    m-0 p-0 
+                    ls-none
+                    bbwidth-1 bbstyle-dashed bcolor-neutral-500" gap-5="md" bradtl-3="md" bradtr-3="md">
+                    <li class="d-flex ai-center">
+                        
+                            <a href="/deckle/" class="p-5 | td-none fvs-wght-700 lsp-5 fs-8 tws-balance | c-neutral-900" title="Deckle documentation">
+                                Deckle
+                            </a>
+                        
+                    </li>
+                    
+                        <li class="pos-relative z-1" d-none="xs,sm">
+                            <form action="/deckle/search/" class="d-flex fd-column | pos-relative | pl-5 pr-5 | search_form | auto-search-wrapper">
+                                <label for="searchInput" class="pos-absolute z-2 | ml-5 t-tY-50 | fvs-wght-400 fs-1 tt-uppercase | c-neutral-900 bc-neutral-100">
+                                    Search
+                                </label>
+                                <input id="searchInput" type="search" name="search" autocomplete="off" class="pos-relative z-1 | pl-5 pr-5 pt-4 pb-4 | fs-3 | c-neutral-900 bc-neutral-100 brad-4 bwidth-1 bstyle-dashed bcolor-neutral-500" placeholder="Press 🆂 to search" value="">
+                                <div class="pos-relative z-1 | d-flex ai-center | pos-absolute top-0 right-0 | h-100 mr-5">
+                                    <button type="button" class="pos-relative | p-4 pr-7 | fs-3 | c-neutral-900 bc-neutral-100 c-neutral-900 b-0 cur-pointer | search_form__clear_btn" title="Clear input" hidden="">
+                                        <span class="icon-x | pos-absolute top-50 left-50 t-tY-50 t-tX-50"></span>
+                                    </button>
+                                    <button type="submit" class="pos-relative | h-100 p-0 ar-square | fs-5 | brad-4 bc-primary-500 c-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-100 cur-pointer" title="Submit search">
+                                        <span class="icon-magnifying-glass | pos-absolute top-50 left-50 t-tY-50 t-tX-50"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </li>
+                    
+                    
+                        <li id="custom_links" class="d-flex ai-center rgap-1 | pos-relative | pb-3 pl-5 o-auto">
+                            
+                                <a href="/deckle/feed.xml" class="
+                                    d-flex ai-center gap-1
+                                    pt-2 pb-2 pr-5
+                                    fvs-wght-700 fs-2 lsp-3 lh-1 tt-uppercase td-none ws-nowrap
+                                    c-primary-600" target="_blank">
+                                    Atom feed
+                                </a>
+                            
+                                <a href="https://github.com/jordanwallwork/deckle" class="
+                                    d-flex ai-center gap-1
+                                    pt-2 pb-2 pr-5
+                                    fvs-wght-700 fs-2 lsp-3 lh-1 tt-uppercase td-none ws-nowrap
+                                    c-primary-600" target="_blank">
+                                    GitHub
+                                </a>
+                            
+                        </li>
+                    
+                </menu>
+                
+                
+
+                
+
+                <div id="nav_primary" class="pos-relative | fg-1 o-auto">
+                    <ol class="d-flex fd-column | m-0 pl-0 pt-3 pb-3 | ls-none"><li class="d-flex fw-wrap ai-center"><a href="/deckle/user-guide/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">User Guide</a><ol class="d-flex fd-column fg-1 order-1 | m-0 pl-5 o-hidden | ls-none"><li class="d-flex fw-wrap ai-center"><a href="/deckle/user-guide/getting-started/" aria-current="page" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Getting Started</a></li>
+<li class="d-flex fw-wrap ai-center"><a href="/deckle/user-guide/components/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Components</a></li>
+<li class="d-flex fw-wrap ai-center"><a href="/deckle/data-sources/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Data Sources</a></li>
+<li class="d-flex fw-wrap ai-center"><a href="/deckle/image-library/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Image Library</a></li></ol></li>
+<li class="d-flex fw-wrap ai-center"><a href="/deckle/development/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Development</a><ol class="d-flex fd-column fg-1 order-1 | m-0 pl-5 o-hidden | ls-none"><li class="d-flex fw-wrap ai-center"><a href="/deckle/development/authentication-setup/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Authentication Setup</a></li>
+<li class="d-flex fw-wrap ai-center"><a href="/deckle/development/railway-deployment/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Railway Deployment</a></li>
+<li class="d-flex fw-wrap ai-center"><a href="/deckle/development/railway-configuration/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Railway Configuration</a></li>
+<li class="d-flex fw-wrap ai-center"><a href="/deckle/development/user-secrets/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">User Secrets</a></li></ol></li></ol>
+                </div>
+            </nav>
+        </div>
+        <main class="pos-relative" w-100-minus-sidebar="md" w-100="xs,sm">
+            <header class="d-flex fd-column | pt-5 pb-7 mb-7">
+                <nav class="d-flex jc-space-between | pos-relative">
+                    <ul class="d-flex ai-center gap-2 | p-0 m-0 | fs-2 lh-3 | ls-none" style="width: calc(100% - 42px)">
+    <li class="d-flex ai-center gap-2">
+        <a href="/deckle/" class="pos-relative | p-5 | fs-4 td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" title="Homepage">
+            <span class="icon-house | pos-absolute top-50 left-50 t-tY-50 t-tX-50"></span>
+        </a> /
+    </li>
+    <li class="o-auto">
+        <ul class="d-flex ai-center gap-2 | p-0 m-0 | fs-2 lh-3 | ls-none">
+            
+                
+                    <li class="d-flex ai-baseline gap-2">
+                        <a href="/deckle/user-guide/" class="pt-2 pb-2 | fvs-wght-400 ws-nowrap">
+                            User Guide
+                        </a> /
+                    </li>
+                
+            
+            
+            
+            <li class="c-neutral-800 ws-nowrap">Getting Started</li>
+        </ul>
+    </li>
+</ul>
+                    <details id="user_preferences">
+                        <summary class="d-flex | pos-relative z-2 | p-5 | fs-4 td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 cur-pointer __hover-1 __soft-shadow" title="User preferences">
+                            <span class="icons">
+                                <span class="icon-faders | pos-absolute top-50 left-50 t-tY-50 t-tX-50"></span>
+                                <span class="icon-x | pos-absolute top-50 left-50 t-tY-50 t-tX-50"></span>
+                            </span>
+                        </summary>
+                        <menu class="d-flex fd-column | pos-absolute right-0 z-1 | w-100 mt-3 mb-0 p-4 | ls-none bc-neutral-100 brad-2 bwidth-1 bstyle-dashed bcolor-neutral-500 | __soft-shadow" style="max-width: 400px">
+                            <li class="d-flex fd-column gap-3 | c-neutral-900">
+                                <p class="m-0 | fs-3 fvs-wght-500">Color schemes</p>
+                                <div class="d-flex fd-column gap-3">
+                                    
+                                        <div>
+                                            <input type="radio" name="libdoc_color_scheme" id="libdoc_color_scheme__auto" class="pos-absolute opa-0" value="auto" checked="">
+                                            <label for="libdoc_color_scheme__auto" class="d-flex ai-start gap-2">
+                                                <span class="d-flex fd-column gap-1">
+                                                    <strong class="fs-2 tt-uppercase">Automatic</strong>
+                                                    <span class="fs-2 | c-neutral-700">Based on you operating system preference</span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    
+                                        <div>
+                                            <input type="radio" name="libdoc_color_scheme" id="libdoc_color_scheme__light" class="pos-absolute opa-0" value="light">
+                                            <label for="libdoc_color_scheme__light" class="d-flex ai-start gap-2">
+                                                <span class="d-flex fd-column gap-1">
+                                                    <strong class="fs-2 tt-uppercase">Light</strong>
+                                                    <span class="fs-2 | c-neutral-700">Always apply light mode</span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    
+                                        <div>
+                                            <input type="radio" name="libdoc_color_scheme" id="libdoc_color_scheme__dark" class="pos-absolute opa-0" value="dark">
+                                            <label for="libdoc_color_scheme__dark" class="d-flex ai-start gap-2">
+                                                <span class="d-flex fd-column gap-1">
+                                                    <strong class="fs-2 tt-uppercase">Dark</strong>
+                                                    <span class="fs-2 | c-neutral-700">Always apply dark mode</span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    
+                                </div>
+                            </li>
+                        </menu>
+                    </details>
+                </nav>
+                <h1 class="mt-3 mb-0 | lsp-5 fvs-wght-700 tws-balance " fs-10="md" fs-9="xs,sm">
+                    Getting Started
+                </h1>
+                
+                    <div class="pt-5 | blwidth-1 blstyle-dashed bcolor-neutral-500"></div>
+                
+                
+                    
+                    <div class="d-flex ai-center | m-0 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                        <div class="pl-5 | bbwidth-1 bbstyle-dashed bcolor-neutral-500"></div>
+                        
+                            <p class="d-flex ai-center gap-2 | m-0 pr-2 | fvs-wght-400 fs-3 lsp-3 lh-3 | c-neutral-700 bc-primary-100" fs-2="xs">
+                                <span class="icon-calendar-dots fs-6"></span>
+                                <span ws-nowrap="sm,md">
+                                    
+                                    
+                                        
+                                        2026-01-17
+                                    
+                                </span>
+                            </p>
+                        
+                        <div class="pl-5 w-100 | bbwidth-1 bbstyle-dashed bcolor-neutral-500"></div>
+                        
+                            <div class="d-flex ai-center gap-3">
+                                <div class="pos-relative | p-5 | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500">
+                                    <div class="icon-user | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-6"></div>
+                                </div>
+                                <p class="d-flex fd-column | m-0 | fvs-wght-400 fs-3 lsp-3 lh-3 | c-neutral-700 bc-primary-100" fs-2="xs" ws-nowrap="sm,md">
+                                    Jordan Wallwork
+                                </p>
+                            </div>
+                        
+                    </div>
+                
+                
+                    <details id="toc_main" open="">
+                        <summary class="d-flex ai-center | pt-5 pb-5 | fvs-wght-500 fs-3 | bwidth-1 bstyle-dashed bcolor-neutral-500 btwidth-0 brwidth-0 cur-pointer">
+                            <span class="pl-5 | bbwidth-1 bbstyle-dashed bcolor-neutral-500"></span>
+                            <span class="d-flex ai-center gap-1 | lsp-2">
+                                <span class="icon-minus-circle | fs-6 | c-primary-500"></span>
+                                <span class="icon-plus-circle | fs-6 | c-primary-500"></span>
+                                Table of content
+                            </span>
+                        </summary>
+                        
+                    <ol class="cgap-3em | m-0 pl-0 pb-5 o-auto | lh-1 | ls-none bwidth-1 bstyle-dashed bcolor-neutral-500 btwidth-0 brwidth-0" d-flex="xs,sm" fd-column="xs,sm" fw-wrap="xs,sm" columns-3="md" columns-2="sm" maxh-300px="sm" maxh-200px="xs">
+                        <li class="d-flex">
+                            <a href="#account-setup-sign-in" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Account Setup / Sign In
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#creating-your-first-project" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Creating your first project
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#components" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Components
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#data-sources-google-sheets" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Data Sources (Google Sheets)
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#exporting" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Exporting
+                            </a>
+                        </li></ol>
+                    </details>
+                
+            </header>
+            <noscript>
+                
+                
+                <aside class="widget widget-alert">
+                    <div class="alert ">
+                        It seems that your browser JavaScript is disabled, LibDoc is set to fallback mode with reduced features.
+                    </div>
+                </aside>
+            
+            </noscript>
+            
+                        <h1 id="account-setup-sign-in" pl-9="xs,sm">
+                            <a href="#account-setup-sign-in" title="Account Setup / Sign In" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Account Setup / Sign In</h1>
+<p>Simply use the 'Sign In with Google' button to log in using a Google account. If it is the first time using Deckle your account will be setup automatically, you don't need to do anything other than log in and start exploring!</p>
+
+                        <h1 id="creating-your-first-project" pl-9="xs,sm">
+                            <a href="#creating-your-first-project" title="Creating your first project" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Creating your first project</h1>
+<p>When you first log in you will be taken to a home page, which will eventually show a list of all of your projects in Deckle.</p>
+<p>To get started, simply click 'New Project' to add a project. All it needs for now is a name, and an optional description.</p>
+
+                        <h1 id="components" pl-9="xs,sm">
+                            <a href="#components" title="Components" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Components</h1>
+<p><a href="/deckle/user-guide/components">Components</a> are the elements that make up your game. These can be cards, player mats, dice etc.</p>
+<aside class="widget widget-alert">
+<div class="alert alert-info">
+Reminder: Deckle is in early development, so you can only add a limited variety of component types currently, however more will be coming
+</div>
+</aside>
+<p>Some components - such as dice - are basic game elements. You can configure the number of these, properties such a colour, type (D6, D10, D20 etc).</p>
+<p>Others - card, player mats, game boards etc - allow you to create custom designs using the Component Editor. If you link a data source to a component, you can easily create multiple variants of components by using merge fields to automatically customise individual components</p>
+<p>To add a component, click the 'Add Component' button, select the type of component that you wish to create, and then enter the configuration options. The component will be created and added to the project. For designable/exportable components, you will see a list of actions (such as &quot;Edit Front Design&quot;) which you can select to go to the Component Editor and start customising the design.</p>
+
+                        <h1 id="data-sources-google-sheets" pl-9="xs,sm">
+                            <a href="#data-sources-google-sheets" title="Data Sources (Google Sheets)" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Data Sources (Google Sheets)</h1>
+<p>To link a Google Sheets <a href="/deckle/user-guide/data-sources">data source</a> to your project, click on the 'Data Sources' tab on the project overview screen, and click 'Add Data Source'.</p>
+<p><em>In Google Sheets:</em></p>
+<ul>
+<li>Click on the Share button</li>
+<li>Ensure the sheet is accessible by setting 'General Access' to 'Anyone with the link'</li>
+<li>Click 'Copy Link' to get the Google Sheets URL</li>
+</ul>
+<p><em>In Deckle:</em></p>
+<ul>
+<li>Fill in the Google Sheets URL</li>
+<li>Optional: Give the data source a name, to make it easy to find/reference later</li>
+<li>If your data source has multiple sheets, by default Deckle will read the first; however if you want to add a different sheet, you will need to set the sheets <code>gid</code>. To get this, view the sheet in Google Sheets and check the browser url. You will see the gid in the url as <code>#gid=123456</code> or <code>?gid=123456</code></li>
+</ul>
+<p>Click 'Add Data Source' to finish adding it to Deckle.</p>
+<p>You can verify that the data was linked correctly by clicking the 'View' button beside the data source in the list; this will show a preview of the data.</p>
+
+                        <h1 id="exporting" pl-9="xs,sm">
+                            <a href="#exporting" title="Exporting" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Exporting</h1>
+<p>Deckle offers export functionality to allow you to print your game components for easy prototyping.</p>
+<p>You can access the Export screen from the Components tab on the projects page.</p>
+
+            <footer class="minh-100vh">
+                <div class="pt-11 | blwidth-1 blstyle-dashed bcolor-neutral-500"></div>
+                <nav class="d-flex ai-center rgap-7 | blwidth-1 blstyle-dashed bcolor-neutral-500" fw-wrap="xs">
+                    <div class="pl-5 | bbwidth-1 bbstyle-dashed bcolor-neutral-500"></div>
+                    
+                    <div class="w-100" d-none="sm,md"></div>
+                    <div class="pl-5 | bbwidth-1 bbstyle-dashed bcolor-neutral-500" w-100="sm,md"></div>
+                    <a href="https://github.com/ita-design-system/eleventy-libdoc" target="_blank" class="d-flex ai-center gap-2 | pl-2 pr-2 | fvs-wght-400 fs-2 lsp-3 lh-3 td-none ws-nowrap">
+                        11ty LibDoc 0.12.0
+                    </a>
+                </nav>
+            </footer>
+        </main>
+    </div>
+    
+    <script src="/deckle/core/assets/js/sandbox.js"></script>
+    <script src="/deckle/core/assets/js/hljs/highlight.min.js"></script>
+    
+        <script src="/deckle/core/assets/js/hljs/languages/xml.min.js"></script>
+    
+        <script src="/deckle/core/assets/js/hljs/languages/javascript.min.js"></script>
+    
+        <script src="/deckle/core/assets/js/hljs/languages/json.min.js"></script>
+    
+        <script src="/deckle/core/assets/js/hljs/languages/yaml.min.js"></script>
+    
+        <script src="/deckle/core/assets/js/hljs/languages/liquid.min.js"></script>
+    
+        <script src="/deckle/core/assets/js/hljs/languages/markdown.min.js"></script>
+    
+        <script src="/deckle/core/assets/js/hljs/languages/css.min.js"></script>
+    
+    <script src="/deckle/core/assets/js/ui.js"></script>
+    
+        <link rel="stylesheet" href="/deckle/core/assets/css/autocomplete.css">
+        <script src="/deckle/core/assets/js/autocomplete.min.js"></script>
+        <script src="/deckle/core/assets/js/fuse.js"></script>
+        <script src="/deckle/core/assets/js/fuzzy.js"></script>
+        <script src="/deckle/core/assets/js/hotkeys.min.js"></script>
+    
+</body>
+</html>

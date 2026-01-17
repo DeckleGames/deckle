@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Deployment Guide</title>
+    
+
+    <meta itemprop="name" content="Railway Deployment Guide">
+    <meta name="description" itemprop="description" content="">
+    <meta name="application-name" content="Railway Deployment Guide">
+    <meta name="author" content="Jordan Wallwork">
+    <link rel="icon" type="image/png" href="/deckle/assets/favicon.svg">
+    
+    <!-- Microsoft -->
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="msapplication-starturl" content="/development/railway-deployment/">
+    <meta name="msapplication-tooltip" content="Railway Deployment Guide">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="/development/railway-deployment/">
+    <meta property="og:title" content="Railway Deployment Guide">
+    <meta property="og:description" content="">
+    <meta property="og:image" content="https://raw.githubusercontent.com/ita-design-system/ita-medias/refs/heads/main/ogimage-11ty-libdoc.png">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Railway Deployment Guide">
+    <meta name="twitter:description" content="">
+    <meta name="twitter:url" content="/development/railway-deployment/">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/ita-design-system/ita-medias/refs/heads/main/ogimage-11ty-libdoc.png">
+    
+    <!-- iOS -->
+    <meta name="apple-mobile-web-app-title" content="Railway Deployment Guide">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <!-- Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <meta name="color-scheme" content="light dark">
+
+    <meta name="generator" content="Eleventy v3.1.2">
+
+    <!-- Font fallback -->
+    <style>
+        @font-face {
+            font-family: "fallbackFont";
+            src: local("Arial");
+            size-adjust: 103%;
+        }
+        html, body {
+            font-family: fallbackFont, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, Adwaita Sans, Cantarell, Ubuntu, roboto, noto, helvetica, arial, sans-serif;
+            font-display: swap;
+        }
+        pre, code {
+            font-family: Menlo, Consolas, Monaco, Adwaita Mono, Liberation Mono, Lucida Console, monospace;
+        }
+    </style>
+    <link rel="stylesheet" href="/deckle/core/assets/css/fonts.css">
+    <link rel="stylesheet" href="/deckle/core/assets/css/ds.css">
+    <link rel="stylesheet" href="/deckle/core/assets/css/ds__defaults.css">
+    <link rel="stylesheet" href="/deckle/core/assets/css/ds__colors.css">
+    <link rel="stylesheet" href="/deckle/core/assets/css/ds__dark_mode.css" media="(prefers-color-scheme: dark)" id="libdoc_dark_mode_css">
+    <link rel="stylesheet" href="/deckle/core/assets/css/hljs/night-owl.css">
+    <link rel="stylesheet" href="/deckle/core/assets/fonts/icomoon/style.css">
+    <link rel="stylesheet" href="/deckle/assets/deckle.css">
+    <style>
+        :root {
+            --libdoc-image-background-color-light-mode: transparent;
+            --libdoc-image-background-color-dark-mode: transparent;
+            --libdoc-image-background-color: var(--libdoc-image-background-color-light-mode);
+            --ita-widths-sidebar: 300px;
+            --ita-widths-content: 700px;
+            --ita-widths-main-container-max: calc(2 * var(--ita-widths-content) + var(--ita-widths-sidebar));
+        }
+        
+            main img {
+                border-radius: 9px;
+            }
+        
+    </style>
+    <noscript>
+        <link rel="stylesheet" href="/deckle/core/assets/css/noscript.css">
+    </noscript>
+    <script>
+        const libdocMessages = {
+            
+                copiedToClipboard: `Copied to clipboard`,
+                code: `Code`,
+                colorSchemes: `Color schemes`,
+                colorSchemeAuto: `Automatic`,
+                colorSchemeDescriptionAuto: `Based on you operating system preference`,
+                colorSchemeLight: `Light`,
+                colorSchemeDescriptionLight: `Always apply light mode`,
+                colorSchemeDark: `Dark`,
+                colorSchemeDescriptionDark: `Always apply dark mode`,
+                copied: `Copied`,
+                copy: `Copy`,
+                copyCode: `Copy code`,
+                copyHTML: `Copy HTML`,
+                copyURL: `Copy URL`,
+                enable: `Enable`,
+                goToTopOfPage: `Go to top of page`,
+                editThisPage: `Edit this page`,
+                height: `Height`,
+                homepage: `Homepage`,
+                homepageShort: `Home`,
+                inANewTab: `In a new tab`,
+                lastModified: `Last modified`,
+                menu: `Menu`,
+                noscriptAlert: `It seems that your browser JavaScript is disabled, LibDoc is set to fallback mode with reduced features.`,
+                open: `Open`,
+                openInANewTab: `Open in a new tab`,
+                otherCustomLinks: `Other custom links`,
+                page: `Page`,
+                pages: `Pages`,
+                pagesTagged: `Pages tagged`,
+                preferences: `Preferences`,
+                reload: `Reload`,
+                reloaded: `Reloaded`,
+                result: `result`,
+                sandbox: `Sandbox`,
+                sandboxResizeHelper: `Click and drag to resize code and result`,
+                search: `Search`,
+                searchClear: `Clear input`,
+                searchMinimumCharacters: `3 characters min.`,
+                searchResultsNoResultForQuery: `No result for query`,
+                searchOccurrence: `Occurrence search`,
+                searchOccurrencesCurrent: `Current search occurrence`,
+                searchOccurrencesNext: `Next search occurrence`,
+                searchOccurrencesPrevious: `Previous search occurrence`,
+                searchOccurrencesStop: `Stop search occurrences`,
+                searchPlaceholder: `Press 🆂 to search`,
+                searchSubmit: `Submit search`,
+                tableOfContent: `Table of content`,
+                tableOfContentAbbr: `TOC`,
+                tag: `Tag`,
+                tagsList: `Tags list`,
+                tagsListDescription: `List of every tag available`,
+                toggleFloatingToc: `Toggle floating Table of content`,
+                top: `Top`,
+                userPreferences: `User preferences`,
+                width: `Width`,
+        }
+        const libdocConfig = {
+            blogTitle: `Blog Posts`,
+            blogDescription: `false`,
+            displayTagsListLink: true
+        }
+        const libdocSystem = {
+            searchIndexUrl: `/deckle/core/assets/js/search_index.json`,
+            fuzzyIndexUrl: `/deckle/core/assets/js/fuzzy_index.json`,
+            productionUrl: `eleventy-libdoc.netlify.app`,
+            blogPostsCount: ``
+        }
+    </script>
+</head>
+<body class="d-flex fd-column ai-center | m-0">
+    <div class="d-flex | w-100" fd-column="xs,sm" ai-start="md" ai-center="xs,sm" pl-5="md" style="max-width: var(--ita-widths-main-container-max)">
+        <div id="sidebar" class="d-flex fd-column | pos-sticky top-0 z-3" ai-center="xs,sm" w-100="xs,sm" w-sidebar="md">
+            <nav id="nav_small_devices" class="d-flex | pos-fixed bottom-0 left-0 z-1 | w-100 h-60px" d-none="md">
+                <div class="d-flex jc-space-between | w-100 | bc-neutral-100 btwidth-1 btstyle-dashed bcolor-neutral-500">
+                    <a href="/deckle/" class="d-flex fd-column jc-center ai-center gap-1 | pl-5 pr-2 | td-none ta-center | c-primary-900 b-0 brad-3">
+                        <span class="icon-house fs-6"></span>
+                        <span class="fvs-wght-400 fs-1 tt-uppercase">Home</span>
+                    </a>
+                    
+                        <a href="/deckle/search/" class="d-flex fd-column jc-center ai-center gap-1 | pl-2 pr-2 | td-none ta-center | c-primary-900 b-0 brad-3">
+                            <span class="icon-magnifying-glass fs-6"></span>
+                            <span class="fvs-wght-400 fs-1 tt-uppercase">Search</span>
+                        </a>
+                    
+                    <button type="button" id="sd_floating_toc_toggle_btn" class="d-flex fd-column jc-center ai-center gap-1 | pl-2 pr-2 | ta-center | cur-pointer c-primary-900 bc-neutral-100 b-0 brad-3" disabled="">
+                        <span class="icon-list-dashes fs-6"></span>
+                        <span class="fvs-wght-400 fs-1 tt-uppercase">TOC</span>
+                    </button>
+                    <button type="button" id="sd_gtt_btn" class="d-flex fd-column jc-center ai-center gap-1 | pl-2 pr-2 | ta-center | cur-pointer c-primary-900 bc-neutral-100 b-0 brad-3" onclick="libdocUi.handlers._clickGTT()">
+                        <span class="icon-arrow-line-up fs-6"></span>
+                        <span class="fvs-wght-400 fs-1 tt-uppercase">Top</span>
+                    </button>
+                    <div class="d-flex ai-center">
+                        <input type="checkbox" name="nav_primary" id="nav_primary_checkbox" value="" class="pos-absolute opa-0 pe-none">
+                        <label for="nav_primary_checkbox" class="d-flex fd-column jc-center ai-center gap-1 | h-100 pl-2 pr-5 | ta-center | cur-pointer c-primary-900 bc-neutral-100">
+                            <span class="icon-list fs-6"></span>
+                            <span class="fvs-wght-400 fs-1 tt-uppercase">Menu</span>
+                        </label>
+                    </div>
+                </div>
+            </nav>
+            <nav id="nav_primary_container" class="d-flex d-none--xs d-none--sm fd-column | w-100 | bwidth-1 bstyle-dashed bcolor-neutral-500 | __soft-shadow" mt-5="md" maxw-sidebar="md" maxh-sidebar="md" h-sidebar="xs,sm" brad-3="md">
+                <menu id="nav_primary_header" class="
+                    d-flex fd-column
+                    pos-sticky top-0 z-1
+                    m-0 p-0 
+                    ls-none
+                    bbwidth-1 bbstyle-dashed bcolor-neutral-500" gap-5="md" bradtl-3="md" bradtr-3="md">
+                    <li class="d-flex ai-center">
+                        
+                            <a href="/deckle/" class="p-5 | td-none fvs-wght-700 lsp-5 fs-8 tws-balance | c-neutral-900" title="Deckle documentation">
+                                Deckle
+                            </a>
+                        
+                    </li>
+                    
+                        <li class="pos-relative z-1" d-none="xs,sm">
+                            <form action="/deckle/search/" class="d-flex fd-column | pos-relative | pl-5 pr-5 | search_form | auto-search-wrapper">
+                                <label for="searchInput" class="pos-absolute z-2 | ml-5 t-tY-50 | fvs-wght-400 fs-1 tt-uppercase | c-neutral-900 bc-neutral-100">
+                                    Search
+                                </label>
+                                <input id="searchInput" type="search" name="search" autocomplete="off" class="pos-relative z-1 | pl-5 pr-5 pt-4 pb-4 | fs-3 | c-neutral-900 bc-neutral-100 brad-4 bwidth-1 bstyle-dashed bcolor-neutral-500" placeholder="Press 🆂 to search" value="">
+                                <div class="pos-relative z-1 | d-flex ai-center | pos-absolute top-0 right-0 | h-100 mr-5">
+                                    <button type="button" class="pos-relative | p-4 pr-7 | fs-3 | c-neutral-900 bc-neutral-100 c-neutral-900 b-0 cur-pointer | search_form__clear_btn" title="Clear input" hidden="">
+                                        <span class="icon-x | pos-absolute top-50 left-50 t-tY-50 t-tX-50"></span>
+                                    </button>
+                                    <button type="submit" class="pos-relative | h-100 p-0 ar-square | fs-5 | brad-4 bc-primary-500 c-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-100 cur-pointer" title="Submit search">
+                                        <span class="icon-magnifying-glass | pos-absolute top-50 left-50 t-tY-50 t-tX-50"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </li>
+                    
+                    
+                        <li id="custom_links" class="d-flex ai-center rgap-1 | pos-relative | pb-3 pl-5 o-auto">
+                            
+                                <a href="/deckle/feed.xml" class="
+                                    d-flex ai-center gap-1
+                                    pt-2 pb-2 pr-5
+                                    fvs-wght-700 fs-2 lsp-3 lh-1 tt-uppercase td-none ws-nowrap
+                                    c-primary-600" target="_blank">
+                                    Atom feed
+                                </a>
+                            
+                                <a href="https://github.com/jordanwallwork/deckle" class="
+                                    d-flex ai-center gap-1
+                                    pt-2 pb-2 pr-5
+                                    fvs-wght-700 fs-2 lsp-3 lh-1 tt-uppercase td-none ws-nowrap
+                                    c-primary-600" target="_blank">
+                                    GitHub
+                                </a>
+                            
+                        </li>
+                    
+                </menu>
+                
+                
+
+                
+
+                <div id="nav_primary" class="pos-relative | fg-1 o-auto">
+                    <ol class="d-flex fd-column | m-0 pl-0 pt-3 pb-3 | ls-none"><li class="d-flex fw-wrap ai-center"><a href="/deckle/user-guide/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">User Guide</a><ol class="d-flex fd-column fg-1 order-1 | m-0 pl-5 o-hidden | ls-none"><li class="d-flex fw-wrap ai-center"><a href="/deckle/user-guide/getting-started/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Getting Started</a></li>
+<li class="d-flex fw-wrap ai-center"><a href="/deckle/user-guide/components/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Components</a></li>
+<li class="d-flex fw-wrap ai-center"><a href="/deckle/data-sources/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Data Sources</a></li>
+<li class="d-flex fw-wrap ai-center"><a href="/deckle/image-library/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Image Library</a></li></ol></li>
+<li class="d-flex fw-wrap ai-center"><a href="/deckle/development/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Development</a><ol class="d-flex fd-column fg-1 order-1 | m-0 pl-5 o-hidden | ls-none"><li class="d-flex fw-wrap ai-center"><a href="/deckle/development/authentication-setup/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Authentication Setup</a></li>
+<li class="d-flex fw-wrap ai-center"><a href="/deckle/development/railway-deployment/" aria-current="page" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Railway Deployment</a></li>
+<li class="d-flex fw-wrap ai-center"><a href="/deckle/development/railway-configuration/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">Railway Configuration</a></li>
+<li class="d-flex fw-wrap ai-center"><a href="/deckle/development/user-secrets/" class="d-flex ai-center fg-1 | pos-relative | w-100 pt-2 pb-2 pr-6 | fs-3 td-none lh-5 tws-balance fvs-wght-500 | c-neutral-900 nav_primary__anchor">User Secrets</a></li></ol></li></ol>
+                </div>
+            </nav>
+        </div>
+        <main class="pos-relative" w-100-minus-sidebar="md" w-100="xs,sm">
+            <header class="d-flex fd-column | pt-5 pb-7 mb-7">
+                <nav class="d-flex jc-space-between | pos-relative">
+                    <ul class="d-flex ai-center gap-2 | p-0 m-0 | fs-2 lh-3 | ls-none" style="width: calc(100% - 42px)">
+    <li class="d-flex ai-center gap-2">
+        <a href="/deckle/" class="pos-relative | p-5 | fs-4 td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" title="Homepage">
+            <span class="icon-house | pos-absolute top-50 left-50 t-tY-50 t-tX-50"></span>
+        </a> /
+    </li>
+    <li class="o-auto">
+        <ul class="d-flex ai-center gap-2 | p-0 m-0 | fs-2 lh-3 | ls-none">
+            
+                
+                    <li class="d-flex ai-baseline gap-2">
+                        <a href="/deckle/development/" class="pt-2 pb-2 | fvs-wght-400 ws-nowrap">
+                            Development
+                        </a> /
+                    </li>
+                
+            
+            
+            
+            <li class="c-neutral-800 ws-nowrap">Railway Deployment Guide</li>
+        </ul>
+    </li>
+</ul>
+                    <details id="user_preferences">
+                        <summary class="d-flex | pos-relative z-2 | p-5 | fs-4 td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 cur-pointer __hover-1 __soft-shadow" title="User preferences">
+                            <span class="icons">
+                                <span class="icon-faders | pos-absolute top-50 left-50 t-tY-50 t-tX-50"></span>
+                                <span class="icon-x | pos-absolute top-50 left-50 t-tY-50 t-tX-50"></span>
+                            </span>
+                        </summary>
+                        <menu class="d-flex fd-column | pos-absolute right-0 z-1 | w-100 mt-3 mb-0 p-4 | ls-none bc-neutral-100 brad-2 bwidth-1 bstyle-dashed bcolor-neutral-500 | __soft-shadow" style="max-width: 400px">
+                            <li class="d-flex fd-column gap-3 | c-neutral-900">
+                                <p class="m-0 | fs-3 fvs-wght-500">Color schemes</p>
+                                <div class="d-flex fd-column gap-3">
+                                    
+                                        <div>
+                                            <input type="radio" name="libdoc_color_scheme" id="libdoc_color_scheme__auto" class="pos-absolute opa-0" value="auto" checked="">
+                                            <label for="libdoc_color_scheme__auto" class="d-flex ai-start gap-2">
+                                                <span class="d-flex fd-column gap-1">
+                                                    <strong class="fs-2 tt-uppercase">Automatic</strong>
+                                                    <span class="fs-2 | c-neutral-700">Based on you operating system preference</span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    
+                                        <div>
+                                            <input type="radio" name="libdoc_color_scheme" id="libdoc_color_scheme__light" class="pos-absolute opa-0" value="light">
+                                            <label for="libdoc_color_scheme__light" class="d-flex ai-start gap-2">
+                                                <span class="d-flex fd-column gap-1">
+                                                    <strong class="fs-2 tt-uppercase">Light</strong>
+                                                    <span class="fs-2 | c-neutral-700">Always apply light mode</span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    
+                                        <div>
+                                            <input type="radio" name="libdoc_color_scheme" id="libdoc_color_scheme__dark" class="pos-absolute opa-0" value="dark">
+                                            <label for="libdoc_color_scheme__dark" class="d-flex ai-start gap-2">
+                                                <span class="d-flex fd-column gap-1">
+                                                    <strong class="fs-2 tt-uppercase">Dark</strong>
+                                                    <span class="fs-2 | c-neutral-700">Always apply dark mode</span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    
+                                </div>
+                            </li>
+                        </menu>
+                    </details>
+                </nav>
+                <h1 class="mt-3 mb-0 | lsp-5 fvs-wght-700 tws-balance " fs-10="md" fs-9="xs,sm">
+                    Railway Deployment Guide
+                </h1>
+                
+                    <div class="pt-5 | blwidth-1 blstyle-dashed bcolor-neutral-500"></div>
+                
+                
+                    
+                    <div class="d-flex ai-center | m-0 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                        <div class="pl-5 | bbwidth-1 bbstyle-dashed bcolor-neutral-500"></div>
+                        
+                            <p class="d-flex ai-center gap-2 | m-0 pr-2 | fvs-wght-400 fs-3 lsp-3 lh-3 | c-neutral-700 bc-primary-100" fs-2="xs">
+                                <span class="icon-calendar-dots fs-6"></span>
+                                <span ws-nowrap="sm,md">
+                                    
+                                    
+                                        
+                                        2026-01-16
+                                    
+                                </span>
+                            </p>
+                        
+                        <div class="pl-5 w-100 | bbwidth-1 bbstyle-dashed bcolor-neutral-500"></div>
+                        
+                            <div class="d-flex ai-center gap-3">
+                                <div class="pos-relative | p-5 | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500">
+                                    <div class="icon-user | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-6"></div>
+                                </div>
+                                <p class="d-flex fd-column | m-0 | fvs-wght-400 fs-3 lsp-3 lh-3 | c-neutral-700 bc-primary-100" fs-2="xs" ws-nowrap="sm,md">
+                                    Jordan Wallwork
+                                </p>
+                            </div>
+                        
+                    </div>
+                
+                
+                    <details id="toc_main" open="">
+                        <summary class="d-flex ai-center | pt-5 pb-5 | fvs-wght-500 fs-3 | bwidth-1 bstyle-dashed bcolor-neutral-500 btwidth-0 brwidth-0 cur-pointer">
+                            <span class="pl-5 | bbwidth-1 bbstyle-dashed bcolor-neutral-500"></span>
+                            <span class="d-flex ai-center gap-1 | lsp-2">
+                                <span class="icon-minus-circle | fs-6 | c-primary-500"></span>
+                                <span class="icon-plus-circle | fs-6 | c-primary-500"></span>
+                                Table of content
+                            </span>
+                        </summary>
+                        
+                    <ol class="cgap-3em | m-0 pl-0 pb-5 o-auto | lh-1 | ls-none bwidth-1 bstyle-dashed bcolor-neutral-500 btwidth-0 brwidth-0" d-flex="xs,sm" fd-column="xs,sm" fw-wrap="xs,sm" columns-3="md" columns-2="sm" maxh-300px="sm" maxh-200px="xs">
+                        <li class="d-flex">
+                            <a href="#prerequisites" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Prerequisites
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#architecture-overview" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Architecture Overview
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#step-1-create-railway-project" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Step 1: Create Railway Project
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#option-a-using-railway-cli" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Option A: Using Railway CLI
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#option-b-using-railway-dashboard" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Option B: Using Railway Dashboard
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#step-2-add-postgresql-database" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Step 2: Add PostgreSQL Database
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#using-railway-cli" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Using Railway CLI
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#using-railway-dashboard" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Using Railway Dashboard
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#step-3-configure-api-service" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Step 3: Configure API Service
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#3-1-create-api-service" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                3.1 Create API Service
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#3-2-add-ghcr-authentication" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                3.2 Add GHCR Authentication
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#3-3-configure-api-environment-variables" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                3.3 Configure API Environment Variables
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#required-variables" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Required Variables
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#authentication-google-oauth" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Authentication - Google OAuth
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#email-smtp-configuration" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Email - SMTP Configuration
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#3-4-configure-service-settings" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                3.4 Configure Service Settings
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#step-4-configure-web-service" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Step 4: Configure Web Service
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#4-1-create-web-service" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                4.1 Create Web Service
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#4-2-configure-web-environment-variables" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                4.2 Configure Web Environment Variables
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#4-3-enable-public-domain" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                4.3 Enable Public Domain
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#step-5-github-actions-integration" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Step 5: GitHub Actions Integration
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#5-1-create-railway-webhooks" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                5.1 Create Railway Webhooks
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#5-2-add-webhooks-to-github-secrets" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                5.2 Add Webhooks to GitHub Secrets
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#5-3-how-automatic-deployment-works" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                5.3 How Automatic Deployment Works
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#step-6-first-deployment" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Step 6: First Deployment
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#initial-manual-deployment" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Initial Manual Deployment
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#monitor-deployment" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Monitor Deployment
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#step-7-verify-deployment" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Step 7: Verify Deployment
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#7-1-api-health-check" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                7.1 API Health Check
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#7-2-api-documentation" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                7.2 API Documentation
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#7-3-web-application" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                7.3 Web Application
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#7-4-database-migrations" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                7.4 Database Migrations
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#7-5-end-to-end-test" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                7.5 End-to-End Test
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#step-8-custom-domain-required-for-production" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Step 8: Custom Domain (Required for Production)
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#8-1-add-custom-domain-to-both-services" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                8.1 Add Custom Domain to Both Services
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#8-2-configure-dns" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                8.2 Configure DNS
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#8-3-update-environment-variables" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                8.3 Update Environment Variables
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#8-4-ssl-certificate" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                8.4 SSL Certificate
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#troubleshooting" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Troubleshooting
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#deployment-fails-with-quot-image-pull-error-quot" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Deployment Fails with &quot;Image Pull Error&quot;
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#database-connection-errors" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Database Connection Errors
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#authentication-issues-redirect-to-quot-projects-quot" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Authentication Issues / Redirect to &quot;projects/&quot;
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#google-oauth-fails" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Google OAuth Fails
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#web-can-t-reach-api" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Web Can't Reach API
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#email-not-sending" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Email Not Sending
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#cost-estimates" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Cost Estimates
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#monitoring-amp-maintenance" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Monitoring &amp; Maintenance
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#view-logs" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                View Logs
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#metrics" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Metrics
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#database-backups" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Database Backups
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#rollback-deployment" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Rollback Deployment
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#security-best-practices" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Security Best Practices
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#support-resources" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Support Resources
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#summary-checklist" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Summary Checklist
+                            </a>
+                        </li>
+                        <li class="d-flex">
+                            <a href="#next-steps-after-deployment" class="pl-5 pt-1 pb-1 | fs-4 lsp-3 lh-5 fvs-wght-400 | blwidth-1 blstyle-dashed bcolor-neutral-500">
+                                Next Steps After Deployment
+                            </a>
+                        </li></ol>
+                    </details>
+                
+            </header>
+            <noscript>
+                
+                
+                <aside class="widget widget-alert">
+                    <div class="alert ">
+                        It seems that your browser JavaScript is disabled, LibDoc is set to fallback mode with reduced features.
+                    </div>
+                </aside>
+            
+            </noscript>
+            <p>This guide provides step-by-step instructions for deploying Deckle to Railway using pre-built Docker images from GitHub Container Registry (GHCR).</p>
+<p><strong>Note:</strong> For a complete custom domain setup example with deckle.games, see <a href="/deckle/development/railway-configuration/">RAILWAY_CONFIG.md</a>.</p>
+
+                        <h2 id="prerequisites" pl-9="xs,sm">
+                            <a href="#prerequisites" title="Prerequisites" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Prerequisites</h2>
+<ul>
+<li>Railway account (sign up at https://railway.app)</li>
+<li>Railway CLI installed (optional but recommended): <code>npm install -g @railway/cli</code></li>
+<li>GitHub Personal Access Token with <code>read:packages</code> scope</li>
+<li>Access to project secrets (Google OAuth, SMTP credentials)</li>
+</ul>
+
+                        <h2 id="architecture-overview" pl-9="xs,sm">
+                            <a href="#architecture-overview" title="Architecture Overview" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Architecture Overview</h2>
+<pre><code>GitHub Actions (CI/CD)
+    ↓
+Build &amp; Push to GHCR
+    ↓
+Trigger Railway Webhooks
+    ↓
+Railway Project
+├── PostgreSQL Database (Railway managed)
+├── API Service (pulls ghcr.io/.../deckle-api)
+└── Web Service (pulls ghcr.io/.../deckle-web)
+</code></pre>
+
+                        <h2 id="step-1-create-railway-project" pl-9="xs,sm">
+                            <a href="#step-1-create-railway-project" title="Step 1: Create Railway Project" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Step 1: Create Railway Project</h2>
+
+                        <h3 id="option-a-using-railway-cli" pl-9="xs,sm">
+                            <a href="#option-a-using-railway-cli" title="Option A: Using Railway CLI" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Option A: Using Railway CLI</h3>
+<pre><code class="language-bash"># Login to Railway
+railway login
+
+# Create new project
+railway init
+
+# Link to existing Railway project (if already created)
+railway link
+</code></pre>
+
+                        <h3 id="option-b-using-railway-dashboard" pl-9="xs,sm">
+                            <a href="#option-b-using-railway-dashboard" title="Option B: Using Railway Dashboard" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Option B: Using Railway Dashboard</h3>
+<ol>
+<li>Go to https://railway.app/dashboard</li>
+<li>Click &quot;New Project&quot;</li>
+<li>Select &quot;Empty Project&quot;</li>
+<li>Name your project (e.g., &quot;deckle-production&quot;)</li>
+</ol>
+
+                        <h2 id="step-2-add-postgresql-database" pl-9="xs,sm">
+                            <a href="#step-2-add-postgresql-database" title="Step 2: Add PostgreSQL Database" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Step 2: Add PostgreSQL Database</h2>
+
+                        <h3 id="using-railway-cli" pl-9="xs,sm">
+                            <a href="#using-railway-cli" title="Using Railway CLI" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Using Railway CLI</h3>
+<pre><code class="language-bash">railway add --database postgres
+</code></pre>
+
+                        <h3 id="using-railway-dashboard" pl-9="xs,sm">
+                            <a href="#using-railway-dashboard" title="Using Railway Dashboard" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Using Railway Dashboard</h3>
+<ol>
+<li>In your project, click &quot;+ New&quot;</li>
+<li>Select &quot;Database&quot;</li>
+<li>Choose &quot;Add PostgreSQL&quot;</li>
+<li>Railway will automatically provision the database and create a <code>DATABASE_URL</code> variable</li>
+</ol>
+
+                        <h2 id="step-3-configure-api-service" pl-9="xs,sm">
+                            <a href="#step-3-configure-api-service" title="Step 3: Configure API Service" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Step 3: Configure API Service</h2>
+
+                        <h3 id="3-1-create-api-service" pl-9="xs,sm">
+                            <a href="#3-1-create-api-service" title="3.1 Create API Service" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    3.1 Create API Service</h3>
+<p><strong>Using Railway Dashboard:</strong></p>
+<ol>
+<li>Click &quot;+ New&quot; → &quot;Empty Service&quot;</li>
+<li>Name it &quot;api&quot;</li>
+<li>Go to service Settings</li>
+</ol>
+<p><strong>Configure Docker Image Source:</strong></p>
+<ol>
+<li>Settings → Source → &quot;Docker Image&quot;</li>
+<li>Image: <code>ghcr.io/{your-github-username}/{repo-name}/deckle-api:latest</code>
+<ul>
+<li>Replace with your actual GHCR path</li>
+<li>Example: <code>ghcr.io/johndoe/deckle/deckle-api:latest</code></li>
+</ul>
+</li>
+</ol>
+
+                        <h3 id="3-2-add-ghcr-authentication" pl-9="xs,sm">
+                            <a href="#3-2-add-ghcr-authentication" title="3.2 Add GHCR Authentication" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    3.2 Add GHCR Authentication</h3>
+<p>Railway needs credentials to pull private images from GHCR.</p>
+<p><strong>Create GitHub Personal Access Token:</strong></p>
+<ol>
+<li>GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)</li>
+<li>Generate new token</li>
+<li>Select scope: <code>read:packages</code></li>
+<li>Copy the token (you won't see it again)</li>
+</ol>
+<p><strong>Add Registry Credentials in Railway:</strong></p>
+<ol>
+<li>API service → Settings → Source</li>
+<li>Under &quot;Image Registry Credentials&quot;:
+<ul>
+<li>Registry: <code>ghcr.io</code></li>
+<li>Username: Your GitHub username</li>
+<li>Password: PAT from above</li>
+</ul>
+</li>
+</ol>
+
+                        <h3 id="3-3-configure-api-environment-variables" pl-9="xs,sm">
+                            <a href="#3-3-configure-api-environment-variables" title="3.3 Configure API Environment Variables" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    3.3 Configure API Environment Variables</h3>
+<p>Go to API service → Variables and add:</p>
+
+                        <h4 id="required-variables" pl-9="xs,sm">
+                            <a href="#required-variables" title="Required Variables" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Required Variables</h4>
+<div class="o-auto w-100 table-wrapper"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ASPNETCORE_ENVIRONMENT</code></td>
+<td><code>Production</code></td>
+<td>ASP.NET environment</td>
+</tr>
+<tr>
+<td><code>ASPNETCORE_URLS</code></td>
+<td><code>http://+:8080</code></td>
+<td>Listening URL</td>
+</tr>
+<tr>
+<td><code>ASPNETCORE_FORWARDEDHEADERS_ENABLED</code></td>
+<td><code>true</code></td>
+<td>Enable proxy headers</td>
+</tr>
+<tr>
+<td><code>ConnectionStrings__deckledb</code></td>
+<td><code>Host=$;Port=$;Username=$;Password=$;Database=$</code></td>
+<td>Database connection (Railway reference)</td>
+</tr>
+<tr>
+<td><code>FrontendUrl</code></td>
+<td><code>https://$</code></td>
+<td><strong>REQUIRED</strong>: Frontend URL (Railway reference)</td>
+</tr>
+<tr>
+<td><code>CookieDomain</code></td>
+<td><em>(see note below)</em></td>
+<td><strong>OPTIONAL</strong>: Cookie domain for cross-domain auth</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>IMPORTANT - Cookie Domain Configuration:</strong></p>
+<p>Railway default domains (<code>*.up.railway.app</code>) cannot share cookies between services because browsers don't allow cookie sharing across different subdomains of a public suffix. This means authentication cookies set by the API won't be accessible to the Web frontend.</p>
+<p><strong>Options:</strong></p>
+<ol>
+<li>
+<p><strong>Use a Custom Domain (Recommended)</strong>:</p>
+<ul>
+<li>Set up custom subdomains: <code>api.yourdomain.com</code> and <code>app.yourdomain.com</code></li>
+<li>Example: <code>api.deckle.games</code> and <code>app.deckle.games</code></li>
+<li>Set <code>CookieDomain</code> to <code>.yourdomain.com</code> (note the leading dot)</li>
+<li>Example: <code>.deckle.games</code></li>
+<li>This allows both subdomains to share authentication cookies</li>
+<li>See Step 8 for custom domain setup or <a href="/deckle/development/railway-configuration/">RAILWAY_CONFIG.md</a> for complete example</li>
+</ul>
+</li>
+<li>
+<p><strong>Use Railway Default Domains (Limited)</strong>:</p>
+<ul>
+<li>Leave <code>CookieDomain</code> empty or unset</li>
+<li>Authentication will work, but cookies won't persist across page refreshes due to cross-domain limitations</li>
+<li>Not recommended for production use</li>
+</ul>
+</li>
+</ol>
+
+                        <h4 id="authentication-google-oauth" pl-9="xs,sm">
+                            <a href="#authentication-google-oauth" title="Authentication - Google OAuth" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Authentication - Google OAuth</h4>
+<div class="o-auto w-100 table-wrapper"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Value</th>
+<th>Where to Get</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Authentication__Google__ClientId</code></td>
+<td><code>your-client-id.apps.googleusercontent.com</code></td>
+<td>Google Cloud Console → APIs &amp; Services → Credentials</td>
+</tr>
+<tr>
+<td><code>Authentication__Google__ClientSecret</code></td>
+<td><code>GOCSPX-xxxxxxxxxxxxx</code></td>
+<td>Same as above</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Important:</strong> After deploying, you must add Railway's domain to Google OAuth redirect URIs:</p>
+<ul>
+<li><code>https://{your-api-domain}.railway.app/api/auth/google-callback</code></li>
+</ul>
+
+                        <h4 id="email-smtp-configuration" pl-9="xs,sm">
+                            <a href="#email-smtp-configuration" title="Email - SMTP Configuration" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Email - SMTP Configuration</h4>
+<div class="o-auto w-100 table-wrapper"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Value</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Email__SmtpHost</code></td>
+<td>SMTP server hostname</td>
+<td><code>smtp.gmail.com</code></td>
+</tr>
+<tr>
+<td><code>Email__SmtpPort</code></td>
+<td>SMTP port</td>
+<td><code>587</code> (TLS) or <code>465</code> (SSL)</td>
+</tr>
+<tr>
+<td><code>Email__UseSsl</code></td>
+<td><code>true</code> or <code>false</code></td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>Email__Username</code></td>
+<td>SMTP username</td>
+<td><code>noreply@yourdomain.com</code></td>
+</tr>
+<tr>
+<td><code>Email__Password</code></td>
+<td>SMTP password</td>
+<td>Your SMTP password or app password</td>
+</tr>
+<tr>
+<td><code>Email__FromAddress</code></td>
+<td>From email address</td>
+<td><code>noreply@yourdomain.com</code></td>
+</tr>
+<tr>
+<td><code>Email__FromName</code></td>
+<td>From display name</td>
+<td><code>Deckle</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Gmail Users:</strong> Use App Passwords (not your regular password)</p>
+<ul>
+<li>Google Account → Security → 2-Step Verification → App passwords</li>
+</ul>
+
+                        <h3 id="3-4-configure-service-settings" pl-9="xs,sm">
+                            <a href="#3-4-configure-service-settings" title="3.4 Configure Service Settings" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    3.4 Configure Service Settings</h3>
+<p><strong>Port Configuration:</strong></p>
+<ol>
+<li>Settings → Networking</li>
+<li>Port: <code>8080</code> (matches ASPNETCORE_URLS)</li>
+</ol>
+<p><strong>Health Check (Optional):</strong></p>
+<ol>
+<li>Settings → Deploy</li>
+<li>Health check path: <code>/health</code> or <code>/swagger</code></li>
+</ol>
+<p><strong>Restart Policy:</strong></p>
+<ol>
+<li>Settings → Deploy</li>
+<li>Restart policy: &quot;On Failure&quot;</li>
+<li>Max retries: 10</li>
+</ol>
+
+                        <h2 id="step-4-configure-web-service" pl-9="xs,sm">
+                            <a href="#step-4-configure-web-service" title="Step 4: Configure Web Service" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Step 4: Configure Web Service</h2>
+
+                        <h3 id="4-1-create-web-service" pl-9="xs,sm">
+                            <a href="#4-1-create-web-service" title="4.1 Create Web Service" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    4.1 Create Web Service</h3>
+<p><strong>Using Railway Dashboard:</strong></p>
+<ol>
+<li>Click &quot;+ New&quot; → &quot;Empty Service&quot;</li>
+<li>Name it &quot;web&quot;</li>
+<li>Go to service Settings</li>
+</ol>
+<p><strong>Configure Docker Image Source:</strong></p>
+<ol>
+<li>Settings → Source → &quot;Docker Image&quot;</li>
+<li>Image: <code>ghcr.io/{your-github-username}/{repo-name}/deckle-web:latest</code></li>
+</ol>
+<p><strong>Add GHCR Authentication:</strong> (same as API service)</p>
+<ol>
+<li>Settings → Source → Image Registry Credentials</li>
+<li>Registry: <code>ghcr.io</code></li>
+<li>Username: Your GitHub username</li>
+<li>Password: PAT from Step 3.2</li>
+</ol>
+
+                        <h3 id="4-2-configure-web-environment-variables" pl-9="xs,sm">
+                            <a href="#4-2-configure-web-environment-variables" title="4.2 Configure Web Environment Variables" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    4.2 Configure Web Environment Variables</h3>
+<p>Go to Web service → Variables and add:</p>
+<div class="o-auto w-100 table-wrapper"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NODE_ENV</code></td>
+<td><code>production</code></td>
+<td>Node.js environment</td>
+</tr>
+<tr>
+<td><code>PORT</code></td>
+<td><code>5173</code></td>
+<td>SvelteKit listening port</td>
+</tr>
+<tr>
+<td><code>PUBLIC_API_URL</code></td>
+<td><code>https://$</code></td>
+<td>API URL for frontend</td>
+</tr>
+<tr>
+<td><code>ORIGIN</code></td>
+<td><code>https://$</code></td>
+<td>Frontend origin</td>
+</tr>
+</tbody>
+</table></div>
+
+                        <h3 id="4-3-enable-public-domain" pl-9="xs,sm">
+                            <a href="#4-3-enable-public-domain" title="4.3 Enable Public Domain" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    4.3 Enable Public Domain</h3>
+<p><strong>Generate Railway Domain:</strong></p>
+<ol>
+<li>Settings → Networking</li>
+<li>Under &quot;Public Networking&quot;, click &quot;Generate Domain&quot;</li>
+<li>Railway will create: <code>{service-name}-production-{hash}.up.railway.app</code></li>
+<li>Copy this URL - you'll need it</li>
+</ol>
+<p><strong>Port Configuration:</strong></p>
+<ol>
+<li>Networking → Port: <code>5173</code></li>
+</ol>
+
+                        <h2 id="step-5-github-actions-integration" pl-9="xs,sm">
+                            <a href="#step-5-github-actions-integration" title="Step 5: GitHub Actions Integration" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Step 5: GitHub Actions Integration</h2>
+<p>The workflow is already configured to trigger Railway deployments automatically.</p>
+
+                        <h3 id="5-1-create-railway-webhooks" pl-9="xs,sm">
+                            <a href="#5-1-create-railway-webhooks" title="5.1 Create Railway Webhooks" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    5.1 Create Railway Webhooks</h3>
+<p><strong>For API Service:</strong></p>
+<ol>
+<li>Railway → API service → Settings</li>
+<li>Scroll to &quot;Webhooks&quot;</li>
+<li>Click &quot;Create Webhook&quot;</li>
+<li>Copy the webhook URL</li>
+</ol>
+<p><strong>For Web Service:</strong></p>
+<ol>
+<li>Railway → Web service → Settings</li>
+<li>Create webhook</li>
+<li>Copy the webhook URL</li>
+</ol>
+<p><strong>Webhook URL Format:</strong></p>
+<pre><code>https://railway.app/project/{project-id}/service/{service-id}/webhook
+</code></pre>
+
+                        <h3 id="5-2-add-webhooks-to-github-secrets" pl-9="xs,sm">
+                            <a href="#5-2-add-webhooks-to-github-secrets" title="5.2 Add Webhooks to GitHub Secrets" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    5.2 Add Webhooks to GitHub Secrets</h3>
+<ol>
+<li>Go to your GitHub repository</li>
+<li>Settings → Secrets and variables → Actions → Repository secrets</li>
+<li>Add two new secrets:</li>
+</ol>
+<div class="o-auto w-100 table-wrapper"><table>
+<thead>
+<tr>
+<th>Secret Name</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RAILWAY_API_WEBHOOK_URL</code></td>
+<td>API webhook URL from Railway</td>
+</tr>
+<tr>
+<td><code>RAILWAY_WEB_WEBHOOK_URL</code></td>
+<td>Web webhook URL from Railway</td>
+</tr>
+</tbody>
+</table></div>
+
+                        <h3 id="5-3-how-automatic-deployment-works" pl-9="xs,sm">
+                            <a href="#5-3-how-automatic-deployment-works" title="5.3 How Automatic Deployment Works" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    5.3 How Automatic Deployment Works</h3>
+<p>When you push to the <code>master</code> branch:</p>
+<ol>
+<li>GitHub Actions builds the project</li>
+<li>Runs tests</li>
+<li>Builds Docker images</li>
+<li>Pushes images to GHCR with tags: <code>:latest</code>, <code>:1.0.0</code>, <code>:1.0</code>, <code>:1</code>, <code>:abc1234</code></li>
+<li><strong>Triggers Railway webhooks</strong> (new step)</li>
+<li>Railway pulls <code>:latest</code> images from GHCR</li>
+<li>Redeploys API and Web services</li>
+</ol>
+
+                        <h2 id="step-6-first-deployment" pl-9="xs,sm">
+                            <a href="#step-6-first-deployment" title="Step 6: First Deployment" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Step 6: First Deployment</h2>
+
+                        <h3 id="initial-manual-deployment" pl-9="xs,sm">
+                            <a href="#initial-manual-deployment" title="Initial Manual Deployment" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Initial Manual Deployment</h3>
+<p>Before automatic deployments work, trigger the first deployment manually:</p>
+<p><strong>Option A: Via Railway Dashboard</strong></p>
+<ol>
+<li>Go to API service</li>
+<li>Click &quot;Deploy&quot; → &quot;Trigger Deploy&quot;</li>
+<li>Repeat for Web service</li>
+</ol>
+<p><strong>Option B: Via Railway CLI</strong></p>
+<pre><code class="language-bash">railway up --service api
+railway up --service web
+</code></pre>
+
+                        <h3 id="monitor-deployment" pl-9="xs,sm">
+                            <a href="#monitor-deployment" title="Monitor Deployment" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Monitor Deployment</h3>
+<p><strong>View Logs:</strong></p>
+<pre><code class="language-bash"># Railway CLI
+railway logs --service api
+railway logs --service web
+
+# Or in Railway Dashboard
+# Service → Deployments → Latest deployment → View logs
+</code></pre>
+<p><strong>Check Deployment Status:</strong></p>
+<ul>
+<li>Green checkmark = successful</li>
+<li>Red X = failed (click for error details)</li>
+</ul>
+
+                        <h2 id="step-7-verify-deployment" pl-9="xs,sm">
+                            <a href="#step-7-verify-deployment" title="Step 7: Verify Deployment" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Step 7: Verify Deployment</h2>
+
+                        <h3 id="7-1-api-health-check" pl-9="xs,sm">
+                            <a href="#7-1-api-health-check" title="7.1 API Health Check" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    7.1 API Health Check</h3>
+<p>Visit your API domain:</p>
+<pre><code>https://{your-api-domain}.railway.app/health
+</code></pre>
+<p><strong>Expected Response:</strong> <code>200 OK</code> or health status JSON</p>
+
+                        <h3 id="7-2-api-documentation" pl-9="xs,sm">
+                            <a href="#7-2-api-documentation" title="7.2 API Documentation" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    7.2 API Documentation</h3>
+<p>Visit Scalar OpenAPI docs:</p>
+<pre><code>https://{your-api-domain}.railway.app/scalar/v1
+</code></pre>
+<p>Should display interactive API documentation.</p>
+
+                        <h3 id="7-3-web-application" pl-9="xs,sm">
+                            <a href="#7-3-web-application" title="7.3 Web Application" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    7.3 Web Application</h3>
+<p>Visit your web domain:</p>
+<pre><code>https://{your-web-domain}.railway.app
+</code></pre>
+<p>The Deckle frontend should load.</p>
+
+                        <h3 id="7-4-database-migrations" pl-9="xs,sm">
+                            <a href="#7-4-database-migrations" title="7.4 Database Migrations" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    7.4 Database Migrations</h3>
+<p>Check API logs for migration messages:</p>
+<pre><code class="language-bash">railway logs --service api
+</code></pre>
+<p>Look for Entity Framework migration logs. The database schema is applied automatically on startup.</p>
+
+                        <h3 id="7-5-end-to-end-test" pl-9="xs,sm">
+                            <a href="#7-5-end-to-end-test" title="7.5 End-to-End Test" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    7.5 End-to-End Test</h3>
+<ol>
+<li>Open web application</li>
+<li>Click &quot;Sign in with Google&quot;</li>
+<li>Complete OAuth flow</li>
+<li>Create a test project</li>
+<li>Verify it's saved (check PostgreSQL)</li>
+</ol>
+
+                        <h2 id="step-8-custom-domain-required-for-production" pl-9="xs,sm">
+                            <a href="#step-8-custom-domain-required-for-production" title="Step 8: Custom Domain (Required for Production)" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Step 8: Custom Domain (Required for Production)</h2>
+<p><strong>Important:</strong> Custom domains are required for proper authentication in production. Railway default domains cannot share cookies between services.</p>
+<p><strong>Example Setup:</strong> <code>api.deckle.games</code> and <code>app.deckle.games</code></p>
+
+                        <h3 id="8-1-add-custom-domain-to-both-services" pl-9="xs,sm">
+                            <a href="#8-1-add-custom-domain-to-both-services" title="8.1 Add Custom Domain to Both Services" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    8.1 Add Custom Domain to Both Services</h3>
+<p><strong>API Service:</strong></p>
+<ol>
+<li>Railway → API service → Settings → Networking → Custom Domains</li>
+<li>Click &quot;Add Custom Domain&quot;</li>
+<li>Enter your API domain: <code>api.yourdomain.com</code> (e.g., <code>api.deckle.games</code>)</li>
+<li>Railway will provide a CNAME target (e.g., <code>deckle-api-production-xyz123.up.railway.app</code>)</li>
+<li>Copy this target - you'll add it to DNS</li>
+</ol>
+<p><strong>Web Service:</strong></p>
+<ol>
+<li>Railway → Web service → Settings → Networking → Custom Domains</li>
+<li>Click &quot;Add Custom Domain&quot;</li>
+<li>Enter your web domain: <code>app.yourdomain.com</code> (e.g., <code>app.deckle.games</code>)</li>
+<li>Railway will provide a CNAME target</li>
+<li>Copy this target - you'll add it to DNS</li>
+</ol>
+
+                        <h3 id="8-2-configure-dns" pl-9="xs,sm">
+                            <a href="#8-2-configure-dns" title="8.2 Configure DNS" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    8.2 Configure DNS</h3>
+<p>Add CNAME records in your DNS provider (Cloudflare, Route53, etc.):</p>
+<pre><code>Type: CNAME
+Name: api
+Value: {api-cname-from-railway}.up.railway.app
+
+Type: CNAME
+Name: app
+Value: {web-cname-from-railway}.up.railway.app
+</code></pre>
+<p><strong>Example for deckle.games:</strong></p>
+<pre><code>Type: CNAME
+Name: api
+Value: deckle-api-production-abc123.up.railway.app
+
+Type: CNAME
+Name: app
+Value: deckle-web-production-xyz789.up.railway.app
+</code></pre>
+<p><strong>Wait for DNS propagation</strong> (5-30 minutes). Verify with:</p>
+<pre><code class="language-bash">nslookup api.yourdomain.com
+nslookup app.yourdomain.com
+</code></pre>
+
+                        <h3 id="8-3-update-environment-variables" pl-9="xs,sm">
+                            <a href="#8-3-update-environment-variables" title="8.3 Update Environment Variables" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    8.3 Update Environment Variables</h3>
+<p>After DNS is propagated and domains are active in Railway:</p>
+<p><strong>API Service Variables:</strong></p>
+<div class="o-auto w-100 table-wrapper"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Value</th>
+<th>Example (deckle.games)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FrontendUrl</code></td>
+<td><code>https://app.yourdomain.com</code></td>
+<td><code>https://app.deckle.games</code></td>
+</tr>
+<tr>
+<td><code>CookieDomain</code></td>
+<td><code>.yourdomain.com</code> (with leading dot)</td>
+<td><code>.deckle.games</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Web Service Variables:</strong></p>
+<div class="o-auto w-100 table-wrapper"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Value</th>
+<th>Example (deckle.games)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PUBLIC_API_URL</code></td>
+<td><code>https://api.yourdomain.com</code></td>
+<td><code>https://api.deckle.games</code></td>
+</tr>
+<tr>
+<td><code>ORIGIN</code></td>
+<td><code>https://app.yourdomain.com</code></td>
+<td><code>https://app.deckle.games</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Google OAuth Configuration:</strong></p>
+<ol>
+<li>Go to Google Cloud Console → APIs &amp; Services → Credentials</li>
+<li>Edit your OAuth 2.0 Client ID</li>
+<li>Update authorized redirect URI to:
+<ul>
+<li><code>https://api.yourdomain.com/signin-google</code></li>
+<li>Example: <code>https://api.deckle.games/signin-google</code></li>
+</ul>
+</li>
+<li>Save changes</li>
+</ol>
+
+                        <h3 id="8-4-ssl-certificate" pl-9="xs,sm">
+                            <a href="#8-4-ssl-certificate" title="8.4 SSL Certificate" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    8.4 SSL Certificate</h3>
+<p>Railway automatically provisions SSL certificates for custom domains (via Let's Encrypt).</p>
+
+                        <h2 id="troubleshooting" pl-9="xs,sm">
+                            <a href="#troubleshooting" title="Troubleshooting" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Troubleshooting</h2>
+
+                        <h3 id="deployment-fails-with-quot-image-pull-error-quot" pl-9="xs,sm">
+                            <a href="#deployment-fails-with-quot-image-pull-error-quot" title="Deployment Fails with &quot;Image Pull Error&quot;" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Deployment Fails with &quot;Image Pull Error&quot;</h3>
+<p><strong>Cause:</strong> Railway cannot authenticate with GHCR.</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Verify GHCR credentials in service settings</li>
+<li>Ensure PAT has <code>read:packages</code> scope</li>
+<li>Check image path is correct (lowercase)</li>
+</ol>
+
+                        <h3 id="database-connection-errors" pl-9="xs,sm">
+                            <a href="#database-connection-errors" title="Database Connection Errors" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Database Connection Errors</h3>
+<p><strong>Symptoms:</strong> API fails to start, logs show &quot;Unable to connect to database&quot; or similar errors.</p>
+<p><strong>Check:</strong></p>
+<ol>
+<li>
+<p><strong>Verify Service Reference Name:</strong></p>
+<ul>
+<li>The service name in <code>$</code> must match your PostgreSQL service name exactly (case-sensitive)</li>
+<li>Check Railway dashboard → PostgreSQL service card for the exact name</li>
+<li>If named &quot;postgres&quot; (lowercase), use <code>$</code></li>
+<li>If named something else, use <code>$</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Verify Connection String Format:</strong></p>
+<ul>
+<li>In Railway dashboard, go to Postgres service → Variables</li>
+<li>Copy the <code>DATABASE_URL</code> value</li>
+<li>It should look like: <code>postgresql://postgres:PASSWORD@postgres.railway.internal:5432/railway</code></li>
+<li>The reference <code>$</code> should resolve to this full connection string</li>
+</ul>
+</li>
+<li>
+<p><strong>Check Service Status:</strong></p>
+<ul>
+<li>PostgreSQL service is running (green status indicator)</li>
+<li>No recent crashes or restarts</li>
+</ul>
+</li>
+<li>
+<p><strong>Check Service Dependencies:</strong></p>
+<ul>
+<li>API service → Settings → Deploy</li>
+<li>Ensure Postgres is listed as a dependency (this ensures Postgres starts before API)</li>
+</ul>
+</li>
+</ol>
+
+                        <h3 id="authentication-issues-redirect-to-quot-projects-quot" pl-9="xs,sm">
+                            <a href="#authentication-issues-redirect-to-quot-projects-quot" title="Authentication Issues / Redirect to &quot;projects/&quot;" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Authentication Issues / Redirect to &quot;projects/&quot;</h3>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>After signing in with Google, redirected to &quot;projects/&quot; (relative URL with no domain)</li>
+<li>CORS errors when making API requests from the web app</li>
+<li>Layout/TopBar not showing after authentication</li>
+</ul>
+<p><strong>Root Cause:</strong> <code>FrontendUrl</code> environment variable is not configured in the API service.</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Go to Railway → API service → Variables</li>
+<li>Verify <code>FrontendUrl</code> is set to: <code>https://$</code></li>
+<li>If missing, add it and redeploy the API service</li>
+<li>Check API logs for: <code>&quot;Auth login initiated. Redirecting to: https://...&quot;</code></li>
+<li>If you see warnings about FrontendUrl, the variable is not being resolved correctly</li>
+</ol>
+<p><strong>Additional Cookie/Session Issues:</strong></p>
+<p>If authentication works but doesn't persist (layout doesn't show, re-authentication required):</p>
+<p><strong>Cause:</strong> Railway default domains can't share cookies between services.</p>
+<p><strong>Solution:</strong></p>
+<ul>
+<li>Set up custom domain with subdomains (recommended - see Step 8)</li>
+<li>Configure <code>CookieDomain</code> to <code>.yourdomain.com</code> in API service variables</li>
+</ul>
+
+                        <h3 id="google-oauth-fails" pl-9="xs,sm">
+                            <a href="#google-oauth-fails" title="Google OAuth Fails" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Google OAuth Fails</h3>
+<p><strong>Check:</strong></p>
+<ol>
+<li><code>Authentication__Google__ClientId</code> and <code>ClientSecret</code> are correct</li>
+<li>Redirect URI added to Google Cloud Console:
+<ul>
+<li><code>https://{api-domain}/signin-google</code></li>
+</ul>
+</li>
+<li>OAuth consent screen configured</li>
+</ol>
+
+                        <h3 id="web-can-t-reach-api" pl-9="xs,sm">
+                            <a href="#web-can-t-reach-api" title="Web Can't Reach API" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Web Can't Reach API</h3>
+<p><strong>Check:</strong></p>
+<ol>
+<li><code>PUBLIC_API_URL</code> uses correct Railway reference: <code>$</code></li>
+<li>API service has public networking enabled</li>
+<li>API is listening on correct port (8080)</li>
+</ol>
+
+                        <h3 id="email-not-sending" pl-9="xs,sm">
+                            <a href="#email-not-sending" title="Email Not Sending" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Email Not Sending</h3>
+<p><strong>Check:</strong></p>
+<ol>
+<li>All <code>Email__*</code> variables are set</li>
+<li>SMTP credentials are correct</li>
+<li>SMTP port is correct (587 for TLS, 465 for SSL)</li>
+<li>Firewall allows outbound SMTP connections</li>
+</ol>
+
+                        <h2 id="cost-estimates" pl-9="xs,sm">
+                            <a href="#cost-estimates" title="Cost Estimates" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Cost Estimates</h2>
+<p><strong>Railway Pricing (Hobby Plan):</strong></p>
+<ul>
+<li>$5 per service per month (usage-based)</li>
+<li>PostgreSQL: $5/month minimum</li>
+<li>Estimated total: $15-20/month (API + Web + PostgreSQL)</li>
+</ul>
+<p><strong>Free Tier:</strong></p>
+<ul>
+<li>$5 free credits per month</li>
+<li>Suitable for development/testing</li>
+<li>Services pause when credits exhausted</li>
+</ul>
+<p><strong>To reduce costs:</strong></p>
+<ul>
+<li>Use single environment (no staging)</li>
+<li>Scale down replicas to 1</li>
+<li>Set sleep policy for non-critical services</li>
+</ul>
+
+                        <h2 id="monitoring-amp-maintenance" pl-9="xs,sm">
+                            <a href="#monitoring-amp-maintenance" title="Monitoring &amp; Maintenance" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Monitoring &amp; Maintenance</h2>
+
+                        <h3 id="view-logs" pl-9="xs,sm">
+                            <a href="#view-logs" title="View Logs" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    View Logs</h3>
+<p><strong>Real-time:</strong></p>
+<pre><code class="language-bash">railway logs --service api --follow
+railway logs --service web --follow
+</code></pre>
+<p><strong>In Dashboard:</strong></p>
+<ul>
+<li>Service → Observability → Logs</li>
+</ul>
+
+                        <h3 id="metrics" pl-9="xs,sm">
+                            <a href="#metrics" title="Metrics" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Metrics</h3>
+<p>Railway provides built-in metrics:</p>
+<ul>
+<li>CPU usage</li>
+<li>Memory usage</li>
+<li>Network traffic</li>
+<li>Request counts</li>
+</ul>
+<p>Access: Service → Observability → Metrics</p>
+
+                        <h3 id="database-backups" pl-9="xs,sm">
+                            <a href="#database-backups" title="Database Backups" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Database Backups</h3>
+<p>Railway PostgreSQL includes:</p>
+<ul>
+<li>Automatic daily backups (retained 7 days)</li>
+<li>Point-in-time recovery</li>
+<li>Manual backup/restore via Railway CLI</li>
+</ul>
+<p><strong>Manual backup:</strong></p>
+<pre><code class="language-bash">railway run pg_dump &gt; backup.sql
+</code></pre>
+
+                        <h3 id="rollback-deployment" pl-9="xs,sm">
+                            <a href="#rollback-deployment" title="Rollback Deployment" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Rollback Deployment</h3>
+<p>If a deployment breaks production:</p>
+<p><strong>Via Dashboard:</strong></p>
+<ol>
+<li>Service → Deployments</li>
+<li>Find previous successful deployment</li>
+<li>Click &quot;Redeploy&quot;</li>
+</ol>
+<p><strong>Via CLI:</strong></p>
+<pre><code class="language-bash">railway up --service api --image ghcr.io/.../deckle-api:1.0.0
+</code></pre>
+
+                        <h2 id="security-best-practices" pl-9="xs,sm">
+                            <a href="#security-best-practices" title="Security Best Practices" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Security Best Practices</h2>
+<ol>
+<li>
+<p><strong>Secrets Management:</strong></p>
+<ul>
+<li>Never commit secrets to Git</li>
+<li>Use Railway's environment variables (encrypted at rest)</li>
+<li>Rotate SMTP passwords and OAuth secrets regularly</li>
+</ul>
+</li>
+<li>
+<p><strong>GHCR Access:</strong></p>
+<ul>
+<li>Use minimal scope PAT (<code>read:packages</code> only)</li>
+<li>Rotate PAT every 6-12 months</li>
+<li>Store securely in Railway (not in code)</li>
+</ul>
+</li>
+<li>
+<p><strong>Database:</strong></p>
+<ul>
+<li>Railway PostgreSQL uses SSL by default</li>
+<li>Database is private (Railway services only)</li>
+<li>Enable connection pooling for production</li>
+</ul>
+</li>
+<li>
+<p><strong>HTTPS:</strong></p>
+<ul>
+<li>Railway provides automatic SSL/TLS</li>
+<li>All endpoints use HTTPS</li>
+<li>Cookies are Secure and HttpOnly</li>
+</ul>
+</li>
+<li>
+<p><strong>Rate Limiting:</strong></p>
+<ul>
+<li>Consider adding rate limiting middleware to API</li>
+<li>Use Railway's built-in DDoS protection</li>
+</ul>
+</li>
+</ol>
+
+                        <h2 id="support-resources" pl-9="xs,sm">
+                            <a href="#support-resources" title="Support Resources" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Support Resources</h2>
+<ul>
+<li><strong>Railway Documentation:</strong> https://docs.railway.app</li>
+<li><strong>Railway Discord:</strong> https://discord.gg/railway</li>
+<li><strong>Railway Status:</strong> https://status.railway.app</li>
+<li><strong>GitHub Actions Logs:</strong> Repository → Actions tab</li>
+</ul>
+
+                        <h2 id="summary-checklist" pl-9="xs,sm">
+                            <a href="#summary-checklist" title="Summary Checklist" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Summary Checklist</h2>
+<p>Before going live:</p>
+<ul>
+<li>[ ] Railway project created with PostgreSQL</li>
+<li>[ ] API service configured with GHCR image and environment variables</li>
+<li>[ ] Web service configured with GHCR image and environment variables</li>
+<li>[ ] GHCR authentication added to both services</li>
+<li>[ ] GitHub secrets added (<code>RAILWAY_API_WEBHOOK_URL</code>, <code>RAILWAY_WEB_WEBHOOK_URL</code>)</li>
+<li>[ ] Google OAuth redirect URI updated with Railway domain</li>
+<li>[ ] First manual deployment successful</li>
+<li>[ ] API health check returns 200 OK</li>
+<li>[ ] Web application loads and connects to API</li>
+<li>[ ] Database migrations applied successfully</li>
+<li>[ ] End-to-end test completed (sign in, create project)</li>
+<li>[ ] Custom domain configured (if applicable)</li>
+<li>[ ] SSL certificate active</li>
+<li>[ ] Monitoring and alerts configured</li>
+</ul>
+
+                        <h2 id="next-steps-after-deployment" pl-9="xs,sm">
+                            <a href="#next-steps-after-deployment" title="Next Steps After Deployment" class="pos-absolute top-50 left-0 t-tY-50 | p-4 ml-1 | td-none | brad-4 bc-neutral-100 bwidth-1 bstyle-dashed bcolor-neutral-500 __hover-1 __soft-shadow" ml-3="xs,sm">
+                                <span class="icon-link-simple | pos-absolute top-50 left-50 t-tY-50 t-tX-50 | fs-4"></span>
+                            </a>
+                    Next Steps After Deployment</h2>
+<ol>
+<li><strong>Set up monitoring:</strong> Configure alerting for downtime</li>
+<li><strong>Backup strategy:</strong> Schedule regular database exports</li>
+<li><strong>Performance tuning:</strong> Monitor metrics and optimize queries</li>
+<li><strong>Scale as needed:</strong> Increase replicas or upgrade service plans</li>
+<li><strong>CI/CD improvements:</strong> Add staging environment, blue-green deployments</li>
+</ol>
+<hr>
+<p>For questions or issues, refer to the Railway documentation or open a GitHub issue in the Deckle repository.</p>
+
+            <footer class="minh-100vh">
+                <div class="pt-11 | blwidth-1 blstyle-dashed bcolor-neutral-500"></div>
+                <nav class="d-flex ai-center rgap-7 | blwidth-1 blstyle-dashed bcolor-neutral-500" fw-wrap="xs">
+                    <div class="pl-5 | bbwidth-1 bbstyle-dashed bcolor-neutral-500"></div>
+                    
+                    <div class="w-100" d-none="sm,md"></div>
+                    <div class="pl-5 | bbwidth-1 bbstyle-dashed bcolor-neutral-500" w-100="sm,md"></div>
+                    <a href="https://github.com/ita-design-system/eleventy-libdoc" target="_blank" class="d-flex ai-center gap-2 | pl-2 pr-2 | fvs-wght-400 fs-2 lsp-3 lh-3 td-none ws-nowrap">
+                        11ty LibDoc 0.12.0
+                    </a>
+                </nav>
+            </footer>
+        </main>
+    </div>
+    
+    <script src="/deckle/core/assets/js/sandbox.js"></script>
+    <script src="/deckle/core/assets/js/hljs/highlight.min.js"></script>
+    
+        <script src="/deckle/core/assets/js/hljs/languages/xml.min.js"></script>
+    
+        <script src="/deckle/core/assets/js/hljs/languages/javascript.min.js"></script>
+    
+        <script src="/deckle/core/assets/js/hljs/languages/json.min.js"></script>
+    
+        <script src="/deckle/core/assets/js/hljs/languages/yaml.min.js"></script>
+    
+        <script src="/deckle/core/assets/js/hljs/languages/liquid.min.js"></script>
+    
+        <script src="/deckle/core/assets/js/hljs/languages/markdown.min.js"></script>
+    
+        <script src="/deckle/core/assets/js/hljs/languages/css.min.js"></script>
+    
+    <script src="/deckle/core/assets/js/ui.js"></script>
+    
+        <link rel="stylesheet" href="/deckle/core/assets/css/autocomplete.css">
+        <script src="/deckle/core/assets/js/autocomplete.min.js"></script>
+        <script src="/deckle/core/assets/js/fuse.js"></script>
+        <script src="/deckle/core/assets/js/fuzzy.js"></script>
+        <script src="/deckle/core/assets/js/hotkeys.min.js"></script>
+    
+</body>
+</html>
