@@ -11,8 +11,15 @@ public class File
     public Guid Id { get; set; }
     public Guid ProjectId { get; set; }
     public Guid UploadedByUserId { get; set; }
+    public Guid? DirectoryId { get; set; }
 
     public string FileName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Full path from root (e.g., "folder/subfolder/image.png" or "image.png" for root)
+    /// </summary>
+    public string Path { get; set; } = string.Empty;
+
     public string ContentType { get; set; } = string.Empty;
     public long FileSizeBytes { get; set; }
     public string StorageKey { get; set; } = string.Empty; // "projects/{projectId}/files/{fileId}/{fileName}"
@@ -24,4 +31,5 @@ public class File
     // Navigation properties
     public Project Project { get; set; } = null!;
     public User UploadedBy { get; set; } = null!;
+    public FileDirectory? Directory { get; set; }
 }

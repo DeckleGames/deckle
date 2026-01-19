@@ -1,11 +1,11 @@
 <script lang="ts">
   import { slide } from 'svelte/transition';
   import { templateStore } from '$lib/stores/templateElements';
-  import type { TemplateElement, ElementType, MenuItem } from '../types';
+  import type { TemplateElement, ElementType } from '../types';
   import { getElementIcon } from '$lib/utils/icons';
   import { createElementOfType } from '../elementFactory';
   import DropTarget from './DropTarget.svelte';
-  import ContextMenu from './ContextMenu.svelte';
+  import ContextMenu, { type ContextMenuItem } from '$lib/components/ContextMenu.svelte';
   import TreeNode from './TreeNode.svelte';
   import { getElementLabel } from '../utils';
 
@@ -176,8 +176,8 @@
     templateStore.updateElement(element.id, { locked: !element.locked });
   }
 
-  function getContextMenuItems(): MenuItem[] {
-    const items: MenuItem[] = [];
+  function getContextMenuItems(): ContextMenuItem[] {
+    const items: ContextMenuItem[] = [];
 
     // Duplicate action (available for all non-root elements)
     items.push({

@@ -30,7 +30,8 @@ public static class FileEndpoints
                     request.FileName,
                     request.ContentType,
                     request.FileSizeBytes,
-                    request.Tags);
+                    request.Tags,
+                    request.DirectoryId);
 
                 return Results.Ok(response);
             }
@@ -56,7 +57,9 @@ public static class FileEndpoints
             HttpContext httpContext,
             FileService fileService,
             string? tags,
-            bool? matchAll) =>
+            bool? matchAll,
+            Guid? directoryId,
+            bool? inRoot) =>
         {
             var userId = httpContext.GetUserId();
             var filterTags = string.IsNullOrEmpty(tags)
@@ -64,11 +67,17 @@ public static class FileEndpoints
                 : tags.Split(',').Select(t => t.Trim()).ToList();
             var useAndLogic = matchAll ?? false;
 
-            var files = await fileService.GetProjectFilesAsync(userId, projectId, filterTags, useAndLogic);
+            // directoryIdSpecified: true if directoryId is provided OR inRoot is true
+            var directoryIdSpecified = directoryId.HasValue || (inRoot == true);
+            // If inRoot is true, directoryId should be null (root level)
+            var effectiveDirectoryId = (inRoot == true) ? null : directoryId;
+
+            var files = await fileService.GetProjectFilesAsync(
+                userId, projectId, filterTags, useAndLogic, effectiveDirectoryId, directoryIdSpecified);
             return Results.Ok(files);
         })
         .WithName("GetProjectFiles")
-        .WithDescription("Get all files for a project, optionally filtered by tags");
+        .WithDescription("Get all files for a project, optionally filtered by tags and/or directory");
 
         // Get project tags (for autocomplete)
         projectFilesGroup.MapGet("/tags", async (
@@ -112,31 +121,6 @@ public static class FileEndpoints
         })
         .WithName("ConfirmFileUpload")
         .WithDescription("Confirm that a file upload has completed successfully");
-
-        // Generate download URL
-        filesGroup.MapGet("/{fileId:guid}/download-url", async (
-            Guid fileId,
-            HttpContext httpContext,
-            FileService fileService) =>
-        {
-            var userId = httpContext.GetUserId();
-
-            try
-            {
-                var response = await fileService.GenerateDownloadUrlAsync(userId, fileId);
-                return Results.Ok(response);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Results.NotFound(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Unauthorized();
-            }
-        })
-        .WithName("GenerateFileDownloadUrl")
-        .WithDescription("Generate a presigned URL for downloading a file");
 
         // Update file tags
         filesGroup.MapPatch("/{fileId:guid}/tags", async (
@@ -202,6 +186,32 @@ public static class FileEndpoints
         .WithName("RenameFile")
         .WithDescription("Rename a file while preserving its extension");
 
+        // Move file to a different directory
+        filesGroup.MapPatch("/{fileId:guid}/move", async (
+            Guid fileId,
+            HttpContext httpContext,
+            FileService fileService,
+            MoveFileRequest request) =>
+        {
+            var userId = httpContext.GetUserId();
+
+            try
+            {
+                var file = await fileService.MoveFileAsync(userId, fileId, request.DirectoryId);
+                return Results.Ok(file);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Results.NotFound(new { error = ex.Message });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Results.Unauthorized();
+            }
+        })
+        .WithName("MoveFile")
+        .WithDescription("Move a file to a different directory (or to root if DirectoryId is null)");
+
         // Delete file
         filesGroup.MapDelete("/{fileId:guid}", async (
             Guid fileId,
@@ -260,8 +270,11 @@ public static class FileEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            // Get file with authorization check
-            var file = await fileService.GetFileByProjectAndFilenameAsync(userId, projectId, filename);
+            // Normalize the path: URL decode and trim leading/trailing slashes
+            var normalizedPath = Uri.UnescapeDataString(filename).Trim('/');
+
+            // Get file with authorization check using path-based lookup
+            var file = await fileService.GetFileByProjectAndPathAsync(userId, projectId, normalizedPath);
 
             // Return 404 if file not found or user doesn't have access
             if (file == null)
@@ -275,8 +288,8 @@ public static class FileEndpoints
             // Return 302 redirect
             return Results.Redirect(downloadUrl);
         })
-        .WithName("GetFileByProjectAndFilename")
-        .WithDescription("Get a file by project ID and filename, returning a 302 redirect to a pre-signed download URL");
+        .WithName("GetFileByProjectAndPath")
+        .WithDescription("Get a file by project ID and path (e.g., 'folder/subfolder/image.png'), returning a 302 redirect to a pre-signed download URL");
 
         return projectFilesGroup;
     }

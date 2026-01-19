@@ -1,10 +1,9 @@
 <script lang="ts">
   import { filesApi, ApiError } from '$lib/api';
-  import Button from './Button.svelte';
+  import { config } from '$lib/config';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import EmptyState from './EmptyState.svelte';
-  import Badge from './Badge.svelte';
-  import TagInput from './forms/TagInput.svelte';
+  import { FileRow, FileLightbox } from './file-gallery';
   import type { File } from '$lib/types';
 
   let {
@@ -17,121 +16,27 @@
     onFileUpdated?: () => void;
   } = $props();
 
-  let selectedFile = $state<File | null>(null);
-  let lightboxOpen = $state(false);
+  // Lightbox state
+  let lightboxFile = $state<File | null>(null);
   let lightboxImageUrl = $state<string | null>(null);
+
+  // Delete confirmation state
   let deleteConfirmOpen = $state(false);
   let fileToDelete = $state<File | null>(null);
   let deletingFileId = $state<string | null>(null);
+
+  // Error state
   let error = $state<string | null>(null);
-  let editingTags = $state<string[]>([]);
-  let availableTags = $state<string[]>([]);
-  let savingTags = $state(false);
-  let editingFileName = $state<string>('');
-  let savingFileName = $state(false);
-  let fileNameError = $state<string | null>(null);
 
-  async function openLightbox(file: File) {
-    try {
-      error = null;
-      fileNameError = null;
-      const { downloadUrl } = await filesApi.generateDownloadUrl(file.id);
-      lightboxImageUrl = downloadUrl;
-      selectedFile = file;
-      editingTags = [...file.tags];
-      editingFileName = file.fileName.substring(0, file.fileName.lastIndexOf('.')) || file.fileName;
-      lightboxOpen = true;
-
-      // Load available tags for autocomplete
-      try {
-        const { tags } = await filesApi.getTags(file.projectId);
-        availableTags = tags;
-      } catch (err) {
-        console.error('Failed to load tags:', err);
-      }
-    } catch (err) {
-      if (err instanceof ApiError) {
-        error = err.message;
-      } else {
-        error = 'Failed to load image';
-      }
-    }
+  function openLightbox(file: File) {
+    error = null;
+    lightboxImageUrl = `${config.apiUrl}/file/${file.projectId}?filename=${encodeURIComponent(file.path)}`;
+    lightboxFile = file;
   }
 
   function closeLightbox() {
-    lightboxOpen = false;
+    lightboxFile = null;
     lightboxImageUrl = null;
-    selectedFile = null;
-    editingTags = [];
-    editingFileName = '';
-    savingTags = false;
-    savingFileName = false;
-    fileNameError = null;
-  }
-
-  async function saveTags() {
-    if (!selectedFile) return;
-
-    savingTags = true;
-    error = null;
-
-    try {
-      const updatedFile = await filesApi.updateTags(selectedFile.id, {
-        tags: editingTags
-      });
-
-      // Update selectedFile with new tags
-      selectedFile = updatedFile;
-
-      // Notify parent to refresh
-      onFileUpdated?.();
-    } catch (err) {
-      if (err instanceof ApiError) {
-        error = err.message;
-      } else {
-        error = 'Failed to update tags';
-      }
-    } finally {
-      savingTags = false;
-    }
-  }
-
-  async function saveFileName() {
-    if (!selectedFile) return;
-
-    savingFileName = true;
-    error = null;
-    fileNameError = null;
-
-    try {
-      const updatedFile = await filesApi.rename(selectedFile.id, {
-        newFileName: editingFileName
-      });
-
-      // Update selectedFile with new filename
-      selectedFile = updatedFile;
-      editingFileName = updatedFile.fileName.substring(0, updatedFile.fileName.lastIndexOf('.')) || updatedFile.fileName;
-
-      // Notify parent to refresh
-      onFileUpdated?.();
-    } catch (err) {
-      if (err instanceof ApiError) {
-        if (err.status === 400) {
-          // Validation error - show inline with input
-          fileNameError = err.message;
-        } else if (err.status === 404) {
-          error = 'File not found. It may have been deleted.';
-        } else if (err.status === 500) {
-          error = err.message || 'A server error occurred while renaming the file.';
-        } else {
-          error = err.message;
-        }
-      } else {
-        error = 'Failed to rename file';
-      }
-    } finally {
-      savingFileName = false;
-    }
   }
 
   function openDeleteConfirm(file: File) {
@@ -162,30 +67,8 @@
     }
   }
 
-  function formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-  }
-
-  function formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  }
-
-  async function getThumbnailUrl(file: File): Promise<string> {
-    try {
-      const { downloadUrl } = await filesApi.generateDownloadUrl(file.id);
-      return downloadUrl;
-    } catch {
-      return '';
-    }
+  function handleError(message: string) {
+    error = message;
   }
 </script>
 
@@ -193,80 +76,16 @@
   {#if files.length === 0}
     <EmptyState title="No files uploaded yet" subtitle="Upload your first file to get started" />
   {:else}
-    <div class="gallery-grid">
+    <div class="file-list">
       {#each files as file (file.id)}
-        <div class="gallery-item" class:deleting={deletingFileId === file.id}>
-          <button class="thumbnail-button" onclick={() => openLightbox(file)} type="button">
-            {#await getThumbnailUrl(file)}
-              <div class="thumbnail-loading">
-                <svg
-                  class="loading-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-              </div>
-            {:then url}
-              {#if url}
-                <img src={url} alt={file.fileName} class="thumbnail-image" />
-              {:else}
-                <div class="thumbnail-error">
-                  <svg
-                    class="error-icon"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-              {/if}
-            {/await}
-          </button>
-
-          <div class="file-info">
-            <p class="file-name" title={file.fileName}>{file.fileName}</p>
-            <p class="file-meta">
-              {formatFileSize(file.fileSizeBytes)} • {formatDate(file.uploadedAt)}
-            </p>
-            <p class="file-uploader">
-              Uploaded by {file.uploadedBy.name || file.uploadedBy.email}
-            </p>
-            {#if file.tags && file.tags.length > 0}
-              <div class="file-tags">
-                {#each file.tags as tag}
-                  <Badge variant="primary" size="sm">{tag}</Badge>
-                {/each}
-              </div>
-            {/if}
-          </div>
-
-          <div class="file-actions">
-            <Button
-              variant="danger"
-              size="sm"
-              outline
-              onclick={() => openDeleteConfirm(file)}
-              disabled={deletingFileId === file.id}
-            >
-              {deletingFileId === file.id ? 'Deleting...' : 'Delete'}
-            </Button>
-          </div>
-        </div>
+        <FileRow
+          {file}
+          isDeleting={deletingFileId === file.id}
+          onThumbnailClick={() => openLightbox(file)}
+          onDeleteClick={() => openDeleteConfirm(file)}
+          onFileRenamed={onFileUpdated}
+          onError={handleError}
+        />
       {/each}
     </div>
   {/if}
@@ -292,63 +111,13 @@
   {/if}
 </div>
 
-{#if lightboxOpen && lightboxImageUrl && selectedFile}
-  <div class="lightbox" onclick={closeLightbox}>
-    <button class="lightbox-close" onclick={closeLightbox} type="button">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M6 18L18 6M6 6l12 12"
-        />
-      </svg>
-    </button>
-    <div class="lightbox-content" onclick={(e) => e.stopPropagation()}>
-      <img src={lightboxImageUrl} alt={selectedFile.fileName} class="lightbox-image" />
-      <div class="lightbox-info">
-        <h3>{selectedFile.fileName}</h3>
-        <p>
-          {formatFileSize(selectedFile.fileSizeBytes)} • Uploaded on {formatDate(
-            selectedFile.uploadedAt
-          )} by {selectedFile.uploadedBy.name || selectedFile.uploadedBy.email}
-        </p>
-
-        <div class="lightbox-filename-section">
-          <label for="lightbox-filename" class="filename-label">File Name</label>
-          <div class="filename-input-group" class:has-error={fileNameError}>
-            <input
-              id="lightbox-filename"
-              type="text"
-              class="filename-input"
-              class:invalid={fileNameError}
-              bind:value={editingFileName}
-              placeholder="Enter file name"
-            />
-            <span class="filename-extension">{selectedFile.fileName.substring(selectedFile.fileName.lastIndexOf('.'))}</span>
-          </div>
-          {#if fileNameError}
-            <div class="filename-error">{fileNameError}</div>
-          {/if}
-          <div class="filename-actions">
-            <Button variant="primary" size="sm" onclick={saveFileName} disabled={savingFileName}>
-              {savingFileName ? 'Saving...' : 'Rename'}
-            </Button>
-          </div>
-        </div>
-
-        <div class="lightbox-tags-section">
-          <label for="lightbox-tags" class="tags-label">Tags</label>
-          <TagInput bind:value={editingTags} suggestions={availableTags} />
-          <div class="tags-actions">
-            <Button variant="primary" size="sm" onclick={saveTags} disabled={savingTags}>
-              {savingTags ? 'Saving...' : 'Save Tags'}
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+{#if lightboxFile && lightboxImageUrl}
+  <FileLightbox
+    file={lightboxFile}
+    imageUrl={lightboxImageUrl}
+    onClose={closeLightbox}
+    onFileUpdated={onFileUpdated}
+  />
 {/if}
 
 <ConfirmDialog
@@ -369,111 +138,10 @@
     width: 100%;
   }
 
-  .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .gallery-item {
-    background-color: white;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    transition: all 0.2s ease;
-  }
-
-  .gallery-item:hover {
-    border-color: var(--color-muted-teal);
-    box-shadow: var(--shadow-md);
-  }
-
-  .gallery-item.deleting {
-    opacity: 0.5;
-    pointer-events: none;
-  }
-
-  .thumbnail-button {
-    width: 100%;
-    height: 200px;
-    border: none;
-    background: none;
-    padding: 0;
-    cursor: pointer;
-    overflow: hidden;
-    position: relative;
-    background-color: var(--color-background);
-  }
-
-  .thumbnail-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.2s ease;
-  }
-
-  .thumbnail-button:hover .thumbnail-image {
-    transform: scale(1.05);
-  }
-
-  .thumbnail-loading,
-  .thumbnail-error {
-    width: 100%;
-    height: 100%;
+  .file-list {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-text-muted);
-  }
-
-  .loading-icon,
-  .error-icon {
-    width: 3rem;
-    height: 3rem;
-  }
-
-  .file-info {
-    padding: 1rem;
-  }
-
-  .file-name {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--color-text);
-    margin: 0 0 0.5rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .file-meta {
-    font-size: 0.875rem;
-    color: var(--color-text-muted);
-    margin: 0 0 0.25rem;
-  }
-
-  .file-uploader {
-    font-size: 0.8125rem;
-    color: var(--color-text-muted);
-    margin: 0;
-  }
-
-  .file-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    margin-top: 0.5rem;
-  }
-
-  .file-actions {
-    padding: 0 1rem 1rem;
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .empty-hint {
-    color: var(--color-text-muted);
-    margin-top: 0.5rem;
+    flex-direction: column;
+    gap: 0;
   }
 
   .error-message {
@@ -493,170 +161,5 @@
     width: 1.25rem;
     height: 1.25rem;
     flex-shrink: 0;
-  }
-
-  /* Lightbox styles */
-  .lightbox {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 1rem;
-    overflow-y: auto;
-  }
-
-  .lightbox-close {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    border-radius: 50%;
-    width: 3rem;
-    height: 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: white;
-    transition: background-color 0.2s ease;
-    z-index: 1001;
-  }
-
-  .lightbox-close:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-
-  .lightbox-close svg {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-
-  .lightbox-content {
-    width: 100%;
-    max-width: 1200px;
-    margin: auto;
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 1.5rem;
-    align-items: start;
-  }
-
-  @media (max-width: 1024px) {
-    .lightbox-content {
-      grid-template-columns: 1fr;
-      max-width: 800px;
-    }
-  }
-
-  .lightbox-image {
-    width: 100%;
-    max-height: calc(90vh - 2rem);
-    object-fit: contain;
-    border-radius: var(--radius-lg);
-  }
-
-  .lightbox-info {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 1.5rem;
-    border-radius: var(--radius-lg);
-    max-height: calc(90vh - 2rem);
-    overflow-y: auto;
-  }
-
-  .lightbox-info h3 {
-    margin: 0 0 0.5rem;
-    color: var(--color-text);
-    font-size: 1.125rem;
-  }
-
-  .lightbox-info p {
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: 0.875rem;
-  }
-
-  .lightbox-filename-section {
-    margin-top: 1.5rem;
-    text-align: left;
-  }
-
-  .filename-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--color-text);
-  }
-
-  .filename-input-group {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    background: white;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 0.5rem 0.75rem;
-    transition: border-color 0.2s ease;
-  }
-
-  .filename-input-group.has-error {
-    border-color: #e74c3c;
-  }
-
-  .filename-input {
-    flex: 1;
-    border: none;
-    outline: none;
-    font-size: 0.875rem;
-    color: var(--color-text);
-    background: transparent;
-  }
-
-  .filename-input.invalid {
-    color: #e74c3c;
-  }
-
-  .filename-error {
-    margin-top: 0.5rem;
-    font-size: 0.8125rem;
-    color: #e74c3c;
-  }
-
-  .filename-extension {
-    font-size: 0.875rem;
-    color: var(--color-text-muted);
-    font-weight: 500;
-  }
-
-  .filename-actions {
-    margin-top: 0.75rem;
-    display: flex;
-    justify-content: flex-start;
-  }
-
-  .lightbox-tags-section {
-    margin-top: 1.5rem;
-    text-align: left;
-  }
-
-  .tags-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--color-text);
-  }
-
-  .tags-actions {
-    margin-top: 0.75rem;
-    display: flex;
-    justify-content: flex-start;
   }
 </style>

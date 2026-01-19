@@ -17,4 +17,5 @@ public class Project
     public ICollection<DataSource> DataSources { get; set; } = [];
     public ICollection<Component> Components { get; set; } = [];
     public ICollection<File> Files { get; set; } = [];
+    public ICollection<FileDirectory> FileDirectories { get; set; } = [];
 }

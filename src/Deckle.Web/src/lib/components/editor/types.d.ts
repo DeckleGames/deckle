@@ -226,14 +226,3 @@ export interface Template {
   };
 }
 
-// ============================================================================
-// Context Menu Interface
-// ============================================================================
-
-export interface MenuItem {
-  label?: string;
-  action?: () => void;
-  submenu?: MenuItem[];
-  divider?: boolean;
-  disabled?: boolean;
-}

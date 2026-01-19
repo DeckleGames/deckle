@@ -232,6 +232,7 @@ builder.Services.AddScoped<GoogleSheetsService>();
 builder.Services.AddScoped<DataSourceService>();
 builder.Services.AddScoped<ComponentService>();
 builder.Services.AddScoped<FileService>();
+builder.Services.AddScoped<FileDirectoryService>();
 
 var app = builder.Build();
 
@@ -267,5 +268,6 @@ app.MapProjectEndpoints();
 app.MapDataSourceEndpoints();
 app.MapComponentEndpoints();
 app.MapFileEndpoints();
+app.MapFileDirectoryEndpoints();
 
 app.Run();

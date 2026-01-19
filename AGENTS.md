@@ -81,6 +81,15 @@ When creating a new .NET project:
 
 ### Database Migrations
 
+**CRITICAL: Always Use EF Core Tools for Migrations**
+
+Never create migration files manually. Always use EF Core CLI tools to generate migrations:
+```bash
+dotnet ef migrations add <MigrationName> --project src/Deckle.Domain --startup-project src/Deckle.API
+```
+
+Manually created migration files are missing the required `*.Designer.cs` companion file that EF Core needs to track and apply migrations correctly. Without this file, migrations will not be recognized or applied.
+
 When making changes to the database schema (entity models in `Deckle.Domain`):
 
 **CRITICAL: Complete ALL Changes Before Generating Migration**

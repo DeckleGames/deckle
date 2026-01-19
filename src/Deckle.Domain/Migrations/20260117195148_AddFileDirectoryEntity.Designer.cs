@@ -3,6 +3,7 @@ using System;
 using Deckle.Domain.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Deckle.Domain.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260117195148_AddFileDirectoryEntity")]
+    partial class AddFileDirectoryEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -145,11 +148,6 @@ namespace Deckle.Domain.Migrations
                     b.Property<long>("FileSizeBytes")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Path")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("uuid");
 
@@ -188,10 +186,6 @@ namespace Deckle.Domain.Migrations
                     NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("Tags"), new[] { "jsonb_path_ops" });
 
                     b.HasIndex("UploadedByUserId");
-
-                    b.HasIndex("ProjectId", "Path")
-                        .IsUnique()
-                        .HasFilter("\"Status\" = 'Confirmed'");
 
                     b.HasIndex("Status", "UploadedAt");
 

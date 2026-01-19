@@ -20,6 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<Dice> Dices { get; set; }
     public DbSet<PlayerMat> PlayerMats { get; set; }
     public DbSet<Entities.File> Files { get; set; }
+    public DbSet<FileDirectory> FileDirectories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -279,6 +280,10 @@ public class AppDbContext : DbContext
                 .IsRequired()
                 .HasMaxLength(255);
 
+            entity.Property(f => f.Path)
+                .IsRequired()
+                .HasMaxLength(1000);
+
             entity.Property(f => f.ContentType)
                 .IsRequired()
                 .HasMaxLength(100);
@@ -326,13 +331,61 @@ public class AppDbContext : DbContext
                     )
                 );
 
+            // Directory relationship (optional)
+            entity.HasOne(f => f.Directory)
+                .WithMany(d => d.Files)
+                .HasForeignKey(f => f.DirectoryId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // Indexes for performance
             entity.HasIndex(f => f.ProjectId);
             entity.HasIndex(f => f.UploadedByUserId);
+            entity.HasIndex(f => f.DirectoryId);
             entity.HasIndex(f => new { f.Status, f.UploadedAt }); // For cleanup job
+
+            // Unique index for Path within project (only for confirmed files)
+            entity.HasIndex(f => new { f.ProjectId, f.Path })
+                .IsUnique()
+                .HasFilter("\"Status\" = 'Confirmed'");
+
             entity.HasIndex(f => f.Tags)
                 .HasMethod("gin")
                 .HasAnnotation("Npgsql:IndexOperators", new[] { "jsonb_path_ops" }); // For tag queries with better performance
+        });
+
+        modelBuilder.Entity<FileDirectory>(entity =>
+        {
+            entity.HasKey(d => d.Id);
+
+            entity.Property(d => d.Name)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            entity.Property(d => d.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.Property(d => d.UpdatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            // Project relationship (cascade delete)
+            entity.HasOne(d => d.Project)
+                .WithMany(p => p.FileDirectories)
+                .HasForeignKey(d => d.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Self-referencing parent directory relationship
+            entity.HasOne(d => d.ParentDirectory)
+                .WithMany(d => d.ChildDirectories)
+                .HasForeignKey(d => d.ParentDirectoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Indexes
+            entity.HasIndex(d => d.ProjectId);
+            entity.HasIndex(d => d.ParentDirectoryId);
+            entity.HasIndex(d => new { d.ProjectId, d.ParentDirectoryId, d.Name })
+                .IsUnique(); // Unique directory name within same parent
         });
     }
 }

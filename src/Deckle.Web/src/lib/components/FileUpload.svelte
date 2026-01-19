@@ -7,9 +7,11 @@
 
   let {
     projectId,
+    directoryId = null,
     onUploadComplete
   }: {
     projectId: string;
+    directoryId?: string | null;
     onUploadComplete?: (file: File) => void;
   } = $props();
 
@@ -118,7 +120,8 @@
         fileName: fileToUpload.name,
         contentType: fileToUpload.type,
         fileSizeBytes: fileToUpload.size,
-        tags: selectedTags
+        tags: selectedTags,
+        directoryId: directoryId
       });
 
       // Phase 2: Upload to R2 (direct, with progress)

@@ -39,7 +39,8 @@ public class FileService
         string fileName,
         string contentType,
         long fileSizeBytes,
-        List<string>? tags = null)
+        List<string>? tags = null,
+        Guid? directoryId = null)
     {
         // 1. Authorization: User must have CanModifyResources permission
         await _authService.EnsureCanModifyResourcesAsync(userId, projectId);
@@ -105,10 +106,26 @@ public class FileService
             ValidateTags(tags);
         }
 
-        // 7. Ensure unique filename by appending number if needed
-        fileName = await EnsureUniqueFileNameAsync(projectId, fileName);
+        // 7. Validate directory if provided
+        if (directoryId.HasValue)
+        {
+            var directory = await _context.FileDirectories
+                .FirstOrDefaultAsync(d => d.Id == directoryId.Value && d.ProjectId == projectId);
 
-        // 8. Create pending File record
+            if (directory == null)
+                throw new KeyNotFoundException("Directory not found or doesn't belong to this project");
+        }
+
+        // 8. Get directory path and ensure unique filename by appending number if needed
+        var directoryPath = await GetDirectoryPathAsync(directoryId);
+        fileName = await EnsureUniquePathAsync(projectId, directoryPath, fileName);
+
+        // Build the full path for this file
+        var filePath = string.IsNullOrEmpty(directoryPath)
+            ? fileName
+            : $"{directoryPath}/{fileName}";
+
+        // 9. Create pending File record
         var fileId = Guid.NewGuid();
         var storageKey = CloudflareR2Service.GenerateStorageKey(projectId, fileId, fileName);
 
@@ -117,7 +134,9 @@ public class FileService
             Id = fileId,
             ProjectId = projectId,
             UploadedByUserId = userId,
+            DirectoryId = directoryId,
             FileName = fileName,
+            Path = filePath,
             ContentType = contentType,
             FileSizeBytes = fileSizeBytes,
             StorageKey = storageKey,
@@ -212,7 +231,9 @@ public class FileService
         Guid userId,
         Guid projectId,
         List<string>? filterTags = null,
-        bool useAndLogic = false)
+        bool useAndLogic = false,
+        Guid? directoryId = null,
+        bool directoryIdSpecified = false)
     {
         // Authorization
         if (!await _authService.HasProjectAccessAsync(userId, projectId))
@@ -223,6 +244,13 @@ public class FileService
         var query = _context.Files
             .Where(f => f.ProjectId == projectId && f.Status == FileStatus.Confirmed)
             .AsQueryable();
+
+        // Filter by directory if specified
+        // directoryIdSpecified distinguishes between "not specified" and "specified as null (root)"
+        if (directoryIdSpecified)
+        {
+            query = query.Where(f => f.DirectoryId == directoryId);
+        }
 
         // Apply tag filtering
         if (filterTags != null && filterTags.Any())
@@ -253,44 +281,13 @@ public class FileService
     }
 
     /// <summary>
-    /// Generate download URL for a file
-    /// </summary>
-    public async Task<GenerateDownloadUrlResponse> GenerateDownloadUrlAsync(
-        Guid userId,
-        Guid fileId)
-    {
-        var file = await _context.Files
-            .Include(f => f.Project)
-            .FirstOrDefaultAsync(f => f.Id == fileId && f.Status == FileStatus.Confirmed);
-
-        if (file == null)
-        {
-            throw new InvalidOperationException("File not found");
-        }
-
-        // Authorization
-        await _authService.RequireProjectAccessAsync(userId, file.ProjectId);
-
-        var downloadUrl = _r2Service.GenerateDownloadUrl(
-            file.StorageKey,
-            file.FileName);
-
-        var expiresAt = DateTime.UtcNow.AddMinutes(15);
-
-        return new GenerateDownloadUrlResponse(
-            downloadUrl,
-            expiresAt
-        );
-    }
-
-    /// <summary>
-    /// Get file by project ID and filename, with authorization check.
+    /// Get file by project ID and path, with authorization check.
     /// Returns null if file not found or user doesn't have access.
     /// </summary>
-    public async Task<Domain.Entities.File?> GetFileByProjectAndFilenameAsync(
+    public async Task<Domain.Entities.File?> GetFileByProjectAndPathAsync(
         Guid userId,
         Guid projectId,
-        string fileName)
+        string path)
     {
         // Check authorization first
         if (!await _authService.HasProjectAccessAsync(userId, projectId))
@@ -298,11 +295,14 @@ public class FileService
             return null;
         }
 
-        // Find the file
+        // Normalize the path: trim leading/trailing slashes
+        var normalizedPath = path.Trim('/');
+
+        // Find the file by path
         var file = await _context.Files
             .FirstOrDefaultAsync(f =>
                 f.ProjectId == projectId &&
-                f.FileName == fileName &&
+                f.Path == normalizedPath &&
                 f.Status == FileStatus.Confirmed);
 
         return file;
@@ -476,16 +476,22 @@ public class FileService
             return MapToDto(file);
         }
 
-        // Check if a file with the new name already exists in the project
+        // Build new path and check for conflicts
+        var directoryPath = await GetDirectoryPathAsync(file.DirectoryId);
+        var newPath = string.IsNullOrEmpty(directoryPath)
+            ? finalFileName
+            : $"{directoryPath}/{finalFileName}";
+
+        // Check if a file with the new path already exists in the project
         var existingFile = await _context.Files
             .FirstOrDefaultAsync(f =>
                 f.ProjectId == file.ProjectId &&
-                f.FileName == finalFileName &&
+                f.Path == newPath &&
                 f.Id != fileId &&
                 f.Status == FileStatus.Confirmed);
 
         if (existingFile != null)
-            throw new ArgumentException($"A file with the name '{finalFileName}' already exists in this project");
+            throw new ArgumentException($"A file with the name '{finalFileName}' already exists in this location");
 
         // Generate new storage key
         var oldStorageKey = file.StorageKey;
@@ -499,6 +505,7 @@ public class FileService
 
         // Update database record
         file.FileName = finalFileName;
+        file.Path = newPath;
         file.StorageKey = newStorageKey;
 
         await _context.SaveChangesAsync();
@@ -511,19 +518,22 @@ public class FileService
     }
 
     /// <summary>
-    /// Ensure unique filename by appending a number if a file with the same name exists
+    /// Ensure unique path by appending a number to filename if a file with the same path exists
     /// </summary>
-    private async Task<string> EnsureUniqueFileNameAsync(Guid projectId, string fileName)
+    private async Task<string> EnsureUniquePathAsync(Guid projectId, string directoryPath, string fileName)
     {
         var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
         var extension = Path.GetExtension(fileName);
         var uniqueFileName = fileName;
         var counter = 1;
 
-        // Check if file exists and generate unique name if needed
+        // Build the full path
+        var basePath = string.IsNullOrEmpty(directoryPath) ? "" : directoryPath + "/";
+
+        // Check if file exists at this path and generate unique name if needed
         while (await _context.Files.AnyAsync(f =>
             f.ProjectId == projectId &&
-            f.FileName == uniqueFileName &&
+            f.Path == basePath + uniqueFileName &&
             f.Status == FileStatus.Confirmed))
         {
             uniqueFileName = $"{fileNameWithoutExtension} ({counter}){extension}";
@@ -533,8 +543,8 @@ public class FileService
         if (uniqueFileName != fileName)
         {
             _logger.LogInformation(
-                "Renamed file from '{OriginalFileName}' to '{UniqueFileName}' to ensure uniqueness in project {ProjectId}",
-                fileName, uniqueFileName, projectId);
+                "Renamed file from '{OriginalFileName}' to '{UniqueFileName}' to ensure uniqueness at path '{Path}' in project {ProjectId}",
+                fileName, uniqueFileName, basePath, projectId);
         }
 
         return uniqueFileName;
@@ -568,12 +578,103 @@ public class FileService
         }
     }
 
+    /// <summary>
+    /// Move a file to a different directory
+    /// </summary>
+    public async Task<FileDto> MoveFileAsync(Guid userId, Guid fileId, Guid? directoryId)
+    {
+        var file = await _context.Files
+            .Include(f => f.UploadedBy)
+            .FirstOrDefaultAsync(f => f.Id == fileId && f.Status == FileStatus.Confirmed);
+
+        if (file == null)
+            throw new KeyNotFoundException("File not found");
+
+        // Authorization: User must have CanModifyResources permission
+        await _authService.EnsureCanModifyResourcesAsync(userId, file.ProjectId);
+
+        // Validate directory if provided
+        if (directoryId.HasValue)
+        {
+            var directory = await _context.FileDirectories
+                .FirstOrDefaultAsync(d => d.Id == directoryId.Value && d.ProjectId == file.ProjectId);
+
+            if (directory == null)
+                throw new KeyNotFoundException("Directory not found or doesn't belong to the same project");
+        }
+
+        // Build new path and check for conflicts at destination
+        var newDirectoryPath = await GetDirectoryPathAsync(directoryId);
+        var newPath = string.IsNullOrEmpty(newDirectoryPath)
+            ? file.FileName
+            : $"{newDirectoryPath}/{file.FileName}";
+
+        // Check if a file with the same name already exists at the destination
+        var existingFile = await _context.Files
+            .FirstOrDefaultAsync(f =>
+                f.ProjectId == file.ProjectId &&
+                f.Path == newPath &&
+                f.Id != fileId &&
+                f.Status == FileStatus.Confirmed);
+
+        if (existingFile != null)
+            throw new ArgumentException($"A file with the name '{file.FileName}' already exists in the destination");
+
+        // Update file
+        file.DirectoryId = directoryId;
+        file.Path = newPath;
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Moved file {FileId} to directory {DirectoryId} (path: {Path}) by user {UserId}",
+            fileId, directoryId?.ToString() ?? "root", newPath, userId);
+
+        return MapToDto(file);
+    }
+
+    /// <summary>
+    /// Get the full path for a directory (e.g., "folder/subfolder")
+    /// Returns empty string for root (null directoryId)
+    /// </summary>
+    private async Task<string> GetDirectoryPathAsync(Guid? directoryId)
+    {
+        if (!directoryId.HasValue)
+            return string.Empty;
+
+        var pathSegments = new List<string>();
+        var currentId = directoryId.Value;
+        var visitedIds = new HashSet<Guid>();
+
+        while (true)
+        {
+            if (!visitedIds.Add(currentId))
+                break; // Prevent infinite loops
+
+            var directory = await _context.FileDirectories
+                .FirstOrDefaultAsync(d => d.Id == currentId);
+
+            if (directory == null)
+                break;
+
+            pathSegments.Insert(0, directory.Name);
+
+            if (directory.ParentDirectoryId == null)
+                break;
+
+            currentId = directory.ParentDirectoryId.Value;
+        }
+
+        return string.Join("/", pathSegments);
+    }
+
     private static FileDto MapToDto(Domain.Entities.File file)
     {
         return new FileDto(
             file.Id,
             file.ProjectId,
+            file.DirectoryId,
             file.FileName,
+            file.Path,
             file.ContentType,
             file.FileSizeBytes,
             file.UploadedAt,

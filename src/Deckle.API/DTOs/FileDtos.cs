@@ -3,7 +3,9 @@ namespace Deckle.API.DTOs;
 public record FileDto(
     Guid Id,
     Guid ProjectId,
+    Guid? DirectoryId,
     string FileName,
+    string Path,
     string ContentType,
     long FileSizeBytes,
     DateTime UploadedAt,
@@ -21,17 +23,13 @@ public record RequestUploadUrlRequest(
     string FileName,
     string ContentType,
     long FileSizeBytes,
-    List<string>? Tags
+    List<string>? Tags,
+    Guid? DirectoryId
 );
 
 public record RequestUploadUrlResponse(
     Guid FileId,
     string UploadUrl,
-    DateTime ExpiresAt
-);
-
-public record GenerateDownloadUrlResponse(
-    string DownloadUrl,
     DateTime ExpiresAt
 );
 
@@ -52,4 +50,8 @@ public record FileTagsResponse(
 
 public record RenameFileRequest(
     string NewFileName
+);
+
+public record MoveFileRequest(
+    Guid? DirectoryId
 );

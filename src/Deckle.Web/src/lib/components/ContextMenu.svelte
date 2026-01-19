@@ -1,11 +1,21 @@
+<script lang="ts" module>
+  export interface ContextMenuItem {
+    label?: string;
+    action?: () => void;
+    disabled?: boolean;
+    variant?: 'default' | 'danger';
+    divider?: boolean;
+    submenu?: ContextMenuItem[];
+  }
+</script>
+
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { MenuItem } from '../types';
 
   interface Props {
     x: number;
     y: number;
-    items: MenuItem[];
+    items: ContextMenuItem[];
     onClose: () => void;
   }
 
@@ -13,7 +23,6 @@
 
   let menuElement: HTMLDivElement | undefined = $state();
   let activeSubmenu: number | null = $state(null);
-  let submenuElement: HTMLDivElement | undefined = $state();
 
   onMount(() => {
     // Adjust position if menu would go off-screen
@@ -30,7 +39,7 @@
       }
     }
 
-    // Close menu on click outside
+    // Close menu on click or right-click outside
     const handleClickOutside = (e: MouseEvent) => {
       if (menuElement && !menuElement.contains(e.target as Node)) {
         onClose();
@@ -44,25 +53,27 @@
       }
     };
 
-    document.addEventListener('click', handleClickOutside);
+    // Use capture phase to close before other handlers
+    document.addEventListener('click', handleClickOutside, true);
+    document.addEventListener('contextmenu', handleClickOutside, true);
     document.addEventListener('keydown', handleEscape);
 
     return () => {
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('click', handleClickOutside, true);
+      document.removeEventListener('contextmenu', handleClickOutside, true);
       document.removeEventListener('keydown', handleEscape);
     };
   });
 
-  function handleItemClick(item: MenuItem) {
-    if (item.disabled) return;
-
+  function handleItemClick(item: ContextMenuItem) {
+    if (item.disabled || item.submenu) return;
     if (item.action) {
       item.action();
       onClose();
     }
   }
 
-  function handleMouseEnter(index: number, item: MenuItem) {
+  function handleMouseEnter(index: number, item: ContextMenuItem) {
     if (item.submenu) {
       activeSubmenu = index;
     } else {
@@ -76,22 +87,16 @@
     const menuRect = menuElement.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
 
-    // Position submenu to the right by default, aligned to top of menu item
-    let leftValue = '100%';
-    let topValue = '0';
-
     // If submenu would go off-screen to the right, position it to the left
-    // Assuming submenu has similar width to menu
     if (menuRect.right + menuRect.width > viewportWidth) {
-      leftValue = 'auto';
-      return { top: topValue, left: leftValue, right: '100%' };
+      return { top: '0', left: 'auto', right: '100%' };
     }
 
-    return { top: topValue, left: leftValue };
+    return { top: '0', left: '100%' };
   }
 </script>
 
-<div bind:this={menuElement} class="context-menu" style="top: {y}px; left: {x}px;">
+<div bind:this={menuElement} class="context-menu" style="top: {y}px; left: {x}px;" role="menu">
   {#each items as item, index}
     {#if item.divider}
       <div class="divider"></div>
@@ -99,6 +104,7 @@
       <div
         class="menu-item"
         class:disabled={item.disabled}
+        class:danger={item.variant === 'danger'}
         class:has-submenu={item.submenu}
         onclick={() => handleItemClick(item)}
         onmouseenter={() => handleMouseEnter(index, item)}
@@ -121,7 +127,6 @@
         {#if activeSubmenu === index && item.submenu}
           {@const pos = getSubmenuPosition()}
           <div
-            bind:this={submenuElement}
             class="submenu"
             style="top: {pos.top}; left: {pos.left}; {pos.right ? `right: ${pos.right};` : ''}"
           >
@@ -132,6 +137,7 @@
                 <div
                   class="menu-item"
                   class:disabled={subitem.disabled}
+                  class:danger={subitem.variant === 'danger'}
                   onclick={(e) => {
                     e.stopPropagation();
                     handleItemClick(subitem);
@@ -154,10 +160,10 @@
   .context-menu {
     position: fixed;
     background: white;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
+    border: 1px solid var(--color-border, #d1d5db);
+    border-radius: var(--radius-md, 6px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    min-width: 160px;
+    min-width: 140px;
     padding: 4px;
     z-index: 1000;
     font-size: 14px;
@@ -168,11 +174,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 12px;
+    padding: 8px 12px;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: var(--radius-sm, 4px);
     user-select: none;
-    color: #374151;
+    color: var(--color-text, #374151);
   }
 
   .menu-item:hover:not(.disabled) {
@@ -182,6 +188,14 @@
   .menu-item.disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  .menu-item.danger {
+    color: var(--color-danger, #dc2626);
+  }
+
+  .menu-item.danger:hover:not(.disabled) {
+    background-color: #fef2f2;
   }
 
   .menu-item.has-submenu {
@@ -195,17 +209,17 @@
 
   .divider {
     height: 1px;
-    background-color: #e5e7eb;
+    background-color: var(--color-border, #e5e7eb);
     margin: 4px 0;
   }
 
   .submenu {
     position: absolute;
     background: white;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
+    border: 1px solid var(--color-border, #d1d5db);
+    border-radius: var(--radius-md, 6px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    min-width: 160px;
+    min-width: 140px;
     padding: 4px;
     z-index: 1001;
   }
