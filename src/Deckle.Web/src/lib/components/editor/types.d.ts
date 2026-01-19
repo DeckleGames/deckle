@@ -116,6 +116,12 @@ export interface Dimensions {
   maxHeight?: number | string;
 }
 
+export interface FontMetadata {
+  family: string; // e.g., "Roboto"
+  variants?: string[]; // e.g., ["400", "700", "400italic"]
+  category?: string; // e.g., "sans-serif", "serif", "display", "handwriting", "monospace"
+}
+
 // ============================================================================
 // Base Element Interface
 // ============================================================================
@@ -154,6 +160,7 @@ export interface ContainerElement extends BaseElement {
   overflow?: 'visible' | 'hidden' | 'scroll' | 'auto';
   bleedAreaColor?: string; // Color for bleed area marking
   safeAreaColor?: string; // Color for safe area marking
+  fonts?: FontMetadata[]; // Track fonts used in this design
 }
 
 // ============================================================================

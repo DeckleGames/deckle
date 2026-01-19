@@ -316,6 +316,34 @@ function createTemplateStore() {
         store.hasUnsavedChanges = false;
         return store;
       });
+    },
+
+    // Update font metadata in the root container
+    updateFontMetadata: (family: string, category: string) => {
+      update((store) => {
+        // Initialize fonts array if it doesn't exist
+        const currentFonts = store.root.fonts || [];
+
+        // Check if font already exists in the array
+        const existingFontIndex = currentFonts.findIndex((f) => f.family === family);
+
+        if (existingFontIndex === -1) {
+          // Add new font to the array
+          store.root = {
+            ...store.root,
+            fonts: [
+              ...currentFonts,
+              {
+                family,
+                category
+              }
+            ]
+          };
+        }
+        // Note: We don't save to history for font metadata updates
+        // as they happen automatically when fonts are used
+        return store;
+      });
     }
   };
 }

@@ -6,6 +6,7 @@
   import PreviewPanel from './PreviewPanel.svelte';
   import StructureTreePanel from './StructureTreePanel.svelte';
   import { templateStore } from '$lib/stores/templateElements';
+  import { fontLoader } from '$lib/stores/fontLoader';
   import { initDataSourceRow } from '$lib/stores/dataSourceRow';
   import { beforeNavigate } from '$app/navigation';
   import { saveActionStore } from '$lib/stores/saveAction';
@@ -67,6 +68,11 @@
           canRedo: false,
           hasUnsavedChanges: false
         });
+
+        // Load fonts used in the design
+        if (design.fonts && design.fonts.length > 0) {
+          fontLoader.preloadTemplateFonts(design.fonts);
+        }
       } catch (error) {
         console.error('Failed to parse saved design:', error);
         // If parsing fails, just use the default empty design

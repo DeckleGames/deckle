@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { BaseElement, TextElement } from '../../types';
+  import type { BaseElement, TextElement, TemplateElement, FontMetadata } from '../../types';
   import { templateStore } from '$lib/stores/templateElements';
+  import { fontLoader } from '$lib/stores/fontLoader';
   import BaseElementConfig from './BaseElementConfig.svelte';
   import ColorPicker from '../config-controls/ColorPicker.svelte';
   import PaddingControls from '../config-controls/PaddingControls.svelte';
@@ -8,12 +9,59 @@
   import TextField from '../config-controls/TextField.svelte';
   import NumberField from '../config-controls/NumberField.svelte';
   import SelectField from '../config-controls/SelectField.svelte';
+  import FontSelector from '../config-controls/FontSelector.svelte';
   import Fields from '../config-controls/Fields.svelte';
 
   let { element }: { element: TextElement } = $props();
 
+  // Helper function to extract all fonts currently used in text elements
+  function extractUsedFonts(el: TemplateElement, fontMetadata: FontMetadata[] | undefined): FontMetadata[] {
+    const fonts: FontMetadata[] = [];
+
+    if (el.type === 'text' && el.fontFamily && el.fontFamily !== 'System Default') {
+      // Look up category from stored fonts metadata if available
+      const storedFont = fontMetadata?.find(f => f.family === el.fontFamily);
+      fonts.push({
+        family: el.fontFamily,
+        category: storedFont?.category || 'sans-serif'
+      });
+    }
+
+    if (el.type === 'container' && el.children) {
+      for (const child of el.children) {
+        fonts.push(...extractUsedFonts(child, fontMetadata));
+      }
+    }
+
+    return fonts;
+  }
+
+  // Get actually used fonts by scanning all text elements (excluding current element's font)
+  let usedFonts = $derived.by(() => {
+    const allFonts = extractUsedFonts($templateStore.root, $templateStore.root.fonts);
+    // Filter to unique fonts, excluding the current element's font (it will show as selected)
+    return allFonts.filter((font, index, self) =>
+      font.family !== element.fontFamily &&
+      self.findIndex(f => f.family === font.family) === index
+    );
+  });
+
   function updateElement(updates: Partial<TextElement>) {
     templateStore.updateElement(element.id, updates);
+  }
+
+  function handleFontChange(font: { family: string; category: string }) {
+    // Update the text element's font family
+    const fontFamily = font.family === 'System Default' ? undefined : font.family;
+    updateElement({ fontFamily });
+
+    // Load the font if it's not the system default
+    if (font.family !== 'System Default') {
+      fontLoader.loadFont(font.family);
+
+      // Update the root's fonts array to track this font
+      templateStore.updateFontMetadata(font.family, font.category);
+    }
   }
 </script>
 
@@ -36,6 +84,14 @@
     rows={3}
     value={element.content}
     oninput={(e) => updateElement({ content: e.currentTarget.value })}
+  />
+
+  <FontSelector
+    label="Font Family"
+    id="font-family"
+    value={element.fontFamily || 'System Default'}
+    usedFonts={usedFonts}
+    onchange={handleFontChange}
   />
 
   <Fields>
