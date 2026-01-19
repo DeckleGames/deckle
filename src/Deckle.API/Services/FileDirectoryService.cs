@@ -42,6 +42,9 @@ public class FileDirectoryService
         if (name.Length > 255)
             throw new ArgumentException("Directory name cannot exceed 255 characters");
 
+        // Validate that name contains only allowed characters
+        NameSanitizer.ValidateDirectoryName(name);
+
         // Validate parent directory if provided
         if (parentDirectoryId.HasValue)
         {
@@ -275,6 +278,9 @@ public class FileDirectoryService
 
         if (newName.Length > 255)
             throw new ArgumentException("Directory name cannot exceed 255 characters");
+
+        // Validate that name contains only allowed characters
+        NameSanitizer.ValidateDirectoryName(newName);
 
         // Check for duplicate name in the same parent
         var existingDirectory = await _context.FileDirectories

@@ -116,7 +116,10 @@ public class FileService
                 throw new KeyNotFoundException("Directory not found or doesn't belong to this project");
         }
 
-        // 8. Get directory path and ensure unique filename by appending number if needed
+        // 8. Sanitize filename (replace invalid characters with underscores)
+        fileName = NameSanitizer.SanitizeFileName(fileName);
+
+        // 9. Get directory path and ensure unique filename by appending number if needed
         var directoryPath = await GetDirectoryPathAsync(directoryId);
         fileName = await EnsureUniquePathAsync(projectId, directoryPath, fileName);
 
@@ -465,6 +468,9 @@ public class FileService
         // Preserve the original file extension
         var originalExtension = Path.GetExtension(file.FileName);
         var newFileNameWithoutExtension = Path.GetFileNameWithoutExtension(newFileName);
+
+        // Sanitize the new filename (replace invalid characters with underscores)
+        newFileNameWithoutExtension = NameSanitizer.SanitizeFileName(newFileNameWithoutExtension);
 
         // Remove any extension from the provided new filename and add the original extension
         var finalFileName = newFileNameWithoutExtension + originalExtension;
