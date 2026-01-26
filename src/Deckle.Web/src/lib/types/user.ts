@@ -21,6 +21,28 @@ export interface CurrentUser {
   username?: string;
   name?: string;
   picture?: string;
+  role?: string;
+}
+
+// Admin user management types
+export interface AdminUser {
+  id: string;
+  email: string;
+  name?: string;
+  pictureUrl?: string;
+  role: string;
+  createdAt: string;
+  lastLoginAt?: string;
+  storageQuotaMb: number;
+  storageUsedBytes: number;
+  projectCount: number;
+}
+
+export interface AdminUserListResponse {
+  users: AdminUser[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
 }
 
 // Username availability response

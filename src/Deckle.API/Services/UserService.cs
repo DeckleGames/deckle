@@ -105,6 +105,7 @@ public class UserService
         var username = user.FindFirst("username")?.Value;
         var name = user.FindFirst(ClaimTypes.Name)?.Value;
         var picture = user.FindFirst("picture")?.Value;
+        var role = user.FindFirst(ClaimTypes.Role)?.Value;
 
         return new CurrentUserDto
         {
@@ -112,7 +113,8 @@ public class UserService
             Email = email,
             Username = username,
             Name = name,
-            Picture = picture
+            Picture = picture,
+            Role = role
         };
     }
 

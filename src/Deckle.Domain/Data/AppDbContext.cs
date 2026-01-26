@@ -80,6 +80,11 @@ public class AppDbContext : DbContext
             entity.Property(u => u.StorageUsedBytes)
                 .IsRequired()
                 .HasDefaultValue(0);
+
+            entity.Property(u => u.Role)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasDefaultValue(UserRole.User);
         });
 
         modelBuilder.Entity<Project>(entity =>

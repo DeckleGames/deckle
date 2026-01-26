@@ -41,7 +41,8 @@ public static class AuthEndpoints
                 return Results.Problem("Invalid FrontendUrl configuration", statusCode: 500);
             }
 
-            var redirectUri = $"{frontendUrl.TrimEnd('/')}/projects";
+            // Redirect to frontend root, which will handle role-based routing
+            var redirectUri = $"{frontendUrl.TrimEnd('/')}";
             logger.LogInformation("Auth login initiated. Redirecting to: {RedirectUri}", redirectUri);
 
             return Results.Challenge(

@@ -159,11 +159,18 @@ builder.Services.AddAuthentication(options =>
             {
                 identity.AddClaim(new Claim("username", user.Username));
             }
+
+            // Add role claim
+            identity.AddClaim(new Claim(ClaimTypes.Role, user.Role.ToString()));
         }
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole("Administrator"));
+});
 
 builder.Services.AddCors(options =>
 {
@@ -239,6 +246,7 @@ builder.Services.AddScoped<DataSourceService>();
 builder.Services.AddScoped<ComponentService>();
 builder.Services.AddScoped<FileService>();
 builder.Services.AddScoped<FileDirectoryService>();
+builder.Services.AddScoped<AdminService>();
 
 var app = builder.Build();
 
@@ -275,5 +283,6 @@ app.MapDataSourceEndpoints();
 app.MapComponentEndpoints();
 app.MapFileEndpoints();
 app.MapFileDirectoryEndpoints();
+app.MapAdminEndpoints();
 
 app.Run();

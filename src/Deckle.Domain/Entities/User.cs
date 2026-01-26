@@ -26,6 +26,8 @@ public class User
 
     public DateTime? LastLoginAt { get; set; }
 
+    public UserRole Role { get; set; } = UserRole.User;
+
     // Storage quota tracking
     public int StorageQuotaMb { get; set; } = 50;
     public long StorageUsedBytes { get; set; } = 0;

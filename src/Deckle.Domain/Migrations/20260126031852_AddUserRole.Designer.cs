@@ -3,6 +3,7 @@ using System;
 using Deckle.Domain.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Deckle.Domain.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260126031852_AddUserRole")]
+    partial class AddUserRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,9 +137,6 @@ namespace Deckle.Domain.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<Guid?>("DirectoryId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -144,11 +144,6 @@ namespace Deckle.Domain.Migrations
 
                     b.Property<long>("FileSizeBytes")
                         .HasColumnType("bigint");
-
-                    b.Property<string>("Path")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
 
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("uuid");
@@ -178,8 +173,6 @@ namespace Deckle.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DirectoryId");
-
                     b.HasIndex("ProjectId");
 
                     b.HasIndex("Tags");
@@ -189,52 +182,9 @@ namespace Deckle.Domain.Migrations
 
                     b.HasIndex("UploadedByUserId");
 
-                    b.HasIndex("ProjectId", "Path")
-                        .IsUnique()
-                        .HasFilter("\"Status\" = 'Confirmed'");
-
                     b.HasIndex("Status", "UploadedAt");
 
                     b.ToTable("Files");
-                });
-
-            modelBuilder.Entity("Deckle.Domain.Entities.FileDirectory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<Guid?>("ParentDirectoryId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ParentDirectoryId");
-
-                    b.HasIndex("ProjectId");
-
-                    b.HasIndex("ProjectId", "ParentDirectoryId", "Name")
-                        .IsUnique();
-
-                    b.ToTable("FileDirectories");
                 });
 
             modelBuilder.Entity("Deckle.Domain.Entities.Project", b =>
@@ -242,11 +192,6 @@ namespace Deckle.Domain.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -269,10 +214,7 @@ namespace Deckle.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects", t =>
-                        {
-                            t.HasCheckConstraint("CK_Projects_Code_Format", "\"Code\" ~ '^[a-zA-Z0-9-]+$'");
-                        });
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("Deckle.Domain.Entities.User", b =>
@@ -339,10 +281,6 @@ namespace Deckle.Domain.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<string>("Username")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Email");
@@ -350,10 +288,6 @@ namespace Deckle.Domain.Migrations
                     b.HasIndex("GoogleId")
                         .IsUnique()
                         .HasFilter("\"GoogleId\" IS NOT NULL");
-
-                    b.HasIndex("Username")
-                        .IsUnique()
-                        .HasFilter("\"Username\" IS NOT NULL");
 
                     b.ToTable("Users");
                 });
@@ -503,11 +437,6 @@ namespace Deckle.Domain.Migrations
 
             modelBuilder.Entity("Deckle.Domain.Entities.File", b =>
                 {
-                    b.HasOne("Deckle.Domain.Entities.FileDirectory", "Directory")
-                        .WithMany("Files")
-                        .HasForeignKey("DirectoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("Deckle.Domain.Entities.Project", "Project")
                         .WithMany("Files")
                         .HasForeignKey("ProjectId")
@@ -520,29 +449,9 @@ namespace Deckle.Domain.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Directory");
-
                     b.Navigation("Project");
 
                     b.Navigation("UploadedBy");
-                });
-
-            modelBuilder.Entity("Deckle.Domain.Entities.FileDirectory", b =>
-                {
-                    b.HasOne("Deckle.Domain.Entities.FileDirectory", "ParentDirectory")
-                        .WithMany("ChildDirectories")
-                        .HasForeignKey("ParentDirectoryId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Deckle.Domain.Entities.Project", "Project")
-                        .WithMany("FileDirectories")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ParentDirectory");
-
-                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("Deckle.Domain.Entities.UserProject", b =>
@@ -584,20 +493,11 @@ namespace Deckle.Domain.Migrations
                     b.Navigation("DataSource");
                 });
 
-            modelBuilder.Entity("Deckle.Domain.Entities.FileDirectory", b =>
-                {
-                    b.Navigation("ChildDirectories");
-
-                    b.Navigation("Files");
-                });
-
             modelBuilder.Entity("Deckle.Domain.Entities.Project", b =>
                 {
                     b.Navigation("Components");
 
                     b.Navigation("DataSources");
-
-                    b.Navigation("FileDirectories");
 
                     b.Navigation("Files");
 
