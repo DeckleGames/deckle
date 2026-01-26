@@ -16,13 +16,13 @@ public abstract record ComponentDto
     public required DateTime CreatedAt { get; init; }
     public required DateTime UpdatedAt { get; init; }
 
-    public ComponentDto(string type)
+    protected ComponentDto(string type)
     {
         Type = type;
     }
 
     [SetsRequiredMembers]
-    public ComponentDto(string type, Component component)
+    protected ComponentDto(string type, Component component)
     {
         Type = type;
         Id = component.Id;

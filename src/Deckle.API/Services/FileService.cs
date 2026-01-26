@@ -314,7 +314,7 @@ public class FileService
     /// <summary>
     /// Delete a file
     /// </summary>
-    public async Task<bool> DeleteFileAsync(Guid userId, Guid fileId)
+    public async Task DeleteFileAsync(Guid userId, Guid fileId)
     {
         var file = await _context.Files
             .Include(f => f.Project)
@@ -324,7 +324,7 @@ public class FileService
 
         if (file == null)
         {
-            return false;
+            throw new KeyNotFoundException("File not found");
         }
 
         // Authorization: User must have CanDeleteResources permission
@@ -362,8 +362,6 @@ public class FileService
 
         _logger.LogInformation("Deleted file {FileId}, updated quota for project owner",
             fileId);
-
-        return true;
     }
 
     /// <summary>

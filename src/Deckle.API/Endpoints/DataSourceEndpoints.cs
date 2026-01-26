@@ -16,38 +16,22 @@ public static class DataSourceEndpoints
         group.MapGet("project/{projectId:guid}", async (Guid projectId, HttpContext httpContext, DataSourceService dataSourceService) =>
         {
             var userId = httpContext.GetUserId();
-
-            try
-            {
-                var dataSources = await dataSourceService.GetProjectDataSourcesAsync(userId, projectId);
-                return Results.Ok(dataSources);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Forbid();
-            }
+            var dataSources = await dataSourceService.GetProjectDataSourcesAsync(userId, projectId);
+            return Results.Ok(dataSources);
         })
         .WithName("GetProjectDataSources");
 
         group.MapGet("{id:guid}", async (Guid id, HttpContext httpContext, DataSourceService dataSourceService) =>
         {
             var userId = httpContext.GetUserId();
+            var dataSource = await dataSourceService.GetDataSourceByIdAsync(userId, id);
 
-            try
+            if (dataSource == null)
             {
-                var dataSource = await dataSourceService.GetDataSourceByIdAsync(userId, id);
-
-                if (dataSource == null)
-                {
-                    return Results.NotFound();
-                }
-
-                return Results.Ok(dataSource);
+                return Results.NotFound();
             }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Forbid();
-            }
+
+            return Results.Ok(dataSource);
         })
         .WithName("GetDataSourceById");
 
@@ -55,30 +39,15 @@ public static class DataSourceEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var dataSource = await dataSourceService.CreateGoogleSheetsDataSourceAsync(
-                    userId,
-                    request.ProjectId,
-                    request.Name,
-                    request.Url,
-                    request.SheetGid
-                );
+            var dataSource = await dataSourceService.CreateGoogleSheetsDataSourceAsync(
+                userId,
+                request.ProjectId,
+                request.Name,
+                request.Url,
+                request.SheetGid
+            );
 
-                return Results.Created($"/data-sources/{dataSource.Id}", dataSource);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Forbid();
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
+            return Results.Created($"/data-sources/{dataSource.Id}", dataSource);
         })
         .WithName("CreateDataSource");
 
@@ -86,21 +55,14 @@ public static class DataSourceEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var dataSource = await dataSourceService.UpdateDataSourceAsync(userId, id, request.Name);
+            var dataSource = await dataSourceService.UpdateDataSourceAsync(userId, id, request.Name);
 
-                if (dataSource == null)
-                {
-                    return Results.NotFound();
-                }
-
-                return Results.Ok(dataSource);
-            }
-            catch (UnauthorizedAccessException)
+            if (dataSource == null)
             {
-                return Results.Forbid();
+                return Results.NotFound();
             }
+
+            return Results.Ok(dataSource);
         })
         .WithName("UpdateDataSource");
 
@@ -108,21 +70,14 @@ public static class DataSourceEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var deleted = await dataSourceService.DeleteDataSourceAsync(userId, id);
+            var deleted = await dataSourceService.DeleteDataSourceAsync(userId, id);
 
-                if (!deleted)
-                {
-                    return Results.NotFound();
-                }
-
-                return Results.NoContent();
-            }
-            catch (UnauthorizedAccessException)
+            if (!deleted)
             {
-                return Results.Forbid();
+                return Results.NotFound();
             }
+
+            return Results.NoContent();
         })
         .WithName("DeleteDataSource");
 
@@ -131,19 +86,8 @@ public static class DataSourceEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var dataSource = await dataSourceService.SyncDataSourceMetadataAsync(userId, id, request.Headers, request.RowCount);
-                return Results.Ok(dataSource);
-            }
-            catch (KeyNotFoundException)
-            {
-                return Results.NotFound();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Forbid();
-            }
+            var dataSource = await dataSourceService.SyncDataSourceMetadataAsync(userId, id, request.Headers, request.RowCount);
+            return Results.Ok(dataSource);
         })
         .WithName("SyncDataSourceMetadata");
 
@@ -152,32 +96,25 @@ public static class DataSourceEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
+            var dataSource = await dataSourceService.GetDataSourceByIdAsync(userId, id);
+
+            if (dataSource == null)
             {
-                var dataSource = await dataSourceService.GetDataSourceByIdAsync(userId, id);
-
-                if (dataSource == null)
-                {
-                    return Results.NotFound();
-                }
-
-                // Return basic metadata from the DataSource entity
-                var metadata = new
-                {
-                    dataSource.Id,
-                    dataSource.Name,
-                    dataSource.GoogleSheetsId,
-                    dataSource.GoogleSheetsUrl,
-                    dataSource.SheetGid,
-                    dataSource.CsvExportUrl
-                };
-
-                return Results.Ok(metadata);
+                return Results.NotFound();
             }
-            catch (UnauthorizedAccessException)
+
+            // Return basic metadata from the DataSource entity
+            var metadata = new
             {
-                return Results.Forbid();
-            }
+                dataSource.Id,
+                dataSource.Name,
+                dataSource.GoogleSheetsId,
+                dataSource.GoogleSheetsUrl,
+                dataSource.SheetGid,
+                dataSource.CsvExportUrl
+            };
+
+            return Results.Ok(metadata);
         })
         .WithName("GetDataSourceMetadata");
 
@@ -186,41 +123,32 @@ public static class DataSourceEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
+            var dataSource = await dataSourceService.GetDataSourceByIdAsync(userId, id);
+
+            if (dataSource == null)
             {
-                var dataSource = await dataSourceService.GetDataSourceByIdAsync(userId, id);
-
-                if (dataSource == null)
-                {
-                    return Results.NotFound();
-                }
-
-                if (string.IsNullOrEmpty(dataSource.CsvExportUrl))
-                {
-                    return Results.BadRequest(new { error = "Data source does not have a valid CSV export URL" });
-                }
-
-                // Fetch CSV data from the public CSV export URL
-                var csvData = await googleSheetsService.FetchCsvDataAsync(dataSource.CsvExportUrl);
-
-                // Parse CSV into 2D array (simple implementation)
-                var lines = csvData.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-                var data = lines.Select(line =>
-                {
-                    // Simple CSV parsing - doesn't handle quoted commas
-                    return line.Split(',').Select(cell => cell.Trim()).ToArray();
-                }).ToList();
-
-                return Results.Ok(new { data });
+                return Results.NotFound();
             }
-            catch (UnauthorizedAccessException)
+
+            if (string.IsNullOrEmpty(dataSource.CsvExportUrl))
             {
-                return Results.Forbid();
+                // This is a business logic error, not an exception from the service.
+                // It should still return a BadRequest.
+                return Results.BadRequest(new { error = "Data source does not have a valid CSV export URL" });
             }
-            catch (InvalidOperationException ex)
+
+            // Fetch CSV data from the public CSV export URL
+            var csvData = await googleSheetsService.FetchCsvDataAsync(dataSource.CsvExportUrl);
+
+            // Parse CSV into 2D array (simple implementation)
+            var lines = csvData.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            var data = lines.Select(line =>
             {
-                return Results.BadRequest(new { error = ex.Message });
-            }
+                // Simple CSV parsing - doesn't handle quoted commas
+                return line.Split(',').Select(cell => cell.Trim()).ToArray();
+            }).ToList();
+
+            return Results.Ok(new { data });
         })
         .WithName("GetDataSourceData");
 

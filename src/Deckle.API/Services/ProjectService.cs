@@ -102,7 +102,7 @@ public class ProjectService
         };
     }
 
-    private static readonly Regex ProjectCodePattern = new("^[a-z0-9-]+$", RegexOptions.Compiled);
+    private static readonly Regex _ProjectCodePattern = new("^[a-z0-9-]+$", RegexOptions.Compiled);
 
     public async Task<ProjectDto> CreateProjectAsync(Guid userId, string name, string code, string? description)
     {
@@ -123,7 +123,7 @@ public class ProjectService
         {
             validationErrors.AddError("code", "Project code is required");
         }
-        else if (!ProjectCodePattern.IsMatch(code))
+        else if (!_ProjectCodePattern.IsMatch(code))
         {
             validationErrors.AddError("code", "Project code can only contain lowercase letters, numbers, and dashes");
         }
@@ -419,25 +419,30 @@ public class ProjectService
         return true;
     }
 
-    public async Task<bool> DeleteProjectAsync(Guid userId, Guid projectId)
+    public async Task DeleteProjectAsync(Guid userId, Guid projectId)
     {
         var userProject = await _authService.GetUserProjectAsync(userId, projectId);
 
         if (userProject == null)
         {
-            return false;
+            // This can mean either project not found, or user not associated.
+            // Throwing Unauthorized is safer than leaking project existence info.
+            var projectExists = await _dbContext.Projects.AnyAsync(p => p.Id == projectId);
+            if (!projectExists)
+            {
+                throw new KeyNotFoundException("Project not found");
+            }
+            throw new UnauthorizedAccessException("You do not have access to this project.");
         }
 
         // Only Owner can delete the project
         if (!ProjectAuthorizationService.CanDeleteProject(userProject.Role))
         {
-            return false;
+            throw new UnauthorizedAccessException("You do not have permission to delete this project.");
         }
 
         _dbContext.Projects.Remove(userProject.Project);
         await _dbContext.SaveChangesAsync();
-
-        return true;
     }
 
     private static int GetRolePriority(string role)

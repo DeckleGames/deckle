@@ -22,31 +22,16 @@ public static class FileEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var response = await fileService.RequestUploadUrlAsync(
-                    userId,
-                    projectId,
-                    request.FileName,
-                    request.ContentType,
-                    request.FileSizeBytes,
-                    request.Tags,
-                    request.DirectoryId);
+            var response = await fileService.RequestUploadUrlAsync(
+                userId,
+                projectId,
+                request.FileName,
+                request.ContentType,
+                request.FileSizeBytes,
+                request.Tags,
+                request.DirectoryId);
 
-                return Results.Ok(response);
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Unauthorized();
-            }
+            return Results.Ok(response);
         })
         .WithName("RequestFileUploadUrl")
         .WithDescription("Request a presigned URL for uploading a file to the project");
@@ -105,19 +90,8 @@ public static class FileEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var file = await fileService.ConfirmUploadAsync(userId, fileId);
-                return Results.Ok(file);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Unauthorized();
-            }
+            var file = await fileService.ConfirmUploadAsync(userId, fileId);
+            return Results.Ok(file);
         })
         .WithName("ConfirmFileUpload")
         .WithDescription("Confirm that a file upload has completed successfully");
@@ -131,19 +105,8 @@ public static class FileEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var file = await fileService.UpdateFileTagsAsync(userId, fileId, request.Tags);
-                return Results.Ok(file);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Results.NotFound(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Unauthorized();
-            }
+            var file = await fileService.UpdateFileTagsAsync(userId, fileId, request.Tags);
+            return Results.Ok(file);
         })
         .WithName("UpdateFileTags")
         .WithDescription("Update tags for a file");
@@ -153,35 +116,13 @@ public static class FileEndpoints
             Guid fileId,
             HttpContext httpContext,
             FileService fileService,
-            ILogger<FileService> logger,
+            ILogger<FileService> logger, // Keep logger for potential logging of success or specific cases if needed in the future
             RenameFileRequest request) =>
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var file = await fileService.RenameFileAsync(userId, fileId, request.NewFileName);
-                return Results.Ok(file);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return Results.NotFound(new { error = ex.Message });
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Unauthorized();
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to rename file {FileId}", fileId);
-                return Results.Problem(
-                    detail: "Failed to rename file. The file may have been moved or deleted.",
-                    statusCode: StatusCodes.Status500InternalServerError);
-            }
+            var file = await fileService.RenameFileAsync(userId, fileId, request.NewFileName);
+            return Results.Ok(file);
         })
         .WithName("RenameFile")
         .WithDescription("Rename a file while preserving its extension");
@@ -195,19 +136,8 @@ public static class FileEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var file = await fileService.MoveFileAsync(userId, fileId, request.DirectoryId);
-                return Results.Ok(file);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return Results.NotFound(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Unauthorized();
-            }
+            var file = await fileService.MoveFileAsync(userId, fileId, request.DirectoryId);
+            return Results.Ok(file);
         })
         .WithName("MoveFile")
         .WithDescription("Move a file to a different directory (or to root if DirectoryId is null)");
@@ -220,20 +150,9 @@ public static class FileEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var success = await fileService.DeleteFileAsync(userId, fileId);
-                if (!success)
-                {
-                    return Results.NotFound();
-                }
+            await fileService.DeleteFileAsync(userId, fileId);
 
-                return Results.NoContent();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Unauthorized();
-            }
+            return Results.NoContent();
         })
         .WithName("DeleteFile")
         .WithDescription("Delete a file from the project");

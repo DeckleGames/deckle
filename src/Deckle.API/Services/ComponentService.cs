@@ -143,28 +143,22 @@ public class ComponentService
         return new DiceDto(dice);
     }
 
-    public async Task<bool> DeleteComponentAsync(Guid userId, Guid componentId)
+    public async Task DeleteComponentAsync(Guid userId, Guid componentId)
     {
         var component = await _context.Components
-            .Where(c => c.Id == componentId && c.Project.Users.Any(u => u.Id == userId))
+            .Where(c => c.Id == componentId)
             .FirstOrDefaultAsync();
 
         if (component == null)
         {
-            return false;
+            throw new KeyNotFoundException("Component not found");
         }
 
-        // Check user's role - Only Owner can delete components
-        var role = await _authService.GetUserProjectRoleAsync(userId, component.ProjectId);
-        if (role == null || !ProjectAuthorizationService.CanDeleteResources(role.Value))
-        {
-            return false;
-        }
+        // Authorization check
+        await _authService.EnsureCanDeleteResourcesAsync(userId, component.ProjectId);
 
         _context.Components.Remove(component);
         await _context.SaveChangesAsync();
-
-        return true;
     }
 
     public async Task<CardDto?> SaveCardDesignAsync(Guid userId, Guid componentId, string part, string? design)

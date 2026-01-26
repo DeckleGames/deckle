@@ -39,15 +39,8 @@ public static class ComponentEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var card = await componentService.CreateCardAsync(userId, projectId, request.Name, request.Size);
-                return Results.Created($"/projects/{projectId}/components/{card.Id}", card);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Unauthorized();
-            }
+            var card = await componentService.CreateCardAsync(userId, projectId, request.Name, request.Size);
+            return Results.Created($"/projects/{projectId}/components/{card.Id}", card);
         })
         .WithName("CreateCard");
 
@@ -55,15 +48,8 @@ public static class ComponentEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var dice = await componentService.CreateDiceAsync(userId, projectId, request.Name, request.Type, request.Style, request.BaseColor, request.Number);
-                return Results.Created($"/projects/{projectId}/components/{dice.Id}", dice);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Unauthorized();
-            }
+            var dice = await componentService.CreateDiceAsync(userId, projectId, request.Name, request.Type, request.Style, request.BaseColor, request.Number);
+            return Results.Created($"/projects/{projectId}/components/{dice.Id}", dice);
         })
         .WithName("CreateDice");
 
@@ -71,27 +57,15 @@ public static class ComponentEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var playerMat = await componentService.CreatePlayerMatAsync(
-                    userId,
-                    projectId,
-                    request.Name,
-                    request.PresetSize,
-                    request.Orientation,
-                    request.CustomWidthMm,
-                    request.CustomHeightMm);
-                return Results.Created($"/projects/{projectId}/components/{playerMat.Id}", playerMat);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Unauthorized();
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
-        })
+            var playerMat = await componentService.CreatePlayerMatAsync(
+                userId,
+                projectId,
+                request.Name,
+                request.PresetSize,
+                request.Orientation,
+                request.CustomWidthMm,
+                request.CustomHeightMm);
+            return Results.Created($"/projects/{projectId}/components/{playerMat.Id}", playerMat);        })
         .WithName("CreatePlayerMat");
 
         group.MapPut("cards/{id:guid}", async (Guid projectId, Guid id, HttpContext httpContext, ComponentService componentService, UpdateCardRequest request) =>
@@ -126,40 +100,27 @@ public static class ComponentEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var playerMat = await componentService.UpdatePlayerMatAsync(
-                    userId,
-                    id,
-                    request.Name,
-                    request.PresetSize,
-                    request.Orientation,
-                    request.CustomWidthMm,
-                    request.CustomHeightMm);
+            var playerMat = await componentService.UpdatePlayerMatAsync(
+                userId,
+                id,
+                request.Name,
+                request.PresetSize,
+                request.Orientation,
+                request.CustomWidthMm,
+                request.CustomHeightMm);
 
-                if (playerMat == null)
-                {
-                    return Results.NotFound();
-                }
-
-                return Results.Ok(playerMat);
-            }
-            catch (ArgumentException ex)
+            if (playerMat == null)
             {
-                return Results.BadRequest(ex.Message);
+                return Results.NotFound();
             }
-        })
+
+            return Results.Ok(playerMat);        })
         .WithName("UpdatePlayerMat");
 
         group.MapDelete("{id:guid}", async (Guid projectId, Guid id, HttpContext httpContext, ComponentService componentService) =>
         {
             var userId = httpContext.GetUserId();
-            var deleted = await componentService.DeleteComponentAsync(userId, id);
-
-            if (!deleted)
-            {
-                return Results.NotFound();
-            }
+            await componentService.DeleteComponentAsync(userId, id);
 
             return Results.NoContent();
         })
@@ -169,22 +130,14 @@ public static class ComponentEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var component = await componentService.SaveDesignAsync(userId, id, part, request.Design);
+            var component = await componentService.SaveDesignAsync(userId, id, part, request.Design);
 
-                if (component == null || component.ProjectId != projectId)
-                {
-                    return Results.NotFound();
-                }
-
-                return Results.Ok(component);
-            }
-            catch (ArgumentException ex)
+            if (component == null || component.ProjectId != projectId)
             {
-                return Results.BadRequest(new { error = ex.Message });
+                return Results.NotFound();
             }
-        })
+
+            return Results.Ok(component);        })
         .WithName("SaveComponentDesign")
         .WithDescription("Save design for any editable component (Card, PlayerMat, etc.)");
 
@@ -192,22 +145,14 @@ public static class ComponentEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var component = await componentService.UpdateDataSourceAsync(userId, id, request.DataSourceId);
+            var component = await componentService.UpdateDataSourceAsync(userId, id, request.DataSourceId);
 
-                if (component == null || component.ProjectId != projectId)
-                {
-                    return Results.NotFound();
-                }
-
-                return Results.Ok(component);
-            }
-            catch (ArgumentException ex)
+            if (component == null || component.ProjectId != projectId)
             {
-                return Results.BadRequest(ex.Message);
+                return Results.NotFound();
             }
-        })
+
+            return Results.Ok(component);        })
         .WithName("UpdateComponentDataSource")
         .WithDescription("Update data source for any component that supports data sources (Card, PlayerMat, etc.)");
 

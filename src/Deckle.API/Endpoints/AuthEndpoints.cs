@@ -35,7 +35,7 @@ public static class AuthEndpoints
             }
 
             // Validate that frontendUrl is an absolute URL
-            if (!Uri.TryCreate(frontendUrl, UriKind.Absolute, out var uri))
+            if (!Uri.TryCreate(frontendUrl, UriKind.Absolute, out var _))
             {
                 logger.LogError("Invalid FrontendUrl configuration: {FrontendUrl}", frontendUrl);
                 return Results.Problem("Invalid FrontendUrl configuration", statusCode: 500);
@@ -47,7 +47,7 @@ public static class AuthEndpoints
 
             return Results.Challenge(
                 new AuthenticationProperties { RedirectUri = redirectUri },
-                new[] { GoogleDefaults.AuthenticationScheme }
+                [GoogleDefaults.AuthenticationScheme]
             );
         })
         .AllowAnonymous()
@@ -105,8 +105,7 @@ public static class AuthEndpoints
             }
 
             // Update the user's claims to include the new username
-            var identity = user.Identity as ClaimsIdentity;
-            if (identity != null)
+            if (user.Identity is ClaimsIdentity identity)
             {
                 // Remove old username claim if exists
                 var existingClaim = identity.FindFirst("username");

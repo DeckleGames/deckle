@@ -23,29 +23,13 @@ public static class FileDirectoryEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var directory = await directoryService.CreateDirectoryAsync(
-                    userId,
-                    projectId,
-                    request.Name,
-                    request.ParentDirectoryId);
+            var directory = await directoryService.CreateDirectoryAsync(
+                userId,
+                projectId,
+                request.Name,
+                request.ParentDirectoryId);
 
-                return Results.Created($"/projects/{projectId}/directories/{directory.Id}", directory);
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return Results.NotFound(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Unauthorized();
-            }
-        })
+            return Results.Created($"/projects/{projectId}/directories/{directory.Id}", directory);        })
         .WithName("CreateFileDirectory")
         .WithDescription("Create a new directory in a project");
 
@@ -135,24 +119,8 @@ public static class FileDirectoryEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var directory = await directoryService.RenameDirectoryAsync(userId, directoryId, request.Name);
-                return Results.Ok(directory);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return Results.NotFound(new { error = ex.Message });
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Unauthorized();
-            }
-        })
+            var directory = await directoryService.RenameDirectoryAsync(userId, directoryId, request.Name);
+            return Results.Ok(directory);        })
         .WithName("RenameFileDirectory")
         .WithDescription("Rename a directory");
 
@@ -165,32 +133,12 @@ public static class FileDirectoryEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
-            {
-                var directory = await directoryService.MoveDirectoryAsync(
-                    userId,
-                    directoryId,
-                    request.ParentDirectoryId,
-                    request.Merge);
-                return Results.Ok(directory);
-            }
-            catch (DirectoryConflictException ex)
-            {
-                return Results.Conflict(ex.Conflict);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return Results.NotFound(new { error = ex.Message });
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Unauthorized();
-            }
-        })
+            var directory = await directoryService.MoveDirectoryAsync(
+                userId,
+                directoryId,
+                request.ParentDirectoryId,
+                request.Merge);
+            return Results.Ok(directory);        })
         .WithName("MoveFileDirectory")
         .WithDescription("Move a directory to a new parent (or to root if ParentDirectoryId is null). Set Merge=true to merge contents when a directory with the same name exists.");
 
@@ -202,21 +150,13 @@ public static class FileDirectoryEndpoints
         {
             var userId = httpContext.GetUserId();
 
-            try
+            var success = await directoryService.DeleteDirectoryAsync(userId, directoryId);
+            if (!success)
             {
-                var success = await directoryService.DeleteDirectoryAsync(userId, directoryId);
-                if (!success)
-                {
-                    return Results.NotFound();
-                }
+                return Results.NotFound();
+            }
 
-                return Results.NoContent();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Results.Unauthorized();
-            }
-        })
+            return Results.NoContent();        })
         .WithName("DeleteFileDirectory")
         .WithDescription("Delete a directory and all its subdirectories (files are moved to root)");
 
