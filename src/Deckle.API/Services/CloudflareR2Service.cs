@@ -15,11 +15,12 @@ public class CloudflareR2Options
     public int PresignedUrlExpirationMinutes { get; set; } = 15;
 }
 
-public class CloudflareR2Service
+public class CloudflareR2Service : IDisposable
 {
     private readonly IAmazonS3 _s3Client;
     private readonly CloudflareR2Options _options;
     private readonly ILogger<CloudflareR2Service> _logger;
+    private bool _disposed;
 
     public CloudflareR2Service(
         IOptions<CloudflareR2Options> options,
@@ -232,5 +233,30 @@ public class CloudflareR2Service
         }
 
         return sanitized;
+    }
+
+    /// <summary>
+    /// Dispose of the S3 client resources
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Protected dispose implementation
+    /// </summary>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                _s3Client.Dispose();
+            }
+
+            _disposed = true;
+        }
     }
 }

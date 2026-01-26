@@ -12,8 +12,9 @@ namespace Deckle.API.Tests;
 /// Tests for FileService focusing on business logic, validation, and database operations.
 /// Note: Tests that require R2 storage network calls are skipped or use test doubles.
 /// </summary>
-public class FileServiceTests
+public class FileServiceTests : IDisposable
 {
+    private bool _disposed;
     private readonly ProjectAuthorizationService _authService;
     private readonly CloudflareR2Service _r2Service;
     private readonly Mock<ILogger<FileService>> _mockLogger;
@@ -623,4 +624,24 @@ public class FileServiceTests
     }
 
     #endregion
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                _context.Dispose();
+                _r2Service.Dispose();
+            }
+
+            _disposed = true;
+        }
+    }
 }
