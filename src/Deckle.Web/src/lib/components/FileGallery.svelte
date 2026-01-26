@@ -12,7 +12,8 @@
     onFileUpdated,
     selectable = false,
     selectedIds = [],
-    onSelectionChange
+    onSelectionChange,
+    allItems = []
   }: {
     files: File[];
     onFileDeleted?: (fileId: string) => void;
@@ -20,6 +21,7 @@
     selectable?: boolean;
     selectedIds?: string[];
     onSelectionChange?: (fileId: string, selected: boolean, shiftKey: boolean) => void;
+    allItems?: Array<{ type: 'file' | 'folder'; id: string }>;
   } = $props();
 
   // Lightbox state
@@ -94,6 +96,8 @@
           {selectable}
           isSelected={selectedIds.includes(file.id)}
           onSelectionChange={(selected, shiftKey) => onSelectionChange?.(file.id, selected, shiftKey)}
+          {selectedIds}
+          {allItems}
         />
       {/each}
     </div>

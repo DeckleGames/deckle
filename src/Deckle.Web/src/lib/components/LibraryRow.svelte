@@ -5,6 +5,7 @@
   export type DragItemData = {
     type: 'file' | 'folder';
     id: string;
+    items?: Array<{ type: 'file' | 'folder'; id: string }>;
   };
 
   let {
@@ -27,7 +28,10 @@
     // Selection props
     selectable = false,
     isSelected = false,
-    onSelectionChange
+    onSelectionChange,
+    // Multi-select drag context
+    selectedIds = [],
+    allItems = []
   }: {
     name?: string;
     metadata?: string;
@@ -49,6 +53,9 @@
     selectable?: boolean;
     isSelected?: boolean;
     onSelectionChange?: (selected: boolean, shiftKey: boolean) => void;
+    // Multi-select drag context
+    selectedIds?: string[];
+    allItems?: Array<{ type: 'file' | 'folder'; id: string }>;
   } = $props();
 
   let contextMenuState = $state<{ x: number; y: number } | null>(null);
@@ -125,7 +132,18 @@
   function handleDragStart(event: DragEvent) {
     if (!dragData || !event.dataTransfer) return;
     event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('application/json', JSON.stringify(dragData));
+
+    // If this item is selected and there are multiple selected items,
+    // include all selected items in the drag data
+    let dataToTransfer: DragItemData = { ...dragData };
+
+    if (isSelected && selectedIds.length > 1) {
+      // Get all selected items from the allItems array
+      const selectedItems = allItems.filter((item) => selectedIds.includes(item.id));
+      dataToTransfer.items = selectedItems;
+    }
+
+    event.dataTransfer.setData('application/json', JSON.stringify(dataToTransfer));
   }
 
   function handleDragOver(event: DragEvent) {

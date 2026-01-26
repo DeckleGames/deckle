@@ -12,7 +12,9 @@
     onItemDropped,
     selectable = false,
     isSelected = false,
-    onSelectionChange
+    onSelectionChange,
+    selectedIds = [],
+    allItems = []
   }: {
     directory: FileDirectory;
     itemCount?: number;
@@ -23,6 +25,8 @@
     selectable?: boolean;
     isSelected?: boolean;
     onSelectionChange?: (selected: boolean, shiftKey: boolean) => void;
+    selectedIds?: string[];
+    allItems?: Array<{ type: 'file' | 'folder'; id: string }>;
   } = $props();
 
   let rowRef: LibraryRow | undefined = $state();
@@ -37,10 +41,14 @@
     id: directory.id
   };
 
-  // Check if we can accept a drop (not ourselves)
+  // Check if we can accept a drop (not ourselves or any item we're part of)
   function canAcceptDrop(data: DragItemData): boolean {
     // Can't drop a folder onto itself
     if (data.type === 'folder' && data.id === directory.id) {
+      return false;
+    }
+    // When multi-selecting, can't drop if this folder is one of the selected items
+    if (data.items?.some((item) => item.type === 'folder' && item.id === directory.id)) {
       return false;
     }
     return true;
@@ -85,6 +93,8 @@
   {selectable}
   {isSelected}
   {onSelectionChange}
+  {selectedIds}
+  {allItems}
 >
   {#snippet thumbnail()}
     <div class="folder-icon">

@@ -16,7 +16,9 @@
     onError,
     selectable = false,
     isSelected = false,
-    onSelectionChange
+    onSelectionChange,
+    selectedIds = [],
+    allItems = []
   }: {
     file: File;
     isDeleting?: boolean;
@@ -27,6 +29,8 @@
     selectable?: boolean;
     isSelected?: boolean;
     onSelectionChange?: (selected: boolean, shiftKey: boolean) => void;
+    selectedIds?: string[];
+    allItems?: Array<{ type: 'file' | 'folder'; id: string }>;
   } = $props();
 
   // Drag data for this file
@@ -65,6 +69,8 @@
   {selectable}
   {isSelected}
   {onSelectionChange}
+  {selectedIds}
+  {allItems}
 >
   {#snippet thumbnail()}
     <FileThumbnail
