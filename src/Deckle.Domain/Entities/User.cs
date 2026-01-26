@@ -29,7 +29,7 @@ public class User
     public UserRole Role { get; set; } = UserRole.User;
 
     // Storage quota tracking
-    public int StorageQuotaMb { get; set; } = 50;
+    public int StorageQuotaMb { get; set; } = 10;
     public long StorageUsedBytes { get; set; } = 0;
 
     public ICollection<Project> Projects { get; set; } = [];
