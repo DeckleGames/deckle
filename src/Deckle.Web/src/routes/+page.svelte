@@ -38,6 +38,9 @@
       Open source game component design - From spreadsheet to playtest in minutes
     </p>
     <button class="google-signin" onclick={handleSignIn}>Sign In with Google</button>
+    <footer>
+      <a href="/privacy">Privacy Policy</a>
+    </footer>
   </main>
 </div>
 
@@ -91,5 +94,19 @@
 
   .google-signin:active {
     transform: translateY(0);
+  }
+
+  footer {
+    margin-top: 3rem;
+  }
+
+  footer a {
+    color: var(--color-muted-teal);
+    font-size: 0.875rem;
+    text-decoration: none;
+  }
+
+  footer a:hover {
+    text-decoration: underline;
   }
 </style>
