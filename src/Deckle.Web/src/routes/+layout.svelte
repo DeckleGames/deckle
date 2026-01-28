@@ -3,10 +3,13 @@
   import favicon from '$lib/assets/favicon.svg';
   import TopBar from '$lib/components/TopBar.svelte';
   import { initPostHog, identifyUser, resetUser } from '$lib/analytics';
+  import { initMaxScreen } from '$lib/stores/maxScreen';
   import type { LayoutData } from './$types';
   import '../app.css';
 
   let { children, data }: { children: Snippet; data: LayoutData } = $props();
+
+  const maxScreen = initMaxScreen();
 
   // Initialize PostHog analytics (cookieless EU configuration)
   $effect(() => {
@@ -34,11 +37,13 @@
   <div class="main-content">
     {@render children()}
   </div>
-  <footer>
-    <a href="/privacy">Privacy</a>
-    <a href="https://docs.deckle.games">Docs</a>
-    <a href="https://github.com/jordanwallwork/deckle">GitHub</a>
-  </footer>
+  {#if !$maxScreen}
+    <footer>
+      <a href="/privacy">Privacy</a>
+      <a href="https://docs.deckle.games">Docs</a>
+      <a href="https://github.com/jordanwallwork/deckle">GitHub</a>
+    </footer>
+  {/if}
 </div>
 
 <style>
