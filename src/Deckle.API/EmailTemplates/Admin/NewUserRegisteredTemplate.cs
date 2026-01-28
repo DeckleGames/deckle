@@ -8,12 +8,12 @@ namespace Deckle.API.EmailTemplates.Admin;
 public class NewUserRegisteredTemplate : EmailTemplateBase
 {
     public required IReadOnlyList<string> AdminEmails { get; init; }
-    public required string UserName { get; init; }
+    public required string Name { get; init; }
     public required string UserEmail { get; init; }
     public required string Username { get; init; }
     public required DateTime SignupDate { get; init; }
 
-    public override IReadOnlyList<EmailAddress> To => AdminEmails.Select(EmailAddress.From).ToList();
+    public override IReadOnlyList<EmailAddress> To => [.. AdminEmails.Select(EmailAddress.From)];
 
     public override string Subject => $"New user registered: {Username}";
 
@@ -27,7 +27,7 @@ New User Registration
 
 A new user has registered on Deckle.
 
-Name: {UserName}
+Name: {Name}
 Email: {UserEmail}
 Username: {Username}
 Signup Date: {SignupDate:dd MMMM yyyy, HH:mm} UTC
@@ -46,7 +46,7 @@ Deckle Admin Notifications
             <table style=""width: 100%; border-collapse: collapse; margin: 20px 0;"">
                 <tr>
                     <td style=""padding: 8px 12px; font-weight: bold; color: #344956; border-bottom: 1px solid #e9ecef;"">Name</td>
-                    <td style=""padding: 8px 12px; border-bottom: 1px solid #e9ecef;"">{UserName}</td>
+                    <td style=""padding: 8px 12px; border-bottom: 1px solid #e9ecef;"">{Name}</td>
                 </tr>
                 <tr>
                     <td style=""padding: 8px 12px; font-weight: bold; color: #344956; border-bottom: 1px solid #e9ecef;"">Email</td>

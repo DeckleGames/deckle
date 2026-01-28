@@ -42,7 +42,7 @@ public class NewUserRegistrationHandler : INotificationHandler<NewUserRegistrati
         var template = new NewUserRegisteredTemplate
         {
             AdminEmails = adminEmails,
-            UserName = notification.Name,
+            Name = notification.Name,
             UserEmail = notification.Email,
             Username = notification.Username,
             SignupDate = notification.SignupDate
