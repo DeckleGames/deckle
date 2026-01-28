@@ -6,6 +6,7 @@ using Deckle.Email.Abstractions;
 using Exceptionless;
 using Hangfire;
 using Hangfire.InMemory;
+using MediatR;
 
 namespace Deckle.API.Extensions;
 
@@ -22,6 +23,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<FileService>();
         services.AddScoped<FileDirectoryService>();
         services.AddScoped<AdminService>();
+
+        // MediatR
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
 
         return services;
     }

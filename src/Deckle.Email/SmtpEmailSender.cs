@@ -38,9 +38,9 @@ public class SmtpEmailSender : IEmailSender
                 _options.UseSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None,
                 cancellationToken);
 
-            if (string.IsNullOrEmpty(_options.Username) && string.IsNullOrEmpty(_options.Password))
+            // Authenticate if credentials are provided
+            if (!string.IsNullOrEmpty(_options.Username) && !string.IsNullOrEmpty(_options.Password))
             {
-                // Authenticate
                 await client.AuthenticateAsync(_options.Username, _options.Password, cancellationToken);
             }
 
