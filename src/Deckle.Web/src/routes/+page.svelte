@@ -2,6 +2,7 @@
   import { config } from '$lib/config';
   import { goto } from '$app/navigation';
   import { authApi } from '$lib/api';
+  import { Button } from '$lib/components';
 
   $effect(() => {
     checkAuth();
@@ -35,7 +36,7 @@
   <main>
     <h1>Deckle</h1>
     <p class="subtitle">Effortless game design - From spreadsheet to playtest in minutes</p>
-    <button class="google-signin" onclick={handleSignIn}>Sign In with Google</button>
+    <Button size="lg" onclick={handleSignIn}>Sign In with Google</Button>
   </main>
 </div>
 
@@ -67,28 +68,5 @@
     color: var(--color-muted-teal);
     margin-bottom: 3rem;
     line-height: 1.6;
-  }
-
-  .google-signin {
-    background-color: var(--color-teal-grey);
-    color: var(--color-sage);
-    border: 2px solid var(--color-muted-teal);
-    padding: 1rem 2.5rem;
-    font-size: 1.125rem;
-    font-weight: 600;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .google-signin:hover {
-    background-color: var(--color-muted-teal);
-    border-color: var(--color-sage);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(120, 160, 131, 0.2);
-  }
-
-  .google-signin:active {
-    transform: translateY(0);
   }
 </style>
