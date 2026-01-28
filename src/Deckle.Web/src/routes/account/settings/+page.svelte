@@ -1,60 +1,41 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import { Avatar } from '$lib/components';
-  import PageLayout from '$lib/components/layout/PageLayout.svelte';
   import PageHeader from '$lib/components/layout/PageHeader.svelte';
 
   let { data }: { data: PageData } = $props();
 </script>
 
-<PageLayout>
-  <PageHeader>
-    <h1>Account Settings</h1>
-    <p class="subtitle">View and manage your account information</p>
-  </PageHeader>
+<PageHeader>
+  <h1>Account Settings</h1>
+</PageHeader>
 
-  <div class="settings-content">
-    <div class="settings-section">
-      <h2>Profile Information</h2>
+<div class="settings-section">
+  <h2>Profile Information</h2>
 
-      <div class="profile-card">
-        <div class="profile-avatar-section">
-          <Avatar src={data.user.picture} name={data.user.name} size="xl" class="profile-avatar" />
-        </div>
+  <section>
+    <Avatar src={data.user.picture} name={data.user.name} size="xl" class="profile-avatar" />
 
-        <dl class="profile-fields">
-          <div class="field-group">
-            <dt class="field-label">User ID</dt>
-            <dd class="field-value">{data.user.id || 'N/A'}</dd>
-          </div>
-
-          <div class="field-group">
-            <dt class="field-label">Name</dt>
-            <dd class="field-value">{data.user.name || 'N/A'}</dd>
-          </div>
-
-          <div class="field-group">
-            <dt class="field-label">Email</dt>
-            <dd class="field-value">{data.user.email || 'N/A'}</dd>
-          </div>
-        </dl>
+    <dl class="profile-fields">
+      <div class="field-group">
+        <dt class="field-label">Username</dt>
+        <dd class="field-value">{data.user.username}</dd>
       </div>
-    </div>
-  </div>
-</PageLayout>
+
+      <div class="field-group">
+        <dt class="field-label">Name</dt>
+        <dd class="field-value">{data.user.name}</dd>
+      </div>
+
+      <div class="field-group">
+        <dt class="field-label">Email</dt>
+        <dd class="field-value">{data.user.email}</dd>
+      </div>
+    </dl>
+  </section>
+</div>
 
 <style>
-  .subtitle {
-    font-size: 0.9375rem;
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  .settings-content {
-    background-color: white;
-    border-radius: 12px;
-    border: 1px solid rgba(52, 73, 86, 0.1);
-  }
-
   .settings-section {
     padding: 2rem;
   }
@@ -66,19 +47,10 @@
     margin: 0 0 1.5rem 0;
   }
 
-  .profile-card {
+  section {
     display: flex;
     flex-direction: column;
     gap: 2rem;
-  }
-
-  .profile-avatar-section {
-    display: flex;
-    justify-content: center;
-  }
-
-  .profile-avatar-section :global(.profile-avatar) {
-    --avatar-border: 4px solid var(--color-sage);
   }
 
   .profile-fields {
@@ -115,14 +87,10 @@
   }
 
   @media (min-width: 640px) {
-    .profile-card {
+    section {
       flex-direction: row;
       align-items: flex-start;
       gap: 3rem;
-    }
-
-    .profile-avatar-section {
-      flex-shrink: 0;
     }
 
     .profile-fields {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { config } from '$lib/config';
   import { goto } from '$app/navigation';
-  import { authApi, ApiError } from '$lib/api';
+  import { authApi } from '$lib/api';
 
   $effect(() => {
     checkAuth();
@@ -24,38 +24,34 @@
 </script>
 
 <svelte:head>
-  <title>Deckle - Open Source Game Component Design</title>
+  <title>Deckle - Effortless Game Design</title>
   <meta
     name="description"
-    content="Create game components from spreadsheets in minutes. Deckle is an open source tool for designing cards, tokens, and game pieces for playtesting."
+    content="Create game components from spreadsheets in minutes. Deckle is a tool for designing cards, tokens, and game pieces for playtesting."
   />
 </svelte:head>
 
 <div class="container">
   <main>
     <h1>Deckle</h1>
-    <p class="subtitle">
-      Open source game component design - From spreadsheet to playtest in minutes
-    </p>
+    <p class="subtitle">Effortless game design - From spreadsheet to playtest in minutes</p>
     <button class="google-signin" onclick={handleSignIn}>Sign In with Google</button>
-    <footer>
-      <a href="/privacy">Privacy Policy</a>
-    </footer>
   </main>
 </div>
 
 <style>
   .container {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
     padding: 2rem;
   }
 
   main {
     text-align: center;
     max-width: 600px;
+    min-height: 0;
   }
 
   h1 {
@@ -94,19 +90,5 @@
 
   .google-signin:active {
     transform: translateY(0);
-  }
-
-  footer {
-    margin-top: 3rem;
-  }
-
-  footer a {
-    color: var(--color-muted-teal);
-    font-size: 0.875rem;
-    text-decoration: none;
-  }
-
-  footer a:hover {
-    text-decoration: underline;
   }
 </style>
